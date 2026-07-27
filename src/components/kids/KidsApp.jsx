@@ -21,8 +21,7 @@ import {
   weeklyResetIfNeeded
 } from '../../lib/gamification'
 import { boxOf } from '../../lib/today'
-import ProgressScreen from './ProgressScreen'
-import CalendarScreen from './CalendarScreen'
+import RecordScreen from './RecordScreen'
 import ShopScreen from './ShopScreen'
 import './kids.css'
 
@@ -53,7 +52,7 @@ export default function KidsApp() {
   const [allSets, setAllSets] = useState([])
   const [progress, setProgress] = useState(null) // { streak_count, longest_streak, points, freeze_tokens, last_activity_date, owned_items, equipped_item }
 
-  const [screen, setScreen] = useState('select') // 'select' | 'quiz' | 'progress' | 'shop'
+  const [screen, setScreen] = useState('select') // 'select' | 'quiz' | 'record' | 'shop'
   const [mode, setMode] = useState('main') // 'main' | 'review'
   const [sessionQuestions, setSessionQuestions] = useState([])
   const [idx, setIdx] = useState(0)
@@ -465,14 +464,12 @@ export default function KidsApp() {
             const list = set.questionIds.map((id) => questionsById.get(id)).filter(Boolean)
             startSet(list, { isToday: false })
           }}
-          onShowProgress={() => setScreen('progress')}
+          onShowRecord={() => setScreen('record')}
           onShowShop={() => setScreen('shop')}
-          onShowCalendar={() => setScreen('calendar')}
         />
       )}
 
-      {screen === 'progress' && <ProgressScreen questions={questions} onBack={() => setScreen('select')} />}
-      {screen === 'calendar' && <CalendarScreen onBack={() => setScreen('select')} />}
+      {screen === 'record' && <RecordScreen questions={questions} onBack={() => setScreen('select')} />}
 
       {screen === 'shop' && (
         <ShopScreen
@@ -559,7 +556,7 @@ function NewCharacterModal({ character, onClose }) {
   )
 }
 
-function SelectScreen({ today, overdue, staticSets, questionsById, title, freezeTokens, weeklyCorrectCount, weeklyMissionsClaimed, onStartToday, onStartOverdue, onStartSet, onShowProgress, onShowShop, onShowCalendar }) {
+function SelectScreen({ today, overdue, staticSets, questionsById, title, freezeTokens, weeklyCorrectCount, weeklyMissionsClaimed, onStartToday, onStartOverdue, onStartSet, onShowRecord, onShowShop }) {
   const todaySub =
     today.picked.length === 0
       ? 'きょうは やることなし！'
@@ -579,11 +576,26 @@ function SelectScreen({ today, overdue, staticSets, questionsById, title, freeze
       <button className="set-card today-card" onClick={onStartToday}>
         <div className="set-icon today-icon">🔥</div>
         <div className="set-body">
-          <div className="set-name">今日やる問題集</div>
+          <div className="set-name">今日やる問題</div>
           <div className="set-sub">{todaySub}</div>
         </div>
         <div className="set-count">{today.picked.length}問</div>
       </button>
+
+      {overdue.picked.length > 0 && (
+        <button className="set-card overdue-card" onClick={onStartOverdue}>
+          <div className="set-icon overdue-icon">⏰</div>
+          <div className="set-body">
+            <div className="set-name">締切をすぎた問題</div>
+            <div className="set-sub">
+              {overdue.totalOverdue > overdue.picked.length
+                ? `候補${overdue.totalOverdue}問から${overdue.picked.length}問`
+                : 'まだ できていないよ'}
+            </div>
+          </div>
+          <div className="set-count">{overdue.picked.length}問</div>
+        </button>
+      )}
 
       {nextMission ? (
         <div className="mission-card">
@@ -603,10 +615,10 @@ function SelectScreen({ today, overdue, staticSets, questionsById, title, freeze
       )}
 
       <div className="two-col">
-        <button className="set-card progress-card" onClick={onShowProgress}>
+        <button className="set-card progress-card" onClick={onShowRecord}>
           <div className="set-icon progress-icon">📊</div>
           <div className="set-body">
-            <div className="set-name">がんばりグラフ</div>
+            <div className="set-name">がんばり記録</div>
           </div>
         </button>
         <button className="set-card shop-card" onClick={onShowShop}>
@@ -616,28 +628,6 @@ function SelectScreen({ today, overdue, staticSets, questionsById, title, freeze
           </div>
         </button>
       </div>
-
-      <button className="set-card calendar-card" onClick={onShowCalendar}>
-        <div className="set-icon calendar-icon">📅</div>
-        <div className="set-body">
-          <div className="set-name">がんばりカレンダー</div>
-        </div>
-      </button>
-
-      {overdue.picked.length > 0 && (
-        <button className="set-card overdue-card" onClick={onStartOverdue}>
-          <div className="set-icon overdue-icon">⏰</div>
-          <div className="set-body">
-            <div className="set-name">締切をすぎた問題</div>
-            <div className="set-sub">
-              {overdue.totalOverdue > overdue.picked.length
-                ? `候補${overdue.totalOverdue}問から${overdue.picked.length}問`
-                : 'まだ できていないよ'}
-            </div>
-          </div>
-          <div className="set-count">{overdue.picked.length}問</div>
-        </button>
-      )}
 
       <div className="set-heading" style={{ marginTop: 18 }}>
         問題集をえらんでね
