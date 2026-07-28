@@ -40,6 +40,8 @@ function shuffle(arr) {
 }
 
 const HAPPY_LINES = ['やったね！', 'その調子！', 'さすが！', 'よくできました！']
+// 未正解・1回・2回・3回・かんぺき の5段階（がんばりグラフと同じ配色）
+const BOX_BAR_COLORS = ['#D8D2C0', '#FFD9A0', '#FFB86B', '#FF9A45', '#FF8A3D']
 
 function formatGoalShort(iso) {
   const d = new Date(iso)
@@ -635,7 +637,8 @@ function SelectScreen({ today, overdue, staticSets, questionsById, title, freeze
       {staticSets.map((set) => {
         const members = set.questionIds.map((id) => questionsById.get(id)).filter(Boolean)
         const total = members.length
-        const mastered = members.filter((q) => boxOf(q) === 4).length
+        const boxCounts = [0, 1, 2, 3, 4].map((b) => members.filter((q) => boxOf(q) === b).length)
+        const mastered = boxCounts[4]
         const rate = total > 0 ? Math.round((mastered / total) * 100) : 0
         const tier = rate === 0 ? 'tier-none' : rate === 100 ? 'tier-done' : 'tier-mid'
         return (
@@ -653,8 +656,12 @@ function SelectScreen({ today, overdue, staticSets, questionsById, title, freeze
               </div>
               <div className={`set-count ${tier}`}>{rate}%</div>
             </div>
-            <div className="set-progress-wrap">
-              <div className={`set-progress-bar ${tier}`} style={{ width: `${Math.max(rate, mastered > 0 ? 4 : 0)}%` }} />
+            <div className="set-progress-wrap" title={`未正解${boxCounts[0]}・1回${boxCounts[1]}・2回${boxCounts[2]}・3回${boxCounts[3]}・かんぺき${boxCounts[4]}`}>
+              {BOX_BAR_COLORS.map((color, i) => (
+                total > 0 && boxCounts[i] > 0 ? (
+                  <div key={i} className="set-progress-seg" style={{ width: `${(boxCounts[i] / total) * 100}%`, background: color }} />
+                ) : null
+              ))}
             </div>
           </button>
         )

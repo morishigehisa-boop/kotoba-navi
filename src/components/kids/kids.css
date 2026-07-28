@@ -127,7 +127,8 @@ body { margin: 0; background: var(--bg); }
 
 .set-card-progress { flex-direction: column; align-items: stretch; gap: 0; }
 .set-card-top { display: flex; align-items: center; gap: 14px; width: 100%; }
-.set-progress-wrap { height: 10px; background: #F3EEDF; border-radius: 8px; overflow: hidden; margin-top: 10px; }
+.set-progress-wrap { height: 10px; background: #F3EEDF; border-radius: 8px; overflow: hidden; margin-top: 10px; display: flex; }
+.set-progress-seg { height: 100%; transition: width .5s ease; }
 .set-progress-bar { height: 100%; border-radius: 8px; transition: width .5s ease; }
 .set-progress-bar.tier-none { background: #D8D2C0; }
 .set-progress-bar.tier-mid { background: linear-gradient(90deg, var(--gold), var(--fox)); }

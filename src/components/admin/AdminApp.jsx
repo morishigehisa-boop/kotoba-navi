@@ -12,8 +12,12 @@ import {
   saveFilterHistory,
   fetchFilterHistory
 } from '../../lib/api'
+import { boxOf } from '../../lib/today'
 import './admin.css'
 import PreviewPanel from './PreviewPanel'
+
+// 未正解・1回・2回・3回・かんぺき の5段階
+const ADMIN_BOX_COLORS = ['#D8D2C0', '#F5D18C', '#F5A742', '#E8863A', '#4CB27A']
 
 const ANSWER_TYPE_LABELS = {
   self_recall: '自己採点',
@@ -635,13 +639,9 @@ function SetsPanel({ sets, questions, onDelete, onReorder, onEdit }) {
   function progressOf(set) {
     const members = set.questionIds.map((id) => questionsById.get(id)).filter(Boolean)
     const total = members.length
-    let none = 0, mid = 0, done = 0
-    members.forEach((q) => {
-      if (q.streak_count >= 4) done++
-      else if (q.correct_count >= 1) mid++
-      else none++
-    })
-    return { total, none, mid, done, doneRate: total > 0 ? Math.round((done / total) * 100) : 0 }
+    const boxCounts = [0, 1, 2, 3, 4].map((b) => members.filter((q) => boxOf(q) === b).length)
+    const done = boxCounts[4]
+    return { total, boxCounts, done, doneRate: total > 0 ? Math.round((done / total) * 100) : 0 }
   }
 
   function handleDrop(targetId) {
@@ -683,14 +683,12 @@ function SetsPanel({ sets, questions, onDelete, onReorder, onEdit }) {
                   <td><b>{s.name}</b></td>
                   <td className="count-cell">{s.questionIds.length}</td>
                   <td style={{ minWidth: 160 }}>
-                    <div className="progress-stack" title={`未正解${p.none} ／ 進行中${p.mid} ／ かんぺき${p.done}`}>
-                      {p.total > 0 && (
-                        <>
-                          <div className="progress-seg seg-none" style={{ width: `${(p.none / p.total) * 100}%` }} />
-                          <div className="progress-seg seg-mid" style={{ width: `${(p.mid / p.total) * 100}%` }} />
-                          <div className="progress-seg seg-done" style={{ width: `${(p.done / p.total) * 100}%` }} />
-                        </>
-                      )}
+                    <div className="progress-stack" title={`未正解${p.boxCounts[0]}・1回${p.boxCounts[1]}・2回${p.boxCounts[2]}・3回${p.boxCounts[3]}・かんぺき${p.boxCounts[4]}`}>
+                      {ADMIN_BOX_COLORS.map((color, i) => (
+                        p.total > 0 && p.boxCounts[i] > 0 ? (
+                          <div key={i} className="progress-seg" style={{ width: `${(p.boxCounts[i] / p.total) * 100}%`, background: color }} />
+                        ) : null
+                      ))}
                     </div>
                     <div className="progress-stack-label">かんぺき {p.doneRate}%（{p.done}/{p.total}）</div>
                   </td>
