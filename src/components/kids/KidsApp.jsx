@@ -487,13 +487,17 @@ export default function KidsApp() {
         </div>
       )}
 
-      <div className={`mascot-zone ${progress.active_background ? 'has-room' : ''}`}>
-        {progress.active_background && screen === 'select' && (
-          <RoomBackground themeId={progress.active_background} height={130} />
-        )}
-        <Character character={progress.active_character} state={mascot.state} accessory={progress.equipped_item} />
-      </div>
-      <div className="speech">{mascot.text}</div>
+      {screen !== 'sugoroku' && (
+        <>
+          <div className={`mascot-zone ${progress.active_background ? 'has-room' : ''}`}>
+            {progress.active_background && screen === 'select' && (
+              <RoomBackground themeId={progress.active_background} height={130} />
+            )}
+            <Character character={progress.active_character} state={mascot.state} accessory={progress.equipped_item} />
+          </div>
+          <div className="speech">{mascot.text}</div>
+        </>
+      )}
 
       {screen === 'select' && (
         <SelectScreen
