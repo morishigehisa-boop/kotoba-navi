@@ -536,10 +536,121 @@ const TREX_BODY = {
   )
 }
 
+// ---- ピカさん（オリジナルの電気ネズミ風キャラ）----
+const PIKA_BODY = {
+  idle: (
+    <>
+      <ellipse cx="50" cy="85" rx="26" ry="6" fill="#00000012" />
+      <path d="M20 62 L8 56 L14 68 Z" fill="#F5C518" />
+      <path d="M80 62 L92 56 L86 68 Z" fill="#F5C518" />
+      <path d="M32 24 L26 42 L40 44 Z" fill="#F5C518" />
+      <path d="M68 24 L74 42 L60 44 Z" fill="#F5C518" />
+      <path d="M33 30 L29 41 L38 42 Z" fill="#3A2E1E" />
+      <path d="M67 30 L71 41 L62 42 Z" fill="#3A2E1E" />
+      <ellipse cx="50" cy="60" rx="29" ry="25" fill="#F5C518" />
+      <ellipse cx="50" cy="68" rx="16" ry="12" fill="#FFF3C4" />
+      <circle cx="40" cy="55" r="4" fill="#3A2E1E" />
+      <circle cx="60" cy="55" r="4" fill="#3A2E1E" />
+      <circle cx="30" cy="63" r="5" fill="#FF6F6F" opacity="0.85" />
+      <circle cx="70" cy="63" r="5" fill="#FF6F6F" opacity="0.85" />
+      <path d="M46 66 Q50 70 54 66" stroke="#3A2E1E" strokeWidth="2.3" fill="none" strokeLinecap="round" />
+      <ellipse cx="50" cy="63" rx="3" ry="2" fill="#3A2E1E" />
+    </>
+  ),
+  happy: (
+    <>
+      <ellipse cx="50" cy="85" rx="26" ry="6" fill="#00000012" />
+      <path d="M17 58 L4 50 L11 65 Z" fill="#F5C518" />
+      <path d="M83 58 L96 50 L89 65 Z" fill="#F5C518" />
+      <path d="M30 18 L23 39 L39 41 Z" fill="#F5C518" />
+      <path d="M70 18 L77 39 L61 41 Z" fill="#F5C518" />
+      <path d="M31 24 L26 38 L37 39 Z" fill="#3A2E1E" />
+      <path d="M69 24 L74 38 L63 39 Z" fill="#3A2E1E" />
+      <ellipse cx="50" cy="59" rx="32" ry="28" fill="#F5C518" />
+      <ellipse cx="50" cy="68" rx="17" ry="13" fill="#FFF3C4" />
+      <path d="M31 53 Q40 44 49 53" stroke="#3A2E1E" strokeWidth="3.2" fill="none" strokeLinecap="round" />
+      <path d="M51 53 Q60 44 69 53" stroke="#3A2E1E" strokeWidth="3.2" fill="none" strokeLinecap="round" />
+      <circle cx="30" cy="63" r="6" fill="#FF6F6F" opacity="0.9" />
+      <circle cx="70" cy="63" r="6" fill="#FF6F6F" opacity="0.9" />
+      <path d="M38 66 Q50 82 62 66" stroke="#3A2E1E" strokeWidth="2.8" fill="none" strokeLinecap="round" />
+      <path d="M12 26 L17 34 M88 26 L83 34" stroke="#FFC53D" strokeWidth="2.5" strokeLinecap="round" />
+    </>
+  ),
+  sad: (
+    <>
+      <ellipse cx="50" cy="85" rx="26" ry="6" fill="#00000012" />
+      <path d="M22 64 L11 60 L16 70 Z" fill="#F5C518" />
+      <path d="M78 64 L89 60 L84 70 Z" fill="#F5C518" />
+      <path d="M34 30 L29 46 L41 47 Z" fill="#F5C518" />
+      <path d="M66 30 L71 46 L59 47 Z" fill="#F5C518" />
+      <ellipse cx="50" cy="63" rx="27" ry="23" fill="#F5C518" />
+      <ellipse cx="50" cy="71" rx="15" ry="11" fill="#FFF3C4" />
+      <path d="M37 58 Q40 55 44 58" stroke="#3A2E1E" strokeWidth="2.4" fill="none" strokeLinecap="round" />
+      <path d="M63 58 Q60 55 56 58" stroke="#3A2E1E" strokeWidth="2.4" fill="none" strokeLinecap="round" />
+      <circle cx="40" cy="62" r="2.8" fill="#3A2E1E" />
+      <circle cx="60" cy="62" r="2.8" fill="#3A2E1E" />
+      <circle cx="32" cy="66" r="4" fill="#FF9E9E" opacity="0.7" />
+      <circle cx="68" cy="66" r="4" fill="#FF9E9E" opacity="0.7" />
+      <path d="M40 68 Q40 74 38 78" stroke="#7EC8F2" strokeWidth="2.2" fill="none" strokeLinecap="round" />
+      <ellipse cx="38" cy="79" rx="2" ry="2.6" fill="#7EC8F2" />
+    </>
+  )
+}
+
+// ---- ドラさん（オリジナルの丸ロボット猫風キャラ）----
+const DORA_BODY = {
+  idle: (
+    <>
+      <ellipse cx="50" cy="85" rx="26" ry="6" fill="#00000012" />
+      <circle cx="30" cy="34" r="7" fill="#4A90D9" />
+      <circle cx="70" cy="34" r="7" fill="#4A90D9" />
+      <ellipse cx="50" cy="60" rx="30" ry="27" fill="#4A90D9" />
+      <ellipse cx="50" cy="65" rx="20" ry="18" fill="#FFFFFF" />
+      <circle cx="40" cy="56" r="4.5" fill="#3A2E1E" />
+      <circle cx="60" cy="56" r="4.5" fill="#3A2E1E" />
+      <ellipse cx="50" cy="64" rx="3.4" ry="3" fill="#7A7A7A" />
+      <path d="M46 68 Q50 71 54 68" stroke="#3A2E1E" strokeWidth="2.2" fill="none" strokeLinecap="round" />
+    </>
+  ),
+  happy: (
+    <>
+      <ellipse cx="50" cy="85" rx="26" ry="6" fill="#00000012" />
+      <circle cx="27" cy="30" r="8" fill="#4A90D9" />
+      <circle cx="73" cy="30" r="8" fill="#4A90D9" />
+      <ellipse cx="50" cy="59" rx="33" ry="30" fill="#4A90D9" />
+      <ellipse cx="50" cy="65" rx="22" ry="20" fill="#FFFFFF" />
+      <path d="M31 53 Q40 44 49 53" stroke="#3A2E1E" strokeWidth="3.2" fill="none" strokeLinecap="round" />
+      <path d="M51 53 Q60 44 69 53" stroke="#3A2E1E" strokeWidth="3.2" fill="none" strokeLinecap="round" />
+      <ellipse cx="50" cy="63" rx="3.8" ry="3.2" fill="#7A7A7A" />
+      <path d="M38 68 Q50 82 62 68" stroke="#3A2E1E" strokeWidth="2.8" fill="none" strokeLinecap="round" />
+      <circle cx="30" cy="66" r="5.5" fill="#FFB3A0" opacity="0.7" />
+      <circle cx="70" cy="66" r="5.5" fill="#FFB3A0" opacity="0.7" />
+      <path d="M12 24 L17 32 M88 24 L83 32" stroke="#FFC53D" strokeWidth="2.5" strokeLinecap="round" />
+    </>
+  ),
+  sad: (
+    <>
+      <ellipse cx="50" cy="85" rx="26" ry="6" fill="#00000012" />
+      <circle cx="32" cy="38" r="6.5" fill="#4A90D9" />
+      <circle cx="68" cy="38" r="6.5" fill="#4A90D9" />
+      <ellipse cx="50" cy="63" rx="27" ry="24" fill="#4A90D9" />
+      <ellipse cx="50" cy="68" rx="18" ry="16" fill="#FFFFFF" />
+      <path d="M36 59 Q40 56 44 59" stroke="#3A2E1E" strokeWidth="2.4" fill="none" strokeLinecap="round" />
+      <path d="M64 59 Q60 56 56 59" stroke="#3A2E1E" strokeWidth="2.4" fill="none" strokeLinecap="round" />
+      <circle cx="40" cy="63" r="3" fill="#3A2E1E" />
+      <circle cx="60" cy="63" r="3" fill="#3A2E1E" />
+      <ellipse cx="50" cy="70" rx="3" ry="2.6" fill="#7A7A7A" />
+      <path d="M40 72 Q40 78 38 82" stroke="#7EC8F2" strokeWidth="2.2" fill="none" strokeLinecap="round" />
+      <ellipse cx="38" cy="83" rx="2" ry="2.6" fill="#7EC8F2" />
+    </>
+  )
+}
+
 const BODIES = {
   fox: FOX_BODY, cat: CAT_BODY, dog: DOG_BODY, dragon: DRAGON_BODY,
   lion: LION_BODY, pig: PIG_BODY, cheetah: CHEETAH_BODY, robot: ROBOT_BODY,
-  ankylosaurus: ANKY_BODY, trex: TREX_BODY
+  ankylosaurus: ANKY_BODY, trex: TREX_BODY,
+  pika: PIKA_BODY, dora: DORA_BODY
 }
 
 // ============================================================
@@ -896,6 +1007,54 @@ const ITEM_FRAGMENTS = {
     <g transform="translate(50,68)">
       <circle r="6" fill="#D94848" />
       <path d="M4 -4 L12 -12 M6 0 L15 -3 M4 4 L10 8" stroke="#FFC53D" strokeWidth="2" strokeLinecap="round" />
+    </g>
+  )},
+
+  // ---- ピカさん専用 ----
+  energy_ball: { front: (
+    <g transform="translate(80,74)">
+      <circle r="9" fill="#F4F1EE" stroke="#2B2A27" strokeWidth="1.4" />
+      <path d="M-9 0 L9 0" stroke="#2B2A27" strokeWidth="1.4" />
+      <path d="M-9 0 A9 9 0 0 1 9 0" fill="#D94848" stroke="#2B2A27" strokeWidth="1.4" />
+      <circle r="2.6" fill="#F4F1EE" stroke="#2B2A27" strokeWidth="1.2" />
+    </g>
+  )},
+
+  // ---- ドラさん専用 ----
+  dorayaki: { front: (
+    <g transform="translate(80,76)">
+      <ellipse cx="0" cy="-3" rx="11" ry="6" fill="#E8B94A" stroke="#B5860B" strokeWidth="1" />
+      <ellipse cx="0" cy="3" rx="11" ry="6" fill="#E8B94A" stroke="#B5860B" strokeWidth="1" />
+      <ellipse cx="0" cy="0" rx="11" ry="3" fill="#8A5A2A" />
+    </g>
+  )},
+  taketombo: { front: (
+    <g transform="translate(50,26)">
+      <rect x="-1.5" y="0" width="3" height="14" fill="#8A6D2A" />
+      <ellipse cx="0" cy="-2" rx="16" ry="3.2" fill="#4CB27A" stroke="#2E8956" strokeWidth="1" />
+    </g>
+  )},
+  mystery_door: { back: (
+    <g>
+      <rect x="30" y="30" width="40" height="58" rx="4" fill="#FF9EB5" stroke="#D9648A" strokeWidth="1.5" />
+      <circle cx="62" cy="60" r="2.4" fill="#D9648A" />
+    </g>
+  )},
+  pouch: { front: (
+    <path d="M36 62 Q50 56 64 62 L61 82 Q50 88 39 82 Z" fill="#4A90D9" opacity="0.9" stroke="#2E5F94" strokeWidth="1" />
+  )},
+  big_light: { front: (
+    <g transform="translate(78,72) rotate(-20)">
+      <rect x="-4" y="0" width="8" height="18" rx="2" fill="#F5C518" stroke="#B5860B" strokeWidth="1" />
+      <path d="M-5 0 L0 -9 L5 0 Z" fill="#FFF3C4" stroke="#B5860B" strokeWidth="1" />
+      <path d="M-9 -10 L-13 -14 M9 -10 L13 -14 M0 -13 L0 -18" stroke="#FFC53D" strokeWidth="1.6" strokeLinecap="round" />
+    </g>
+  )},
+  small_tunnel: { front: (
+    <g transform="translate(78,74)">
+      <ellipse rx="11" ry="13" fill="#2B2A27" />
+      <ellipse rx="7" ry="9" fill="#4A4A46" />
+      <ellipse rx="3.5" ry="4.5" fill="#171715" />
     </g>
   )}
 }

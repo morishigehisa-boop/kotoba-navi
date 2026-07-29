@@ -11,20 +11,39 @@ const ANSWER_TYPE_LABELS_LOCAL = {
   choice: '選択式'
 }
 
-export default function PreviewPanel({ questions, books, categories, types }) {
+export default function PreviewPanel({ questions, books, categories, types, sets }) {
   const [category, setCategory] = useState('')
   const [type, setType] = useState('')
   const [book, setBook] = useState('')
+  const [pageFrom, setPageFrom] = useState('')
+  const [pageTo, setPageTo] = useState('')
+  const [setId, setSetId] = useState('')
   const [index, setIndex] = useState(0)
 
   const filtered = useMemo(() => {
-    return questions.filter((q) => {
+    let base = questions
+    if (setId) {
+      const chosenSet = sets.find((s) => String(s.id) === setId)
+      if (chosenSet) {
+        const byId = new Map(questions.map((q) => [q.id, q]))
+        base = chosenSet.questionIds.map((id) => byId.get(id)).filter(Boolean)
+      }
+    }
+    return base.filter((q) => {
       if (category && q.category !== category) return false
       if (type && q.answer_type !== type) return false
       if (book && q.source_book !== book) return false
+      if (pageFrom !== '' || pageTo !== '') {
+        const pages = String(q.source_page || '').split('-').map(Number)
+        const qFrom = pages[0]
+        const qTo = pages[1] === undefined ? pages[0] : pages[1]
+        if (Number.isNaN(qFrom)) return false
+        if (pageFrom !== '' && qTo < parseInt(pageFrom)) return false
+        if (pageTo !== '' && qFrom > parseInt(pageTo)) return false
+      }
       return true
     })
-  }, [questions, category, type, book])
+  }, [questions, sets, category, type, book, pageFrom, pageTo, setId])
 
   const safeIndex = Math.min(index, Math.max(0, filtered.length - 1))
   const item = filtered[safeIndex]
@@ -41,6 +60,10 @@ export default function PreviewPanel({ questions, books, categories, types }) {
       </p>
 
       <div className="filters">
+        <select value={setId} onChange={resetFilter(setSetId)}>
+          <option value="">作成した問題集: すべて</option>
+          {sets.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+        </select>
         <select value={category} onChange={resetFilter(setCategory)}>
           <option value="">カテゴリー: すべて</option>
           {categories.map((c) => <option key={c} value={c}>{c}</option>)}
@@ -50,9 +73,11 @@ export default function PreviewPanel({ questions, books, categories, types }) {
           {types.map((t) => <option key={t} value={t}>{ANSWER_TYPE_LABELS_LOCAL[t] || t}</option>)}
         </select>
         <select value={book} onChange={resetFilter(setBook)}>
-          <option value="">問題集: すべて</option>
+          <option value="">インプット問題集: すべて</option>
           {books.map((b) => <option key={b} value={b}>{b}</option>)}
         </select>
+        <input type="number" placeholder="ページ開始" style={{ width: 110 }} value={pageFrom} onChange={resetFilter(setPageFrom)} />
+        <input type="number" placeholder="ページ終了" style={{ width: 110 }} value={pageTo} onChange={resetFilter(setPageTo)} />
       </div>
 
       {!item ? (

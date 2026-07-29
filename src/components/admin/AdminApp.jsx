@@ -165,7 +165,7 @@ export default function AdminApp() {
         />
       )}
       {tab === 'preview' && (
-        <PreviewPanel questions={questions} books={books} categories={categories} types={types} />
+        <PreviewPanel questions={questions} books={books} categories={categories} types={types} sets={sets} />
       )}
       {tab === 'make' && (
         <MakePanel

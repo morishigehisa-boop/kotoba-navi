@@ -82,7 +82,9 @@ export const CHARACTERS = [
   { id: 'robot', name: 'ロボット', emoji: '🤖' },
   { id: 'ankylosaurus', name: 'アンキロサウルス', emoji: '🦕' },
   { id: 'trex', name: 'ティラノザウルス', emoji: '🦖' },
-  { id: 'dragon', name: 'ドラゴン', emoji: '🐉' }
+  { id: 'dragon', name: 'ドラゴン', emoji: '🐉' },
+  { id: 'pika', name: 'ピカさん', emoji: '⚡' },
+  { id: 'dora', name: 'ドラさん', emoji: '🔵' }
 ]
 
 // 着せ替えショップのアイテム（キャラクターごとにテーマが違う専用アイテム）
@@ -205,6 +207,30 @@ export const SHOP_ITEMS_BY_CHARACTER = {
     { id: 'cape', name: 'マント', cost: 130, emoji: '🦸' },
     { id: 'spike_crest', name: 'とさかスパイク', cost: 150, emoji: '🔺' },
     { id: 'meteor_badge', name: 'いんせきバッジ', cost: 200, emoji: '🌠' },
+    { id: 'crown', name: 'きんの かんむり', cost: 300, emoji: '👑' }
+  ],
+  pika: [
+    { id: 'energy_ball', name: 'エナジーボール', cost: 50, emoji: '🔴' },
+    { id: 'lightning_badge', name: 'いなずまバッジ', cost: 60, emoji: '⚡' },
+    { id: 'scarf_red', name: 'あかい マフラー', cost: 80, emoji: '🧣' },
+    { id: 'star_badge', name: 'きらきらバッジ', cost: 90, emoji: '⭐' },
+    { id: 'bell', name: 'すずの くびわ', cost: 100, emoji: '🔔' },
+    { id: 'glasses', name: 'サングラス', cost: 120, emoji: '🕶️' },
+    { id: 'cape', name: 'マント', cost: 130, emoji: '🦸' },
+    { id: 'medal', name: 'きんメダル', cost: 150, emoji: '🏅' },
+    { id: 'sun_crown', name: 'たいようのかんむり', cost: 200, emoji: '☀️' },
+    { id: 'crown', name: 'きんの かんむり', cost: 300, emoji: '👑' }
+  ],
+  dora: [
+    { id: 'dorayaki', name: 'どらやき', cost: 50, emoji: '🥮' },
+    { id: 'bell', name: 'すず', cost: 60, emoji: '🔔' },
+    { id: 'taketombo', name: 'たけとんぼ', cost: 80, emoji: '🎋' },
+    { id: 'mystery_door', name: 'ふしぎな とびら', cost: 90, emoji: '🚪' },
+    { id: 'pouch', name: 'ふしぎな ポケット', cost: 100, emoji: '🎒' },
+    { id: 'glasses', name: 'サングラス', cost: 120, emoji: '🕶️' },
+    { id: 'big_light', name: '大きくなるライト', cost: 130, emoji: '🔦' },
+    { id: 'small_tunnel', name: '小さくなるトンネル', cost: 150, emoji: '🕳️' },
+    { id: 'medal', name: 'きんメダル', cost: 200, emoji: '🏅' },
     { id: 'crown', name: 'きんの かんむり', cost: 300, emoji: '👑' }
   ]
 }
