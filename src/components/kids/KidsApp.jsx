@@ -18,11 +18,15 @@ import {
   categoryProgress,
   tierForRate,
   WEEKLY_MISSIONS,
-  weeklyResetIfNeeded
+  weeklyResetIfNeeded,
+  stageInfo,
+  STAGE_THEMES
 } from '../../lib/gamification'
 import { boxOf } from '../../lib/today'
 import RecordScreen from './RecordScreen'
 import ShopScreen from './ShopScreen'
+import SugorokuScreen from './SugorokuScreen'
+import RoomBackground from './RoomBackground'
 import './kids.css'
 
 function Ruby({ text }) {
@@ -73,6 +77,8 @@ export default function KidsApp() {
   const [struggleToast, setStruggleToast] = useState(false)
   const categoryTierRef = useRef(new Map())
   const seededCategoryTierRef = useRef(false)
+  const masteredQuestionsRef = useRef(new Set())
+  const seededMasteredRef = useRef(false)
 
   function celebrate() {
     setConfettiOn(false)
@@ -124,6 +130,42 @@ export default function KidsApp() {
     })
     seededCategoryTierRef.current = true
   }, [loading, questions])
+
+  // すごろく：既に「かんぺき」になっている問題を、起動時に記録しておく（二重カウント防止）
+  useEffect(() => {
+    if (seededMasteredRef.current || loading || questions.length === 0) return
+    questions.forEach((q) => { if (boxOf(q) >= 4) masteredQuestionsRef.current.add(q.id) })
+    seededMasteredRef.current = true
+  }, [loading, questions])
+
+  // 4. すごろく風マップ：問題が新たに「かんぺき」になるたびに進める
+  function checkMasteryProgress(updatedQuestion) {
+    if (boxOf(updatedQuestion) < 4) return
+    if (masteredQuestionsRef.current.has(updatedQuestion.id)) return
+    masteredQuestionsRef.current.add(updatedQuestion.id)
+
+    setProgress((prev) => {
+      const prevTotal = prev.mastery_event_total || 0
+      const nextTotal = prevTotal + 1
+      const prevInfo = stageInfo(prevTotal)
+      const nextInfo = stageInfo(nextTotal)
+      let patch = { mastery_event_total: nextTotal }
+      let next = { ...prev, ...patch }
+
+      if (nextInfo.boardPosition > prevInfo.boardPosition && nextInfo.squareInStage === 0) {
+        const newThemeId = nextInfo.theme.id
+        if (!prev.unlocked_backgrounds.includes(newThemeId)) {
+          const nextBackgrounds = [...prev.unlocked_backgrounds, newThemeId]
+          patch.unlocked_backgrounds = nextBackgrounds
+          next.unlocked_backgrounds = nextBackgrounds
+          setTimeout(() => { playFanfareBig(); celebrate() }, 300)
+        }
+      }
+
+      updateProgress(patch).catch(console.error)
+      return next
+    })
+  }
 
   // 正解によって、まだお祝いしていない問題集が新たに「かんぺき」になったら効果音を鳴らす
   function checkSetCompletion(updatedQuestion) {
@@ -304,6 +346,7 @@ export default function KidsApp() {
             const updated = { ...q, ...patch }
             checkSetCompletion(updated)
             checkCategoryBadge(updated)
+            checkMasteryProgress(updated)
           }
         })
         .catch(console.error)
@@ -397,6 +440,11 @@ export default function KidsApp() {
     await updateProgress({ equipped_item: itemId }).catch(console.error)
   }
 
+  async function handleEquipBackground(themeId) {
+    setProgress((prev) => ({ ...prev, active_background: themeId }))
+    await updateProgress({ active_background: themeId }).catch(console.error)
+  }
+
   async function handleSwitchCharacter(characterId) {
     if (!progress.unlocked_characters.includes(characterId)) return
     // アイテムはキャラクターごとに所持しているので、切り替え時にそうびは一旦外す
@@ -439,7 +487,10 @@ export default function KidsApp() {
         </div>
       )}
 
-      <div className="mascot-zone">
+      <div className={`mascot-zone ${progress.active_background ? 'has-room' : ''}`}>
+        {progress.active_background && screen === 'select' && (
+          <RoomBackground themeId={progress.active_background} height={130} />
+        )}
         <Character character={progress.active_character} state={mascot.state} accessory={progress.equipped_item} />
       </div>
       <div className="speech">{mascot.text}</div>
@@ -468,10 +519,19 @@ export default function KidsApp() {
           }}
           onShowRecord={() => setScreen('record')}
           onShowShop={() => setScreen('shop')}
+          onShowSugoroku={() => setScreen('sugoroku')}
         />
       )}
 
       {screen === 'record' && <RecordScreen questions={questions} onBack={() => setScreen('select')} />}
+
+      {screen === 'sugoroku' && (
+        <SugorokuScreen
+          masteryEventTotal={progress.mastery_event_total || 0}
+          characterEmoji={CHARACTERS.find((c) => c.id === progress.active_character)?.emoji || '🦊'}
+          onBack={() => setScreen('select')}
+        />
+      )}
 
       {screen === 'shop' && (
         <ShopScreen
@@ -480,9 +540,12 @@ export default function KidsApp() {
           equippedItem={progress.equipped_item}
           activeCharacter={progress.active_character}
           unlockedCharacters={progress.unlocked_characters}
+          unlockedBackgrounds={progress.unlocked_backgrounds || []}
+          activeBackground={progress.active_background}
           onPurchase={handlePurchase}
           onEquip={handleEquip}
           onSwitchCharacter={handleSwitchCharacter}
+          onEquipBackground={handleEquipBackground}
           onBack={() => setScreen('select')}
         />
       )}
@@ -558,7 +621,7 @@ function NewCharacterModal({ character, onClose }) {
   )
 }
 
-function SelectScreen({ today, overdue, staticSets, questionsById, title, freezeTokens, weeklyCorrectCount, weeklyMissionsClaimed, onStartToday, onStartOverdue, onStartSet, onShowRecord, onShowShop }) {
+function SelectScreen({ today, overdue, staticSets, questionsById, title, freezeTokens, weeklyCorrectCount, weeklyMissionsClaimed, onStartToday, onStartOverdue, onStartSet, onShowRecord, onShowShop, onShowSugoroku }) {
   const todaySub =
     today.picked.length === 0
       ? 'きょうは やることなし！'
@@ -616,11 +679,17 @@ function SelectScreen({ today, overdue, staticSets, questionsById, title, freeze
         </div>
       )}
 
-      <div className="two-col">
+      <div className="two-col three-col">
         <button className="set-card progress-card" onClick={onShowRecord}>
           <div className="set-icon progress-icon">📊</div>
           <div className="set-body">
             <div className="set-name">がんばり記録</div>
+          </div>
+        </button>
+        <button className="set-card sugoroku-card" onClick={onShowSugoroku}>
+          <div className="set-icon sugoroku-icon">🗺️</div>
+          <div className="set-body">
+            <div className="set-name">すごろく</div>
           </div>
         </button>
         <button className="set-card shop-card" onClick={onShowShop}>

@@ -1,8 +1,10 @@
-import { itemsForCharacter, CHARACTERS, isItemOwned, ownedCountForCharacter } from '../../lib/gamification'
+import { itemsForCharacter, CHARACTERS, isItemOwned, ownedCountForCharacter, STAGE_THEMES } from '../../lib/gamification'
+import RoomBackground from './RoomBackground'
 
 export default function ShopScreen({
   points, ownedItems, equippedItem, activeCharacter, unlockedCharacters,
-  onPurchase, onEquip, onSwitchCharacter, onBack
+  unlockedBackgrounds, activeBackground,
+  onPurchase, onEquip, onSwitchCharacter, onEquipBackground, onBack
 }) {
   const items = itemsForCharacter(activeCharacter)
   const ownedCount = ownedCountForCharacter(ownedItems, activeCharacter)
@@ -74,6 +76,29 @@ export default function ShopScreen({
           })}
         </div>
       </div>
+
+      <div className="card" style={{ alignItems: 'stretch' }}>
+        <div className="label">部屋の背景</div>
+        <div className="hint" style={{ marginTop: 20 }}>すごろくマップでステージが かわるたびに、新しい背景をゲットできるよ！</div>
+        <div className="room-grid">
+          {STAGE_THEMES.map((theme) => {
+            const unlocked = unlockedBackgrounds.includes(theme.id)
+            const equipped = activeBackground === theme.id
+            return (
+              <button
+                key={theme.id}
+                className={`room-option ${equipped ? 'equipped' : ''} ${!unlocked ? 'locked' : ''}`}
+                disabled={!unlocked}
+                onClick={() => onEquipBackground(equipped ? null : theme.id)}
+              >
+                {unlocked ? <RoomBackground themeId={theme.id} height={70} /> : <div style={{ height: 70, background: '#EDEAE0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22 }}>🔒</div>}
+                <div className="room-option-name">{unlocked ? theme.name : '？？？'}</div>
+              </button>
+            )
+          })}
+        </div>
+      </div>
+
       <button className="restart pick-another" onClick={onBack}>もどる</button>
     </div>
   )

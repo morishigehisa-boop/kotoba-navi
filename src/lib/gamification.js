@@ -71,6 +71,38 @@ export function weeklyResetIfNeeded(progress, now = new Date()) {
   return { weekly_correct_count: 0, week_start_date: thisWeek, weekly_missions_claimed: [] }
 }
 
+// ---- 4. すごろく風マップ ----
+// かんぺきになった問題が10問増えるごとに1マス進む。10マスごとにステージ（地図・背景）が切り替わる。
+export const SQUARES_PER_STAGE = 10
+export const MASTERY_PER_SQUARE = 10
+
+export const STAGE_THEMES = [
+  { id: 'coast', name: '海岸', sky: ['#8FD9F0', '#D9F5EC'], ground: '#F2E1B0', accent: '#4FB6E8' },
+  { id: 'mountain', name: '山', sky: ['#BFE0EE', '#E8F3F5'], ground: '#8FA876', accent: '#6E7F87' },
+  { id: 'grassland', name: '草原', sky: ['#BEE6F5', '#EFFAE0'], ground: '#8FC15A', accent: '#5FA23A' },
+  { id: 'monument_valley', name: 'モニュメントバレー', sky: ['#F5C98A', '#FBE3B8'], ground: '#C97A4A', accent: '#A85236' },
+  { id: 'desert', name: '砂漠', sky: ['#FBE3A0', '#FFF3D2'], ground: '#E8C177', accent: '#C99A4A' },
+  { id: 'countryside', name: '田舎の町', sky: ['#CDEAF7', '#F5F9E8'], ground: '#B8D98A', accent: '#E8946A' },
+  { id: 'city', name: '都会の町', sky: ['#B8C6E0', '#E6ECF5'], ground: '#8E97A6', accent: '#5A6478' },
+  { id: 'sky', name: '空', sky: ['#7FC4F0', '#DCF0FB'], ground: '#FFFFFF', accent: '#FFFFFF' },
+  { id: 'fuji', name: '富士山', sky: ['#F7C6D9', '#FDE7C8'], ground: '#7C93B0', accent: '#FFFFFF' },
+  { id: 'swamp', name: '沼地', sky: ['#8FA88C', '#C9D9B0'], ground: '#4E6B4A', accent: '#3A4E36' }
+]
+
+export function stageInfo(masteryEventTotal) {
+  const boardPosition = Math.floor(masteryEventTotal / MASTERY_PER_SQUARE)
+  const stageIndex = Math.floor(boardPosition / SQUARES_PER_STAGE) % STAGE_THEMES.length
+  const squareInStage = boardPosition % SQUARES_PER_STAGE
+  const towardNextSquare = masteryEventTotal % MASTERY_PER_SQUARE
+  return {
+    boardPosition,
+    stageIndex,
+    squareInStage,
+    theme: STAGE_THEMES[stageIndex],
+    towardNextSquare
+  }
+}
+
 // キャラクター（この順番でアンロックされていく）
 export const CHARACTERS = [
   { id: 'fox', name: 'きつね', emoji: '🦊' },
