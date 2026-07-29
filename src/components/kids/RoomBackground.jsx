@@ -28,7 +28,7 @@ function Decor({ themeId }) {
   }
 }
 
-export default function RoomBackground({ themeId, height = 130 }) {
+export default function RoomBackground({ themeId, height = 130, children }) {
   const theme = STAGE_THEMES.find((t) => t.id === themeId) || STAGE_THEMES[0]
   return (
     <div
@@ -41,6 +41,7 @@ export default function RoomBackground({ themeId, height = 130 }) {
       <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="room-bg-svg">
         <Decor themeId={theme.id} />
       </svg>
+      {children}
     </div>
   )
 }

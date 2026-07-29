@@ -168,46 +168,47 @@ const DRAGON_BODY = {
   idle: (
     <>
       <ellipse cx="50" cy="85" rx="26" ry="6" fill="#00000012" />
-      <path d="M39 16 L34 32 L46 29 Z" fill="#265E42" />
-      <path d="M61 16 L66 32 L54 29 Z" fill="#265E42" />
-      <path d="M18 55 Q6 50 10 62 Q16 60 22 58 Z" fill="#3E8E64" />
-      <path d="M82 55 Q94 50 90 62 Q84 60 78 58 Z" fill="#3E8E64" />
-      <ellipse cx="50" cy="62" rx="29" ry="25" fill="#357A56" />
-      <path d="M40 44 L44 36 L48 44 Z M52 44 L56 36 L60 44 Z" fill="#265E42" />
-      <ellipse cx="50" cy="72" rx="15" ry="10" fill="#7A9E86" />
+      <path d="M37 12 L31 32 L45 28 Z" fill="#1A4A32" />
+      <path d="M63 12 L69 32 L55 28 Z" fill="#1A4A32" />
+      <path d="M16 54 Q2 48 7 63 Q14 61 22 58 Z" fill="#2E7A50" />
+      <path d="M84 54 Q98 48 93 63 Q86 61 78 58 Z" fill="#2E7A50" />
+      <ellipse cx="50" cy="62" rx="29" ry="25" fill="#245C3E" />
+      <path d="M40 44 L44 34 L48 44 Z M52 44 L56 34 L60 44 Z" fill="#1A4A32" />
+      <path d="M20 56 L25 59 M80 56 L75 59 M15 66 L21 67 M85 66 L79 67" stroke="#123322" strokeWidth="1.4" strokeLinecap="round" />
+      <ellipse cx="50" cy="72" rx="14" ry="9" fill="#5C8A6E" />
       <ellipse cx="40" cy="56" rx="5" ry="5.5" fill="#D9B84A" />
       <rect x="39" y="53.5" width="2.2" height="6" fill="#1A1A16" />
       <ellipse cx="60" cy="56" rx="5" ry="5.5" fill="#D9B84A" />
       <rect x="58.8" y="53.5" width="2.2" height="6" fill="#1A1A16" />
-      <path d="M36 51 Q40 48 44 51 M56 51 Q60 48 64 51" stroke="#1A1A16" strokeWidth="1.8" fill="none" strokeLinecap="round" />
-      <path d="M42 70 L44 76 L47 70 L50 77 L53 70 L56 76 L58 70" fill="none" stroke="#1A1A16" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M35 50 Q40 46 45 50 M55 50 Q60 46 65 50" stroke="#123322" strokeWidth="1.8" fill="none" strokeLinecap="round" />
+      <path d="M40 69 L43 76 L46 68 L49 78 L52 68 L55 78 L58 68 L61 76 L64 69" fill="none" stroke="#123322" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
     </>
   ),
   happy: (
     <>
       <ellipse cx="50" cy="85" rx="26" ry="6" fill="#00000012" />
-      <path d="M37 10 L31 29 L44 26 Z" fill="#265E42" />
-      <path d="M63 10 L69 29 L56 26 Z" fill="#265E42" />
-      <path d="M14 50 Q-2 44 5 60 Q13 57 21 54 Z" fill="#3E8E64" />
-      <path d="M86 50 Q102 44 95 60 Q87 57 79 54 Z" fill="#3E8E64" />
-      <ellipse cx="50" cy="60" rx="33" ry="29" fill="#357A56" />
-      <path d="M38 40 L43 30 L48 40 Z M52 40 L57 30 L62 40 Z" fill="#265E42" />
-      <ellipse cx="50" cy="70" rx="16" ry="11" fill="#7A9E86" />
-      <path d="M28 51 Q40 39 50 50 Q60 39 72 51" stroke="#1A1A16" strokeWidth="3" fill="none" strokeLinecap="round" />
-      <path d="M32 66 L36 76 L42 66 L46 78 L50 65 L54 78 L58 66 L64 76 L68 66" fill="#7A2020" stroke="#1A1A16" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M8 22 L13 30 M92 22 L87 30" stroke="#FF6F6F" strokeWidth="2.5" strokeLinecap="round" />
+      <path d="M35 4 L28 28 L44 24 Z" fill="#1A4A32" />
+      <path d="M65 4 L72 28 L56 24 Z" fill="#1A4A32" />
+      <path d="M12 48 Q-6 40 2 60 Q11 57 20 53 Z" fill="#2E7A50" />
+      <path d="M88 48 Q106 40 98 60 Q89 57 80 53 Z" fill="#2E7A50" />
+      <ellipse cx="50" cy="60" rx="33" ry="29" fill="#245C3E" />
+      <path d="M38 40 L43 28 L48 40 Z M52 40 L57 28 L62 40 Z" fill="#1A4A32" />
+      <ellipse cx="50" cy="70" rx="16" ry="11" fill="#5C8A6E" />
+      <path d="M28 51 Q40 39 50 50 Q60 39 72 51" stroke="#123322" strokeWidth="3" fill="none" strokeLinecap="round" />
+      <path d="M30 64 L34 78 L40 64 L44 80 L50 63 L56 80 L60 64 L66 78 L70 64" fill="#7A2020" stroke="#123322" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M6 20 L12 28 M94 20 L88 28" stroke="#FF6F6F" strokeWidth="2.6" strokeLinecap="round" />
     </>
   ),
   sad: (
     <>
       <ellipse cx="50" cy="85" rx="26" ry="6" fill="#00000012" />
-      <path d="M40 22 L36 35 L46 32 Z" fill="#265E42" />
-      <path d="M60 22 L64 35 L54 32 Z" fill="#265E42" />
-      <path d="M20 58 Q10 54 13 64 Q18 62 23 60 Z" fill="#3E8E64" />
-      <path d="M80 58 Q90 54 87 64 Q82 62 77 60 Z" fill="#3E8E64" />
-      <ellipse cx="50" cy="64" rx="28" ry="24" fill="#357A56" />
-      <ellipse cx="50" cy="73" rx="14" ry="9" fill="#7A9E86" />
-      <path d="M35 58 Q40 63 45 59" stroke="#1A1A16" strokeWidth="2.4" fill="none" strokeLinecap="round" />
+      <path d="M39 18 L34 36 L46 32 Z" fill="#1A4A32" />
+      <path d="M61 18 L66 36 L54 32 Z" fill="#1A4A32" />
+      <path d="M18 58 Q8 53 12 65 Q17 63 23 60 Z" fill="#2E7A50" />
+      <path d="M82 58 Q92 53 88 65 Q83 63 77 60 Z" fill="#2E7A50" />
+      <ellipse cx="50" cy="64" rx="28" ry="24" fill="#245C3E" />
+      <ellipse cx="50" cy="73" rx="14" ry="9" fill="#5C8A6E" />
+      <path d="M35 58 Q40 63 45 59" stroke="#123322" strokeWidth="2.4" fill="none" strokeLinecap="round" />
       <path d="M65 58 Q60 63 55 59" stroke="#1A1A16" strokeWidth="2.4" fill="none" strokeLinecap="round" />
       <ellipse cx="40" cy="64" rx="3.6" ry="4" fill="#D9B84A" />
       <rect x="39.2" y="62" width="1.6" height="4.5" fill="#1A1A16" />
@@ -225,58 +226,64 @@ const LION_BODY = {
   idle: (
     <>
       <ellipse cx="50" cy="85" rx="26" ry="6" fill="#00000012" />
-      {[...Array(10)].map((_, i) => {
-        const a = (i / 10) * Math.PI * 2
-        const x = 50 + Math.cos(a) * 30
-        const y = 55 + Math.sin(a) * 30
-        return <ellipse key={i} cx={x} cy={y} rx="7" ry="4" fill="#C9822E" transform={`rotate(${(a * 180) / Math.PI} ${x} ${y})`} />
+      {[...Array(13)].map((_, i) => {
+        const a = (i / 13) * Math.PI * 2
+        const x = 50 + Math.cos(a) * 32
+        const y = 55 + Math.sin(a) * 32
+        return <ellipse key={i} cx={x} cy={y} rx="8" ry="4.6" fill="#8C5A1E" transform={`rotate(${(a * 180) / Math.PI} ${x} ${y})`} />
       })}
-      <ellipse cx="50" cy="58" rx="26" ry="23" fill="#E8A94A" />
-      <ellipse cx="50" cy="66" rx="15" ry="12" fill="#FFF3D9" />
-      <circle cx="40" cy="54" r="4" fill="#3A2E1E" />
-      <circle cx="60" cy="54" r="4" fill="#3A2E1E" />
-      <ellipse cx="50" cy="61" rx="3.4" ry="2.4" fill="#3A2E1E" />
-      <path d="M46 65 Q50 69 54 65" stroke="#3A2E1E" strokeWidth="2.4" fill="none" strokeLinecap="round" />
+      <ellipse cx="50" cy="58" rx="26" ry="23" fill="#D9962E" />
+      <ellipse cx="50" cy="67" rx="14" ry="11" fill="#F2DBA0" />
+      <ellipse cx="39" cy="53" rx="4" ry="4.6" fill="#8C5A1E" />
+      <rect x="38.2" y="50.5" width="1.6" height="5" fill="#1A1A16" />
+      <ellipse cx="61" cy="53" rx="4" ry="4.6" fill="#8C5A1E" />
+      <rect x="60.2" y="50.5" width="1.6" height="5" fill="#1A1A16" />
+      <path d="M32 49 Q39 45 46 49 M54 49 Q61 45 68 49" stroke="#5C3A12" strokeWidth="1.8" fill="none" strokeLinecap="round" />
+      <path d="M38 68 L41 73 L45 68 L50 74 L55 68 L59 73 L62 68" fill="none" stroke="#3A2410" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M22 60 L27 63 M78 60 L73 63" stroke="#8C5A1E" strokeWidth="1.4" strokeLinecap="round" opacity="0.7" />
     </>
   ),
   happy: (
     <>
       <ellipse cx="50" cy="85" rx="26" ry="6" fill="#00000012" />
-      {[...Array(12)].map((_, i) => {
-        const a = (i / 12) * Math.PI * 2
-        const x = 50 + Math.cos(a) * 33
-        const y = 54 + Math.sin(a) * 33
-        return <ellipse key={i} cx={x} cy={y} rx="8" ry="4.5" fill="#C9822E" transform={`rotate(${(a * 180) / Math.PI} ${x} ${y})`} />
+      {[...Array(15)].map((_, i) => {
+        const a = (i / 15) * Math.PI * 2
+        const x = 50 + Math.cos(a) * 35
+        const y = 54 + Math.sin(a) * 35
+        return <ellipse key={i} cx={x} cy={y} rx="9" ry="5" fill="#8C5A1E" transform={`rotate(${(a * 180) / Math.PI} ${x} ${y})`} />
       })}
-      <ellipse cx="50" cy="57" rx="28" ry="25" fill="#E8A94A" />
-      <ellipse cx="50" cy="66" rx="16" ry="13" fill="#FFF3D9" />
-      <path d="M31 51 Q40 41 49 51" stroke="#3A2E1E" strokeWidth="3.2" fill="none" strokeLinecap="round" />
-      <path d="M51 51 Q60 41 69 51" stroke="#3A2E1E" strokeWidth="3.2" fill="none" strokeLinecap="round" />
-      <ellipse cx="50" cy="60" rx="3.6" ry="2.6" fill="#3A2E1E" />
-      <path d="M38 64 Q50 79 62 64" stroke="#3A2E1E" strokeWidth="2.8" fill="none" strokeLinecap="round" />
-      <circle cx="31" cy="61" r="5" fill="#FFB3A0" opacity="0.75" />
-      <circle cx="69" cy="61" r="5" fill="#FFB3A0" opacity="0.75" />
-      <path d="M16 30 L20 36 M84 30 L80 36" stroke="#FFC53D" strokeWidth="2.3" strokeLinecap="round" />
+      <ellipse cx="50" cy="57" rx="28" ry="25" fill="#D9962E" />
+      <ellipse cx="50" cy="67" rx="16" ry="12" fill="#F2DBA0" />
+      <path d="M30 50 Q40 40 50 50" stroke="#1A1A16" strokeWidth="3.2" fill="none" strokeLinecap="round" />
+      <path d="M50 50 Q60 40 70 50" stroke="#1A1A16" strokeWidth="3.2" fill="none" strokeLinecap="round" />
+      <ellipse cx="39" cy="55" rx="4.2" ry="5" fill="#8C5A1E" />
+      <rect x="38.2" y="52" width="1.7" height="5.4" fill="#1A1A16" />
+      <ellipse cx="61" cy="55" rx="4.2" ry="5" fill="#8C5A1E" />
+      <rect x="60.2" y="52" width="1.7" height="5.4" fill="#1A1A16" />
+      <path d="M32 66 L36 76 L42 66 L46 79 L50 65 L54 79 L58 66 L64 76 L68 66" fill="#7A2020" stroke="#1A1A16" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M10 24 L15 30 M90 24 L85 30" stroke="#FFC53D" strokeWidth="2.4" strokeLinecap="round" />
     </>
   ),
   sad: (
     <>
       <ellipse cx="50" cy="85" rx="26" ry="6" fill="#00000012" />
-      {[...Array(10)].map((_, i) => {
-        const a = (i / 10) * Math.PI * 2
-        const x = 50 + Math.cos(a) * 27
-        const y = 58 + Math.sin(a) * 27
-        return <ellipse key={i} cx={x} cy={y} rx="6" ry="3.5" fill="#C9822E" transform={`rotate(${(a * 180) / Math.PI} ${x} ${y})`} />
+      {[...Array(12)].map((_, i) => {
+        const a = (i / 12) * Math.PI * 2
+        const x = 50 + Math.cos(a) * 28
+        const y = 58 + Math.sin(a) * 28
+        return <ellipse key={i} cx={x} cy={y} rx="7" ry="4" fill="#8C5A1E" transform={`rotate(${(a * 180) / Math.PI} ${x} ${y})`} />
       })}
-      <ellipse cx="50" cy="61" rx="24" ry="21" fill="#E8A94A" />
-      <ellipse cx="50" cy="68" rx="14" ry="11" fill="#FFF3D9" />
-      <path d="M36 58 Q40 55 44 58" stroke="#3A2E1E" strokeWidth="2.4" fill="none" strokeLinecap="round" />
-      <path d="M64 58 Q60 55 56 58" stroke="#3A2E1E" strokeWidth="2.4" fill="none" strokeLinecap="round" />
-      <circle cx="40" cy="61" r="2.8" fill="#3A2E1E" />
-      <circle cx="60" cy="61" r="2.8" fill="#3A2E1E" />
-      <path d="M40 66 Q40 72 38 76" stroke="#7EC8F2" strokeWidth="2.2" fill="none" strokeLinecap="round" />
-      <ellipse cx="38" cy="77" rx="2" ry="2.6" fill="#7EC8F2" />
-      <path d="M45 73 Q50 70 55 73" stroke="#3A2E1E" strokeWidth="2.2" fill="none" strokeLinecap="round" />
+      <ellipse cx="50" cy="61" rx="24" ry="21" fill="#D9962E" />
+      <ellipse cx="50" cy="69" rx="13" ry="10" fill="#F2DBA0" />
+      <path d="M35 57 Q40 63 45 58" stroke="#1A1A16" strokeWidth="2.4" fill="none" strokeLinecap="round" />
+      <path d="M65 57 Q60 63 55 58" stroke="#1A1A16" strokeWidth="2.4" fill="none" strokeLinecap="round" />
+      <ellipse cx="40" cy="62" rx="3.2" ry="3.6" fill="#8C5A1E" />
+      <rect x="39.2" y="60" width="1.5" height="4" fill="#1A1A16" />
+      <ellipse cx="60" cy="62" rx="3.2" ry="3.6" fill="#8C5A1E" />
+      <rect x="59.2" y="60" width="1.5" height="4" fill="#1A1A16" />
+      <path d="M42 71 L45 76 L50 72 L54 76 L57 71" fill="none" stroke="#1A1A16" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M40 68 Q40 74 38 78" stroke="#7EC8F2" strokeWidth="2.2" fill="none" strokeLinecap="round" />
+      <ellipse cx="38" cy="79" rx="2" ry="2.6" fill="#7EC8F2" />
     </>
   )
 }
@@ -443,46 +450,51 @@ const ANKY_BODY = {
   idle: (
     <>
       <ellipse cx="50" cy="85" rx="28" ry="6" fill="#00000012" />
-      <path d="M26 34 L34 22 L40 36 M60 36 L66 22 L74 34 M42 22 L46 12 L50 22 M50 22 L54 12 L58 22" fill="#4A5C33" />
-      <ellipse cx="24" cy="60" rx="4.5" ry="3.5" fill="#4A5C33" /><ellipse cx="76" cy="60" rx="4.5" ry="3.5" fill="#4A5C33" />
-      <ellipse cx="50" cy="62" rx="32" ry="24" fill="#6B8049" />
-      <path d="M50 50 Q40 60 44 70 Q50 74 56 70 Q60 60 50 50 Z" fill="#556B39" opacity="0.6" />
-      <ellipse cx="50" cy="70" rx="17" ry="10" fill="#9CAE7A" />
-      <path d="M32 55 Q38 51 43 55" stroke="#213B2C" strokeWidth="2" fill="none" strokeLinecap="round" />
-      <path d="M68 55 Q62 51 57 55" stroke="#213B2C" strokeWidth="2" fill="none" strokeLinecap="round" />
-      <circle cx="38" cy="58" r="3.2" fill="#1A1A16" />
-      <circle cx="62" cy="58" r="3.2" fill="#1A1A16" />
-      <path d="M44 70 L56 70" stroke="#1A1A16" strokeWidth="2.3" fill="none" strokeLinecap="round" />
+      <path d="M22 33 L32 16 L40 35 M60 35 L68 16 L78 33 M38 20 L44 6 L48 21 M52 21 L56 6 L62 20" fill="#3A4A28" />
+      <ellipse cx="20" cy="59" rx="5.5" ry="4" fill="#3A4A28" /><ellipse cx="80" cy="59" rx="5.5" ry="4" fill="#3A4A28" />
+      <ellipse cx="50" cy="62" rx="32" ry="24" fill="#5A6E3D" />
+      <path d="M50 50 Q40 60 44 70 Q50 74 56 70 Q60 60 50 50 Z" fill="#40522A" opacity="0.7" />
+      <path d="M20 55 L26 58 M80 55 L74 58 M15 65 L22 66 M85 65 L78 66" stroke="#2E3D22" strokeWidth="1.6" strokeLinecap="round" />
+      <ellipse cx="50" cy="70" rx="16" ry="9" fill="#8A9C6A" />
+      <path d="M30 53 Q38 48 44 53" stroke="#1A1A16" strokeWidth="2.2" fill="none" strokeLinecap="round" />
+      <path d="M70 53 Q62 48 56 53" stroke="#1A1A16" strokeWidth="2.2" fill="none" strokeLinecap="round" />
+      <ellipse cx="38" cy="57" rx="3" ry="3.6" fill="#D9C25A" />
+      <rect x="37.2" y="55" width="1.5" height="4" fill="#1A1A16" />
+      <ellipse cx="62" cy="57" rx="3" ry="3.6" fill="#D9C25A" />
+      <rect x="61.2" y="55" width="1.5" height="4" fill="#1A1A16" />
+      <path d="M40 70 L43 74 L47 70 L50 75 L53 70 L57 74 L60 70" fill="none" stroke="#1A1A16" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
     </>
   ),
   happy: (
     <>
       <ellipse cx="50" cy="85" rx="28" ry="6" fill="#00000012" />
-      <path d="M22 30 L32 16 L39 32 M61 32 L68 16 L78 30 M40 16 L45 5 L50 16 M50 16 L55 5 L60 16" fill="#4A5C33" />
-      <ellipse cx="20" cy="58" rx="5" ry="4" fill="#4A5C33" /><ellipse cx="80" cy="58" rx="5" ry="4" fill="#4A5C33" />
-      <ellipse cx="50" cy="60" rx="35" ry="27" fill="#6B8049" />
-      <path d="M50 47 Q39 58 44 69 Q50 73 56 69 Q61 58 50 47 Z" fill="#556B39" opacity="0.6" />
-      <ellipse cx="50" cy="69" rx="18" ry="11" fill="#9CAE7A" />
+      <path d="M18 29 L30 10 L39 31 M61 31 L70 10 L82 29 M37 14 L44 -2 L49 15 M51 15 L56 -2 L63 14" fill="#3A4A28" />
+      <ellipse cx="16" cy="57" rx="6" ry="4.5" fill="#3A4A28" /><ellipse cx="84" cy="57" rx="6" ry="4.5" fill="#3A4A28" />
+      <ellipse cx="50" cy="60" rx="35" ry="27" fill="#5A6E3D" />
+      <path d="M50 47 Q39 58 44 69 Q50 73 56 69 Q61 58 50 47 Z" fill="#40522A" opacity="0.7" />
+      <ellipse cx="50" cy="69" rx="18" ry="11" fill="#8A9C6A" />
       <path d="M28 51 Q39 40 50 51" stroke="#1A1A16" strokeWidth="3.2" fill="none" strokeLinecap="round" />
       <path d="M50 51 Q61 40 72 51" stroke="#1A1A16" strokeWidth="3.2" fill="none" strokeLinecap="round" />
-      <path d="M38 66 L42 74 L48 65 L52 76 L56 65 L62 74 L66 66" fill="none" stroke="#1A1A16" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M14 24 L18 30 M86 24 L82 30" stroke="#FFC53D" strokeWidth="2.3" strokeLinecap="round" />
+      <path d="M35 65 L40 75 L46 64 L50 77 L54 64 L60 75 L65 65" fill="#7A2020" stroke="#1A1A16" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M12 22 L17 29 M88 22 L83 29" stroke="#FFC53D" strokeWidth="2.4" strokeLinecap="round" />
     </>
   ),
   sad: (
     <>
       <ellipse cx="50" cy="85" rx="28" ry="6" fill="#00000012" />
-      <path d="M29 36 L36 26 L41 38 M59 38 L64 26 L71 36" fill="#4A5C33" />
-      <ellipse cx="27" cy="63" rx="4" ry="3.2" fill="#4A5C33" /><ellipse cx="73" cy="63" rx="4" ry="3.2" fill="#4A5C33" />
-      <ellipse cx="50" cy="65" rx="29" ry="22" fill="#6B8049" />
-      <ellipse cx="50" cy="72" rx="15" ry="9" fill="#9CAE7A" />
-      <path d="M35 60 Q39 57 44 60" stroke="#1A1A16" strokeWidth="2.3" fill="none" strokeLinecap="round" />
-      <path d="M65 60 Q61 57 56 60" stroke="#1A1A16" strokeWidth="2.3" fill="none" strokeLinecap="round" />
-      <circle cx="39" cy="63" r="2.6" fill="#1A1A16" />
-      <circle cx="61" cy="63" r="2.6" fill="#1A1A16" />
+      <path d="M27 34 L36 20 L42 37 M58 37 L64 20 L73 34" fill="#3A4A28" />
+      <ellipse cx="25" cy="62" rx="5" ry="3.8" fill="#3A4A28" /><ellipse cx="75" cy="62" rx="5" ry="3.8" fill="#3A4A28" />
+      <ellipse cx="50" cy="65" rx="29" ry="22" fill="#5A6E3D" />
+      <ellipse cx="50" cy="72" rx="15" ry="9" fill="#8A9C6A" />
+      <path d="M33 59 Q38 56 44 59" stroke="#1A1A16" strokeWidth="2.3" fill="none" strokeLinecap="round" />
+      <path d="M67 59 Q62 56 56 59" stroke="#1A1A16" strokeWidth="2.3" fill="none" strokeLinecap="round" />
+      <ellipse cx="38" cy="62" rx="2.6" ry="3.2" fill="#D9C25A" />
+      <rect x="37.2" y="60" width="1.4" height="3.6" fill="#1A1A16" />
+      <ellipse cx="62" cy="62" rx="2.6" ry="3.2" fill="#D9C25A" />
+      <rect x="61.2" y="60" width="1.4" height="3.6" fill="#1A1A16" />
+      <path d="M42 71 L45 75 L50 71 L54 75 L57 71" fill="none" stroke="#1A1A16" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
       <path d="M40 68 Q40 74 38 78" stroke="#7EC8F2" strokeWidth="2.2" fill="none" strokeLinecap="round" />
       <ellipse cx="38" cy="79" rx="2" ry="2.6" fill="#7EC8F2" />
-      <path d="M45 74 L55 74" stroke="#1A1A16" strokeWidth="2.1" fill="none" strokeLinecap="round" />
     </>
   )
 }
@@ -492,44 +504,45 @@ const TREX_BODY = {
   idle: (
     <>
       <ellipse cx="50" cy="85" rx="26" ry="6" fill="#00000012" />
-      <path d="M40 20 L44 10 L48 20 M52 20 L56 10 L60 20" fill="#234A2C" />
-      <ellipse cx="50" cy="60" rx="28" ry="26" fill="#2F5A3B" />
-      <path d="M50 46 Q41 55 45 66 Q50 70 55 66 Q59 55 50 46 Z" fill="#234A2C" opacity="0.55" />
-      <ellipse cx="50" cy="72" rx="14" ry="9" fill="#6E9576" />
+      <path d="M38 18 L43 6 L47 19 M53 19 L57 6 L62 18" fill="#1C3A22" />
+      <ellipse cx="50" cy="60" rx="28" ry="26" fill="#26492E" />
+      <path d="M50 46 Q41 55 45 66 Q50 70 55 66 Q59 55 50 46 Z" fill="#1C3A22" opacity="0.6" />
+      <path d="M18 58 L23 60 M82 58 L77 60" stroke="#152C1A" strokeWidth="1.5" strokeLinecap="round" />
+      <ellipse cx="50" cy="72" rx="14" ry="9" fill="#5C7E63" />
       <ellipse cx="39" cy="53" rx="4.6" ry="5" fill="#E8963C" />
       <rect x="38.1" y="50.5" width="1.9" height="5.5" fill="#1A1A16" />
       <path d="M33 49 Q39 46 45 49" stroke="#1A1A16" strokeWidth="1.8" fill="none" strokeLinecap="round" />
       <ellipse cx="61" cy="53" rx="4.6" ry="5" fill="#E8963C" />
       <rect x="60.1" y="50.5" width="1.9" height="5.5" fill="#1A1A16" />
       <path d="M55 49 Q61 46 67 49" stroke="#1A1A16" strokeWidth="1.8" fill="none" strokeLinecap="round" />
-      <path d="M38 66 L41 72 L45 66 L48 74 L52 66 L55 74 L59 66 L62 72" fill="none" stroke="#1A1A16" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M36 67 L39 74 L43 66 L47 76 L50 65 L53 76 L57 66 L61 74 L64 67" fill="#7A2020" stroke="#1A1A16" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
     </>
   ),
   happy: (
     <>
       <ellipse cx="50" cy="85" rx="26" ry="6" fill="#00000012" />
-      <path d="M38 12 L43 2 L48 12 M52 12 L57 2 L62 12" fill="#234A2C" />
-      <ellipse cx="50" cy="59" rx="31" ry="29" fill="#2F5A3B" />
-      <path d="M50 42 Q39 53 44 66 Q50 71 56 66 Q61 53 50 42 Z" fill="#234A2C" opacity="0.55" />
-      <ellipse cx="50" cy="70" rx="15" ry="10" fill="#6E9576" />
+      <path d="M36 10 L42 -2 L47 11 M53 11 L58 -2 L64 10" fill="#1C3A22" />
+      <ellipse cx="50" cy="59" rx="31" ry="29" fill="#26492E" />
+      <path d="M50 42 Q39 53 44 66 Q50 71 56 66 Q61 53 50 42 Z" fill="#1C3A22" opacity="0.6" />
+      <ellipse cx="50" cy="70" rx="15" ry="10" fill="#5C7E63" />
       <path d="M28 51 Q39 39 50 50 Q61 39 72 51" stroke="#1A1A16" strokeWidth="3" fill="none" strokeLinecap="round" />
-      <path d="M32 65 L36 76 L42 65 L46 79 L50 64 L54 79 L58 65 L64 76 L68 65" fill="#7A2020" stroke="#1A1A16" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M10 22 L15 28 M90 22 L85 28" stroke="#FF6F6F" strokeWidth="2.4" strokeLinecap="round" />
+      <path d="M30 65 L34 78 L40 65 L44 80 L50 64 L56 80 L60 65 L66 78 L70 65" fill="#7A2020" stroke="#1A1A16" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M8 20 L14 27 M92 20 L86 27" stroke="#FF6F6F" strokeWidth="2.5" strokeLinecap="round" />
     </>
   ),
   sad: (
     <>
       <ellipse cx="50" cy="85" rx="26" ry="6" fill="#00000012" />
-      <path d="M42 24 L45 15 L48 24 M52 24 L55 15 L58 24" fill="#234A2C" />
-      <ellipse cx="50" cy="64" rx="27" ry="23" fill="#2F5A3B" />
-      <ellipse cx="50" cy="74" rx="13" ry="8" fill="#6E9576" />
+      <path d="M40 22 L44 12 L47 23 M53 23 L56 12 L60 22" fill="#1C3A22" />
+      <ellipse cx="50" cy="64" rx="27" ry="23" fill="#26492E" />
+      <ellipse cx="50" cy="74" rx="13" ry="8" fill="#5C7E63" />
       <path d="M34 57 Q40 62 46 58" stroke="#1A1A16" strokeWidth="2.3" fill="none" strokeLinecap="round" />
       <path d="M66 57 Q60 62 54 58" stroke="#1A1A16" strokeWidth="2.3" fill="none" strokeLinecap="round" />
       <ellipse cx="40" cy="62" rx="3.4" ry="3.8" fill="#E8963C" />
       <rect x="39.2" y="60" width="1.6" height="4.2" fill="#1A1A16" />
       <ellipse cx="60" cy="62" rx="3.4" ry="3.8" fill="#E8963C" />
       <rect x="59.2" y="60" width="1.6" height="4.2" fill="#1A1A16" />
-      <path d="M43 71 L46 76 L50 72 L54 76 L57 71" fill="none" stroke="#1A1A16" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M42 71 L45 77 L49 70 L52 78 L55 70 L58 77 L61 71" fill="none" stroke="#1A1A16" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
       <path d="M40 67 Q40 73 38 77" stroke="#7EC8F2" strokeWidth="2.2" fill="none" strokeLinecap="round" />
       <ellipse cx="38" cy="78" rx="2" ry="2.6" fill="#7EC8F2" />
     </>

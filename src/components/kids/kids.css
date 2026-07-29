@@ -246,7 +246,8 @@ body { margin: 0; background: var(--bg); }
 
 /* 部屋の背景（すごろくで解放） */
 .room-bg { width: 100%; border-radius: 20px; overflow: hidden; position: relative; margin-bottom: 4px; }
-.room-bg-svg { width: 100%; height: 100%; display: block; }
+.room-bg-svg { width: 100%; height: 100%; display: block; position: absolute; inset: 0; }
+.room-bg-path-overlay { position: absolute; inset: 0; width: 100%; height: 100%; }
 .mascot-zone.has-room { position: relative; }
 .mascot-zone.has-room .fox { position: absolute; bottom: 6px; left: 50%; transform: translateX(-50%); }
 
