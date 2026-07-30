@@ -71,6 +71,22 @@ export default function PreviewPanel({ questions, books, categories, types, sets
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [item?.id])
 
+  // 左右キーで前の問題・次の問題に移動する（フォームの入力中は無視する）
+  useEffect(() => {
+    function onKeyDown(e) {
+      if (editing) return
+      const tag = document.activeElement?.tagName
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return
+      if (e.key === 'ArrowRight') {
+        setIndex((v) => Math.min(v + 1, filtered.length - 1))
+      } else if (e.key === 'ArrowLeft') {
+        setIndex((v) => Math.max(v - 1, 0))
+      }
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [filtered.length, editing])
+
   function resetFilter(setter) {
     return (e) => { setter(e.target.value); setIndex(0) }
   }
