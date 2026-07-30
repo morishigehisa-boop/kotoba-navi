@@ -1,5 +1,6 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { buildPreviewHtml } from './previewHtml'
+import { EditModal } from './EditModal'
 
 const ANSWER_TYPE_LABELS_LOCAL = {
   self_recall: '自己採点',
@@ -11,7 +12,7 @@ const ANSWER_TYPE_LABELS_LOCAL = {
   choice: '選択式'
 }
 
-export default function PreviewPanel({ questions, books, categories, types, sets }) {
+export default function PreviewPanel({ questions, books, categories, types, sets, onChanged }) {
   const [category, setCategory] = useState('')
   const [type, setType] = useState('')
   const [book, setBook] = useState('')
@@ -19,6 +20,7 @@ export default function PreviewPanel({ questions, books, categories, types, sets
   const [pageTo, setPageTo] = useState('')
   const [setId, setSetId] = useState('')
   const [index, setIndex] = useState(0)
+  const [editing, setEditing] = useState(false)
 
   const filtered = useMemo(() => {
     let base = questions
@@ -45,8 +47,23 @@ export default function PreviewPanel({ questions, books, categories, types, sets
     })
   }, [questions, sets, category, type, book, pageFrom, pageTo, setId])
 
+  const [pinnedId, setPinnedId] = useState(null)
+
+  // 編集などでquestionsが更新された後も、同じ問題を表示し続ける
+  useEffect(() => {
+    if (pinnedId === null) return
+    const idx = filtered.findIndex((q) => q.id === pinnedId)
+    if (idx >= 0) setIndex(idx)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [questions])
+
   const safeIndex = Math.min(index, Math.max(0, filtered.length - 1))
   const item = filtered[safeIndex]
+
+  useEffect(() => {
+    if (item) setPinnedId(item.id)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [item?.id])
 
   function resetFilter(setter) {
     return (e) => { setter(e.target.value); setIndex(0) }
@@ -90,6 +107,7 @@ export default function PreviewPanel({ questions, books, categories, types, sets
               Q{String(item.id).padStart(4, '0')}　{safeIndex + 1} / {filtered.length}
             </div>
             <button className="btn btn-secondary" disabled={safeIndex >= filtered.length - 1} onClick={() => setIndex(safeIndex + 1)}>次の問題 ▶</button>
+            <button className="btn btn-primary" onClick={() => setEditing(true)}>この問題を編集</button>
           </div>
 
           <div className="preview-grid">
@@ -103,6 +121,17 @@ export default function PreviewPanel({ questions, books, categories, types, sets
             </div>
           </div>
         </>
+      )}
+
+      {editing && item && (
+        <EditModal
+          question={item}
+          onClose={() => setEditing(false)}
+          onSaved={async () => {
+            setEditing(false)
+            await onChanged('問題を更新しました')
+          }}
+        />
       )}
     </div>
   )

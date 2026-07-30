@@ -93,7 +93,7 @@ textarea { width: 100%; min-height: 130px; font-family: monospace; font-size: 12
 .modal textarea { min-height: 70px; font-family: inherit; font-size: 14px; }
 .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px; }
 
-.preview-nav { display: flex; align-items: center; justify-content: center; gap: 16px; margin-bottom: 16px; }
+.preview-nav { display: flex; align-items: center; justify-content: center; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }
 .preview-nav-info { font-size: 13px; font-weight: 700; color: #5A5749; min-width: 160px; text-align: center; }
 .preview-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
 .preview-col-title { font-size: 12px; font-weight: 700; color: #8A8678; margin-bottom: 6px; }
