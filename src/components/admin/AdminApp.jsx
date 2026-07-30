@@ -31,6 +31,7 @@ const ANSWER_TYPE_LABELS = {
   fill_blank: '穴埋め',
   pair_fill: '二文穴埋め',
   antonym_pair: '対になることわざ',
+  synonym_pair: '類義語(二文穴埋め)',
   choice: '選択式'
 }
 
@@ -46,6 +47,7 @@ const UNIFIED_CSV_EXAMPLE = [
   'ことわざ(似た意味),synonym_forward,名人でも時には失敗する。,,河童の川流れ,,弘法にも筆の誤り／猿も木から落ちる,,,,,,,言葉ナビ上巻,34-35',
   '類義語,pair_fill,,,,,,個人でも本を（　　）できる時代だ。,出版,雑誌を（　　）する。,刊行,,,言葉ナビ上巻,88-89',
   'ことわざ(対になる),antonym_pair,,,,,,危険な手段を用いること。,危ない橋を渡る,用心に用心を重ねること。,石橋を叩いて渡る,,,言葉ナビ上巻,37',
+  '類義語,synonym_pair,,,,,,外国から届いた手紙に（　　）を書く。,返事,管制塔の呼びかけに（　　）する。,応答,,,言葉ナビ上巻,88',
   '同音異義語,choice,,（　　）技術の発展による恩恵を受ける。,,科学,,,,,,カガク,科学／化学,言葉ナビ上巻,144'
 ].join('\n')
 
@@ -66,6 +68,7 @@ function buildQuestionFromRow(row) {
       return { ...base, content: { q: row.question_text, shown: row.shown_proverb, a: splitPipe(row.answer_proverbs) } }
     case 'pair_fill':
     case 'antonym_pair':
+    case 'synonym_pair':
       return { ...base, content: { sentenceA: row.sentence_a, answerA: row.answer_a, sentenceB: row.sentence_b, answerB: row.answer_b } }
     case 'choice':
       return { ...base, content: { reading: row.reading, sentence: row.sentence, choices: splitPipe(row.choices), answer: row.answer } }
@@ -85,6 +88,7 @@ function summarizeContent(q) {
       return { main: `${c.shown} → ${(c.a || []).join('／')}`, sub: c.q }
     case 'pair_fill':
     case 'antonym_pair':
+    case 'synonym_pair':
       return { main: `①${c.answerA}　②${c.answerB}`, sub: `${c.sentenceA} / ${c.sentenceB}` }
     case 'choice':
       return { main: `${c.reading}：${c.answer}`, sub: `選択肢: ${(c.choices || []).join('／')}` }

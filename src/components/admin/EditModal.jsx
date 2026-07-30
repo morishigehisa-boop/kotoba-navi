@@ -8,6 +8,7 @@ export const ANSWER_TYPE_LABELS = {
   fill_blank: '穴埋め',
   pair_fill: '二文穴埋め',
   antonym_pair: '対になる',
+  synonym_pair: '類義語(二文穴埋め)',
   choice: '選択式'
 }
 
@@ -101,10 +102,10 @@ export function EditModal({ question, onClose, onSaved }) {
           </>
         )}
 
-        {(t === 'pair_fill' || t === 'antonym_pair') && (
+        {(t === 'pair_fill' || t === 'antonym_pair' || t === 'synonym_pair') && (
           <>
             <div className="form-row" style={{ maxWidth: 'none' }}>
-              <label className="f-label">{t === 'antonym_pair' ? '意味①' : '例文①'}</label>
+              <label className="f-label">{t === 'antonym_pair' ? '意味①' : t === 'synonym_pair' ? '例文①' : '例文①'}</label>
               <input type="text" value={content.sentenceA || ''} onChange={(e) => setField('sentenceA', e.target.value)} />
             </div>
             <div className="form-row">
@@ -112,7 +113,7 @@ export function EditModal({ question, onClose, onSaved }) {
               <input type="text" value={content.answerA || ''} onChange={(e) => setField('answerA', e.target.value)} />
             </div>
             <div className="form-row" style={{ maxWidth: 'none' }}>
-              <label className="f-label">{t === 'antonym_pair' ? '意味②' : '例文②'}</label>
+              <label className="f-label">{t === 'antonym_pair' ? '意味②' : t === 'synonym_pair' ? '例文②' : '例文②'}</label>
               <input type="text" value={content.sentenceB || ''} onChange={(e) => setField('sentenceB', e.target.value)} />
             </div>
             <div className="form-row">
