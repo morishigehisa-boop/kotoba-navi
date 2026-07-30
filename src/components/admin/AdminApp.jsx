@@ -9,12 +9,15 @@ import {
   insertQuestions,
   deleteQuestion,
   saveFilterHistory,
-  fetchFilterHistory
+  fetchFilterHistory,
+  fetchFuriganaEntries
 } from '../../lib/api'
 import { boxOf } from '../../lib/today'
+import { setCustomFurigana } from '../../lib/furigana'
 import './admin.css'
 import PreviewPanel from './PreviewPanel'
 import { EditModal } from './EditModal'
+import FuriganaPanel from './FuriganaPanel'
 
 // 未正解・1回・2回・3回・かんぺき の5段階
 const ADMIN_BOX_COLORS = ['#D8D2C0', '#F5D18C', '#F5A742', '#E8863A', '#4CB27A']
@@ -110,14 +113,17 @@ export default function AdminApp() {
   const [questions, setQuestions] = useState([])
   const [sets, setSets] = useState([])
   const [history, setHistory] = useState([])
+  const [furiganaEntries, setFuriganaEntries] = useState([])
   const [toast, setToast] = useState('')
   const [loading, setLoading] = useState(true)
 
   async function reloadAll() {
-    const [qs, s, h] = await Promise.all([fetchQuestions(), fetchQuestionSetsWithItems(), fetchFilterHistory()])
+    const [qs, s, h, fe] = await Promise.all([fetchQuestions(), fetchQuestionSetsWithItems(), fetchFilterHistory(), fetchFuriganaEntries()])
     setQuestions(qs)
     setSets(s)
     setHistory(h)
+    setFuriganaEntries(fe)
+    setCustomFurigana(fe)
   }
 
   useEffect(() => {
@@ -144,7 +150,8 @@ export default function AdminApp() {
           ['make', '問題集作成'],
           ['sets', '問題集一覧'],
           ['history', '抽出条件履歴'],
-          ['import', 'インポート']
+          ['import', 'インポート'],
+          ['furigana', 'ふりがな辞書']
         ].map(([key, label]) => (
           <button key={key} className={`tab ${tab === key ? 'active' : ''}`} onClick={() => setTab(key)}>
             {label}
@@ -218,6 +225,15 @@ export default function AdminApp() {
           onImported={async (count, typeLabel) => {
             await reloadAll()
             toastShow(setToast, `${count}問を追加しました（${typeLabel}）`)
+          }}
+        />
+      )}
+      {tab === 'furigana' && (
+        <FuriganaPanel
+          entries={furiganaEntries}
+          onChanged={async (msg) => {
+            await reloadAll()
+            toastShow(setToast, msg)
           }}
         />
       )}

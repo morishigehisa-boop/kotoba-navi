@@ -23,6 +23,17 @@ export const FURIGANA = {
 
 const FURIGANA_KEYS = Object.keys(FURIGANA).sort((a, b) => b.length - a.length)
 
+// 管理画面から追加・編集された「ふりがな辞書」（Supabaseのfurigana_entriesテーブル由来）をマージする。
+// アプリ起動時に一度呼び出す想定。既存の単語は上書きされる。
+let mergedFurigana = { ...FURIGANA }
+let mergedKeys = FURIGANA_KEYS
+
+export function setCustomFurigana(entries) {
+  mergedFurigana = { ...FURIGANA }
+  entries.forEach((e) => { mergedFurigana[e.word] = e.reading })
+  mergedKeys = Object.keys(mergedFurigana).sort((a, b) => b.length - a.length)
+}
+
 // テキスト中の辞書登録語だけを <ruby> でラップしたHTML文字列を返す。
 // 呼び出し側は dangerouslySetInnerHTML で描画する（例文中の <span class="kanji-hint"> なども素通りする）。
 export function addFurigana(text) {
@@ -30,9 +41,9 @@ export function addFurigana(text) {
   let result = ''
   let i = 0
   outer: while (i < text.length) {
-    for (const k of FURIGANA_KEYS) {
+    for (const k of mergedKeys) {
       if (text.startsWith(k, i)) {
-        result += `<ruby>${k}<rt>${FURIGANA[k]}</rt></ruby>`
+        result += `<ruby>${k}<rt>${mergedFurigana[k]}</rt></ruby>`
         i += k.length
         continue outer
       }

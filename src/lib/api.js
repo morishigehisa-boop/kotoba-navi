@@ -111,6 +111,28 @@ export async function fetchActivityDates() {
   return [...set]
 }
 
+// ふりがな辞書（管理画面から編集する追加分）
+export async function fetchFuriganaEntries() {
+  const { data, error } = await supabase.from('furigana_entries').select('*').order('word', { ascending: true })
+  if (error) throw error
+  return data
+}
+
+export async function addFuriganaEntry(word, reading) {
+  const { error } = await supabase.from('furigana_entries').insert({ word, reading })
+  if (error) throw error
+}
+
+export async function updateFuriganaEntry(id, patch) {
+  const { error } = await supabase.from('furigana_entries').update(patch).eq('id', id)
+  if (error) throw error
+}
+
+export async function deleteFuriganaEntry(id) {
+  const { error } = await supabase.from('furigana_entries').delete().eq('id', id)
+  if (error) throw error
+}
+
 export async function saveFilterHistory({ name, filter_condition, result_count }) {
   const { error } = await supabase.from('filter_history').insert({ name, filter_condition, result_count })
   if (error) throw error

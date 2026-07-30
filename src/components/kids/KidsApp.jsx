@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import Character from './Character'
 import Confetti from './Confetti'
-import { addFurigana } from '../../lib/furigana'
+import { addFurigana, setCustomFurigana } from '../../lib/furigana'
 import { playCorrect, playWrong, playFanfareBig, playCharacterUnlock, playItemGet, playLevelUp, playBadgeGet, playComeback } from '../../lib/sound'
-import { fetchQuestions, fetchQuestionSetsWithItems, recordAnswer, fetchProgress, updateProgress } from '../../lib/api'
+import { fetchQuestions, fetchQuestionSetsWithItems, recordAnswer, fetchProgress, updateProgress, fetchFuriganaEntries } from '../../lib/api'
 import { buildTodaySet, buildOverdueSet } from '../../lib/today'
 import {
   computeStreakUpdate,
@@ -90,7 +90,10 @@ export default function KidsApp() {
   useEffect(() => {
     ;(async () => {
       try {
-        const [qs, sets, prog] = await Promise.all([fetchQuestions(), fetchQuestionSetsWithItems(), fetchProgress()])
+        const [qs, sets, prog, furiganaEntries] = await Promise.all([
+          fetchQuestions(), fetchQuestionSetsWithItems(), fetchProgress(), fetchFuriganaEntries()
+        ])
+        setCustomFurigana(furiganaEntries)
         setQuestions(qs)
         setAllSets(sets)
         setProgress(prog)
