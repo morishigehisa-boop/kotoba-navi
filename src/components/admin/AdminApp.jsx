@@ -552,10 +552,10 @@ function SetsPanel({ sets, questions, onDelete, onReorder, onEdit, onToggleRevie
   return (
     <div className="card">
       <h2>作成した問題集</h2>
-      <p className="lead" style={{ marginBottom: 10 }}>行をドラッグ&ドロップすると、子どもアプリでの表示順を変更できます。「確認済み」は、プレビューで内容をチェックし終わった問題集にチェックを入れてください。</p>
+      <p className="lead" style={{ marginBottom: 10 }}>行をドラッグ&ドロップすると、子どもアプリでの表示順を変更できます。「レビュー」は、プレビューで内容をチェックし終わった問題集にチェックを入れてください。</p>
       <div className="table-scroll">
         <table>
-          <thead><tr><th></th><th>問題集名</th><th>問題数</th><th>進捗</th><th>確認済み</th><th>目標日時</th><th>作成日</th><th></th></tr></thead>
+          <thead><tr><th></th><th>問題集名</th><th>問題数</th><th>進捗</th><th>目標日時</th><th>作成日</th><th></th><th>レビュー</th></tr></thead>
           <tbody>
             {order.length === 0 && <tr><td colSpan="8" className="empty">まだ問題集がありません</td></tr>}
             {order.map((s) => {
@@ -584,17 +584,14 @@ function SetsPanel({ sets, questions, onDelete, onReorder, onEdit, onToggleRevie
                     </div>
                     <div className="progress-stack-label">かんぺき {p.doneRate}%（{p.done}/{p.total}）</div>
                   </td>
-                  <td style={{ textAlign: 'center' }}>
-                    <label className="reviewed-check">
-                      <input type="checkbox" checked={!!s.reviewed} onChange={(e) => onToggleReviewed(s, e.target.checked)} />
-                      {s.reviewed && <span className="reviewed-badge">✅ 確認済み</span>}
-                    </label>
-                  </td>
                   <td><span className={goal.cls}>{goal.text}</span></td>
                   <td>{new Date(s.created_at).toLocaleString('ja-JP')}</td>
                   <td className="row-actions">
                     <button className="btn btn-secondary" onClick={() => setEditing(s)}>編集</button>
                     <button className="btn btn-danger" onClick={() => onDelete(s)}>削除</button>
+                  </td>
+                  <td style={{ textAlign: 'center' }}>
+                    <input type="checkbox" checked={!!s.reviewed} onChange={(e) => onToggleReviewed(s, e.target.checked)} />
                   </td>
                 </tr>
               )
