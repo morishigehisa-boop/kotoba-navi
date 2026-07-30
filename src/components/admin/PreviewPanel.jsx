@@ -150,11 +150,13 @@ export default function PreviewPanel({ questions, books, categories, types, sets
       ) : (
         <>
           <div className="preview-nav">
-            <button className="btn btn-secondary" disabled={safeIndex === 0} onClick={() => setIndex(safeIndex - 1)}>◀ 前の問題</button>
+            <div className="preview-nav-buttons">
+              <button className="btn btn-secondary" disabled={safeIndex === 0} onClick={() => setIndex(safeIndex - 1)}>◀ 前の問題</button>
+              <button className="btn btn-secondary" disabled={safeIndex >= filtered.length - 1} onClick={() => setIndex(safeIndex + 1)}>次の問題 ▶</button>
+            </div>
             <div className="preview-nav-info">
               Q{String(item.id).padStart(4, '0')}　{safeIndex + 1} / {filtered.length}
             </div>
-            <button className="btn btn-secondary" disabled={safeIndex >= filtered.length - 1} onClick={() => setIndex(safeIndex + 1)}>次の問題 ▶</button>
             <button className="btn btn-primary" onClick={() => setEditing(true)}>この問題を編集</button>
           </div>
 

@@ -94,6 +94,7 @@ textarea { width: 100%; min-height: 130px; font-family: monospace; font-size: 12
 .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px; }
 
 .preview-nav { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+.preview-nav-buttons { display: flex; gap: 8px; flex-wrap: nowrap; }
 .preview-nav .btn { padding: 8px 12px; font-size: 13px; min-height: 0; }
 .preview-nav-info { font-size: 12px; font-weight: 700; color: #5A5749; min-width: 0; text-align: center; }
 .preview-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
