@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { buildPreviewHtml } from './previewHtml'
 import { EditModal } from './EditModal'
+import { addFuriganaEntry, updateFuriganaEntry, deleteFuriganaEntry } from '../../lib/api'
 
 const ANSWER_TYPE_LABELS_LOCAL = {
   self_recall: '自己採点',
@@ -12,7 +13,7 @@ const ANSWER_TYPE_LABELS_LOCAL = {
   choice: '選択式'
 }
 
-export default function PreviewPanel({ questions, books, categories, types, sets, onChanged }) {
+export default function PreviewPanel({ questions, books, categories, types, sets, furiganaEntries, onChanged }) {
   const [category, setCategory] = useState('')
   const [type, setType] = useState('')
   const [book, setBook] = useState('')
@@ -21,6 +22,11 @@ export default function PreviewPanel({ questions, books, categories, types, sets
   const [setId, setSetId] = useState('')
   const [index, setIndex] = useState(0)
   const [editing, setEditing] = useState(false)
+  const [furiWord, setFuriWord] = useState('')
+  const [furiReading, setFuriReading] = useState('')
+  const [furiEditingId, setFuriEditingId] = useState(null)
+  const [furiEditWord, setFuriEditWord] = useState('')
+  const [furiEditReading, setFuriEditReading] = useState('')
 
   const filtered = useMemo(() => {
     let base = questions
@@ -67,6 +73,48 @@ export default function PreviewPanel({ questions, books, categories, types, sets
 
   function resetFilter(setter) {
     return (e) => { setter(e.target.value); setIndex(0) }
+  }
+
+  function itemText(q) {
+    if (!q) return ''
+    const c = q.content
+    return [c.q, c.a, c.sentence, c.shown, c.sentenceA, c.sentenceB, c.answerA, c.answerB, c.reading, c.answer, ...(Array.isArray(c.a) ? c.a : []), ...(c.choices || [])]
+      .filter(Boolean).join(' ')
+  }
+
+  const relevantFurigana = useMemo(() => {
+    if (!item) return []
+    const text = itemText(item)
+    return furiganaEntries.filter((e) => text.includes(e.word))
+  }, [item, furiganaEntries])
+
+  async function handleAddFurigana() {
+    if (!furiWord.trim() || !furiReading.trim()) { window.alert('単語と読みの両方を入力してください'); return }
+    try {
+      await addFuriganaEntry(furiWord.trim(), furiReading.trim())
+      setFuriWord(''); setFuriReading('')
+      await onChanged('ふりがなを追加しました')
+    } catch {
+      window.alert('追加に失敗しました（同じ単語が既に登録されている可能性があります）')
+    }
+  }
+
+  function startEditFurigana(e) {
+    setFuriEditingId(e.id); setFuriEditWord(e.word); setFuriEditReading(e.reading)
+  }
+
+  async function saveEditFurigana() {
+    if (!furiEditWord.trim() || !furiEditReading.trim()) return
+    await updateFuriganaEntry(furiEditingId, { word: furiEditWord.trim(), reading: furiEditReading.trim() })
+    setFuriEditingId(null)
+    await onChanged('ふりがなを更新しました')
+  }
+
+  async function handleDeleteFurigana(e) {
+    const ok = window.confirm(`「${e.word}（${e.reading}）」を削除しますか？`)
+    if (!ok) return
+    await deleteFuriganaEntry(e.id)
+    await onChanged('ふりがなを削除しました')
   }
 
   return (
@@ -118,6 +166,47 @@ export default function PreviewPanel({ questions, books, categories, types, sets
             <div>
               <div className="preview-col-title">答え（タップ後）</div>
               <iframe title="answer" className="preview-frame" srcDoc={buildPreviewHtml(item, true)} />
+            </div>
+          </div>
+
+          <div className="furigana-inline">
+            <div className="preview-col-title" style={{ marginTop: 12 }}>ふりがな</div>
+            {relevantFurigana.length > 0 && (
+              <div className="table-scroll" style={{ marginBottom: 8 }}>
+                <table>
+                  <thead><tr><th>単語</th><th>読み</th><th></th></tr></thead>
+                  <tbody>
+                    {relevantFurigana.map((e) => (
+                      <tr key={e.id}>
+                        {furiEditingId === e.id ? (
+                          <>
+                            <td><input type="text" value={furiEditWord} onChange={(ev) => setFuriEditWord(ev.target.value)} /></td>
+                            <td><input type="text" value={furiEditReading} onChange={(ev) => setFuriEditReading(ev.target.value)} /></td>
+                            <td className="row-actions">
+                              <button className="btn btn-primary" onClick={saveEditFurigana}>保存</button>
+                              <button className="btn btn-secondary" onClick={() => setFuriEditingId(null)}>キャンセル</button>
+                            </td>
+                          </>
+                        ) : (
+                          <>
+                            <td><b>{e.word}</b></td>
+                            <td>{e.reading}</td>
+                            <td className="row-actions">
+                              <button className="btn btn-secondary" onClick={() => startEditFurigana(e)}>編集</button>
+                              <button className="btn btn-danger" onClick={() => handleDeleteFurigana(e)}>削除</button>
+                            </td>
+                          </>
+                        )}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+            <div className="filters" style={{ marginBottom: 0 }}>
+              <input type="text" placeholder="単語（例: 竹馬）" style={{ width: 140 }} value={furiWord} onChange={(e) => setFuriWord(e.target.value)} />
+              <input type="text" placeholder="読み（例: ちくば）" style={{ width: 140 }} value={furiReading} onChange={(e) => setFuriReading(e.target.value)} />
+              <button className="btn btn-primary" onClick={handleAddFurigana}>ふりがなを追加</button>
             </div>
           </div>
         </>

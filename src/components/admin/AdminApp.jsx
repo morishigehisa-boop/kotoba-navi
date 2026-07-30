@@ -178,6 +178,7 @@ export default function AdminApp() {
           categories={categories}
           types={types}
           sets={sets}
+          furiganaEntries={furiganaEntries}
           onChanged={async (msg) => {
             await reloadAll()
             toastShow(setToast, msg)
