@@ -72,7 +72,7 @@ export default function PreviewPanel({ questions, books, categories, types, sets
   return (
     <div className="card">
       <h2>子ども画面プレビュー</h2>
-      <p className="lead" style={{ marginBottom: 14 }}>
+      <p className="lead" style={{ marginBottom: 8 }}>
         実際に子どもアプリで使っているデザインをそのまま表示しています。左が問題（タップ前）、右が答え（タップ後）です。
       </p>
 

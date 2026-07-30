@@ -19,8 +19,8 @@ body { margin: 0; background: #F6F5F1; }
 .card { background: #fff; border-radius: 14px; padding: 18px 20px; margin-bottom: 16px; border: 1px solid #EDEAE0; }
 .card h2 { font-size: 15px; font-weight: 700; margin: 0 0 12px; }
 
-.filters { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 14px; }
-.filters select, .filters input { font-family: inherit; font-size: 14px; padding: 8px 10px; border-radius: 8px; border: 1px solid #DEDBD0; background: #FAF9F5; cursor: pointer; }
+.filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+.filters select, .filters input { width: auto; min-width: 0; flex: 0 1 160px; font-family: inherit; font-size: 13px; padding: 6px 8px; border-radius: 8px; border: 1px solid #DEDBD0; background: #FAF9F5; cursor: pointer; }
 
 table { width: 100%; border-collapse: collapse; font-size: 13px; }
 th { text-align: left; color: #8A8678; font-weight: 700; font-size: 11.5px; padding: 8px 8px; border-bottom: 1px solid #EDEAE0; white-space: nowrap; }
@@ -93,8 +93,9 @@ textarea { width: 100%; min-height: 130px; font-family: monospace; font-size: 12
 .modal textarea { min-height: 70px; font-family: inherit; font-size: 14px; }
 .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px; }
 
-.preview-nav { display: flex; align-items: center; justify-content: center; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }
-.preview-nav-info { font-size: 13px; font-weight: 700; color: #5A5749; min-width: 160px; text-align: center; }
-.preview-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-.preview-col-title { font-size: 12px; font-weight: 700; color: #8A8678; margin-bottom: 6px; }
-.preview-frame { width: 100%; height: 480px; border: 1px solid #EDEAE0; border-radius: 12px; background: #FFF7E8; }
+.preview-nav { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+.preview-nav .btn { padding: 8px 12px; font-size: 13px; min-height: 0; }
+.preview-nav-info { font-size: 12px; font-weight: 700; color: #5A5749; min-width: 0; text-align: center; }
+.preview-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.preview-col-title { font-size: 11px; font-weight: 700; color: #8A8678; margin-bottom: 4px; }
+.preview-frame { width: 100%; height: 340px; border: 1px solid #EDEAE0; border-radius: 12px; background: #FFF7E8; }
