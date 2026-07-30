@@ -782,7 +782,7 @@ function QuizCard({ item, revealed, reviewMode, choiceFeedback, onReveal, onAnsw
   }
 
   if (c.sentenceA) {
-    let labelText = 'たいになることわざ'
+    let labelText = '対になることわざ'
     let labelClass = 'label'
     let hintText = '2つとも なんという ことわざ？'
     if (item.category === '類義語') {

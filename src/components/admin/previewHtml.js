@@ -28,7 +28,7 @@ function cardInner(item, revealed) {
   if (c.sentenceA) {
     const isRuigigo = item.category === '類義語'
     const isTaigigo = item.category === '対義語'
-    const labelText = isRuigigo ? '類義語' : isTaigigo ? '対義語' : 'たいになることわざ'
+    const labelText = isRuigigo ? '類義語' : isTaigigo ? '対義語' : '対になることわざ'
     const labelClass = isRuigigo ? 'label label-ruigigo' : isTaigigo ? 'label label-taigigo' : 'label'
     const hintText = isRuigigo ? 'この二つの文章の意味になる類義語はなに？' : isTaigigo ? 'この二つの文章の意味になる対義語はなに？' : '2つとも なんという ことわざ？'
     return `
