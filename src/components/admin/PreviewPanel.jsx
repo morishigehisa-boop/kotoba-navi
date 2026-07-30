@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { buildPreviewHtml } from './previewHtml'
 import { EditModal } from './EditModal'
 import { addFuriganaEntry, updateFuriganaEntry, deleteFuriganaEntry } from '../../lib/api'
@@ -104,6 +104,8 @@ export default function PreviewPanel({ questions, books, categories, types, sets
     return furiganaEntries.filter((e) => text.includes(e.word))
   }, [item, furiganaEntries])
 
+  const furiWordInputRef = useRef(null)
+
   async function handleAddFurigana() {
     if (!furiWord.trim() || !furiReading.trim()) { window.alert('単語と読みの両方を入力してください'); return }
     try {
@@ -112,6 +114,8 @@ export default function PreviewPanel({ questions, books, categories, types, sets
       await onChanged('ふりがなを追加しました')
     } catch {
       window.alert('追加に失敗しました（同じ単語が既に登録されている可能性があります）')
+    } finally {
+      furiWordInputRef.current?.focus()
     }
   }
 
@@ -222,7 +226,7 @@ export default function PreviewPanel({ questions, books, categories, types, sets
               </div>
             )}
             <div className="filters" style={{ marginBottom: 0 }}>
-              <input type="text" placeholder="単語（例: 竹馬）" style={{ width: 140 }} value={furiWord} onChange={(e) => setFuriWord(e.target.value)} />
+              <input ref={furiWordInputRef} type="text" placeholder="単語（例: 竹馬）" style={{ width: 140 }} value={furiWord} onChange={(e) => setFuriWord(e.target.value)} />
               <input type="text" placeholder="読み（例: ちくば）" style={{ width: 140 }} value={furiReading} onChange={(e) => setFuriReading(e.target.value)} />
               <button className="btn btn-primary" onClick={handleAddFurigana}>ふりがなを追加</button>
             </div>

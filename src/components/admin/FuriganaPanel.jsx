@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { addFuriganaEntry, updateFuriganaEntry, deleteFuriganaEntry } from '../../lib/api'
 
 export default function FuriganaPanel({ entries, onChanged }) {
@@ -9,6 +9,7 @@ export default function FuriganaPanel({ entries, onChanged }) {
   const [editWord, setEditWord] = useState('')
   const [editReading, setEditReading] = useState('')
   const [saving, setSaving] = useState(false)
+  const wordInputRef = useRef(null)
 
   const filtered = entries.filter((e) => !search || e.word.includes(search) || e.reading.includes(search))
 
@@ -23,6 +24,7 @@ export default function FuriganaPanel({ entries, onChanged }) {
       window.alert('追加に失敗しました（同じ単語が既に登録されている可能性があります）')
     } finally {
       setSaving(false)
+      wordInputRef.current?.focus()
     }
   }
 
@@ -52,7 +54,7 @@ export default function FuriganaPanel({ entries, onChanged }) {
       </p>
 
       <div className="filters">
-        <input type="text" placeholder="単語" style={{ width: 140 }} value={word} onChange={(e) => setWord(e.target.value)} />
+        <input ref={wordInputRef} type="text" placeholder="単語" style={{ width: 140 }} value={word} onChange={(e) => setWord(e.target.value)} />
         <input type="text" placeholder="読み（ひらがな）" style={{ width: 140 }} value={reading} onChange={(e) => setReading(e.target.value)} />
         <button className="btn btn-primary" disabled={saving} onClick={handleAdd}>追加する</button>
         <input type="text" placeholder="検索" style={{ width: 140, marginLeft: 'auto' }} value={search} onChange={(e) => setSearch(e.target.value)} />
