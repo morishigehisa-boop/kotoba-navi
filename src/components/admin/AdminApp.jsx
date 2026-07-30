@@ -218,6 +218,10 @@ export default function AdminApp() {
             await reloadAll()
             toastShow(setToast, `「${patch.name}」を更新しました`)
           }}
+          onToggleReviewed={async (set, reviewed) => {
+            await updateQuestionSet(set.id, { reviewed })
+            await reloadAll()
+          }}
         />
       )}
       {tab === 'history' && <HistoryPanel history={history} />}
@@ -512,7 +516,7 @@ function MakePanel({ questions, books, categories, types, onSaved }) {
   )
 }
 
-function SetsPanel({ sets, questions, onDelete, onReorder, onEdit }) {
+function SetsPanel({ sets, questions, onDelete, onReorder, onEdit, onToggleReviewed }) {
   const [order, setOrder] = useState(sets)
   const [dragId, setDragId] = useState(null)
   const [dragOverId, setDragOverId] = useState(null)
@@ -548,12 +552,12 @@ function SetsPanel({ sets, questions, onDelete, onReorder, onEdit }) {
   return (
     <div className="card">
       <h2>作成した問題集</h2>
-      <p className="lead" style={{ marginBottom: 10 }}>行をドラッグ&ドロップすると、子どもアプリでの表示順を変更できます。</p>
+      <p className="lead" style={{ marginBottom: 10 }}>行をドラッグ&ドロップすると、子どもアプリでの表示順を変更できます。「確認済み」は、プレビューで内容をチェックし終わった問題集にチェックを入れてください。</p>
       <div className="table-scroll">
         <table>
-          <thead><tr><th></th><th>問題集名</th><th>問題数</th><th>進捗</th><th>目標日時</th><th>作成日</th><th></th></tr></thead>
+          <thead><tr><th></th><th>問題集名</th><th>問題数</th><th>進捗</th><th>確認済み</th><th>目標日時</th><th>作成日</th><th></th></tr></thead>
           <tbody>
-            {order.length === 0 && <tr><td colSpan="7" className="empty">まだ問題集がありません</td></tr>}
+            {order.length === 0 && <tr><td colSpan="8" className="empty">まだ問題集がありません</td></tr>}
             {order.map((s) => {
               const goal = formatGoal(s.goal_at)
               const p = progressOf(s)
@@ -565,7 +569,7 @@ function SetsPanel({ sets, questions, onDelete, onReorder, onEdit }) {
                   onDragOver={(e) => { e.preventDefault(); setDragOverId(s.id) }}
                   onDragEnd={() => { setDragId(null); setDragOverId(null) }}
                   onDrop={() => handleDrop(s.id)}
-                  className={`drag-row ${dragOverId === s.id ? 'drag-over' : ''} ${dragId === s.id ? 'dragging' : ''}`}
+                  className={`drag-row ${dragOverId === s.id ? 'drag-over' : ''} ${dragId === s.id ? 'dragging' : ''} ${s.reviewed ? 'reviewed-row' : ''}`}
                 >
                   <td className="drag-handle" title="ドラッグして並び替え">⠿</td>
                   <td><b>{s.name}</b></td>
@@ -579,6 +583,12 @@ function SetsPanel({ sets, questions, onDelete, onReorder, onEdit }) {
                       ))}
                     </div>
                     <div className="progress-stack-label">かんぺき {p.doneRate}%（{p.done}/{p.total}）</div>
+                  </td>
+                  <td style={{ textAlign: 'center' }}>
+                    <label className="reviewed-check">
+                      <input type="checkbox" checked={!!s.reviewed} onChange={(e) => onToggleReviewed(s, e.target.checked)} />
+                      {s.reviewed && <span className="reviewed-badge">✅ 確認済み</span>}
+                    </label>
                   </td>
                   <td><span className={goal.cls}>{goal.text}</span></td>
                   <td>{new Date(s.created_at).toLocaleString('ja-JP')}</td>
