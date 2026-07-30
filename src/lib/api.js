@@ -87,6 +87,16 @@ export async function deleteQuestion(id) {
   if (error) throw error
 }
 
+export async function bulkUpdateQuestions(ids, patch) {
+  const { error } = await supabase.from('questions').update(patch).in('id', ids)
+  if (error) throw error
+}
+
+export async function bulkDeleteQuestions(ids) {
+  const { error } = await supabase.from('questions').delete().in('id', ids)
+  if (error) throw error
+}
+
 export async function fetchProgress() {
   const { data, error } = await supabase.from('user_progress').select('*').eq('id', 1).single()
   if (error) throw error

@@ -8,6 +8,8 @@ import {
   reorderQuestionSets,
   insertQuestions,
   deleteQuestion,
+  bulkUpdateQuestions,
+  bulkDeleteQuestions,
   saveFilterHistory,
   fetchFilterHistory,
   fetchFuriganaEntries
@@ -255,9 +257,17 @@ function ListPanel({ questions, books, categories, types, onChanged }) {
   const [search, setSearch] = useState('')
   const [pageFrom, setPageFrom] = useState('')
   const [pageTo, setPageTo] = useState('')
+  const [idFrom, setIdFrom] = useState('')
+  const [idTo, setIdTo] = useState('')
   const [editing, setEditing] = useState(null) // 編集中の question オブジェクト
+  const [bulkCategory, setBulkCategory] = useState('')
+  const [bulkBook, setBulkBook] = useState('')
+  const [bulkPage, setBulkPage] = useState('')
+  const [bulkBusy, setBulkBusy] = useState(false)
 
   const rows = questions.filter((q) => {
+    if (idFrom !== '' && q.id < parseInt(idFrom)) return false
+    if (idTo !== '' && q.id > parseInt(idTo)) return false
     if (category && q.category !== category) return false
     if (type && q.answer_type !== type) return false
     if (book && q.source_book !== book) return false
@@ -276,6 +286,8 @@ function ListPanel({ questions, books, categories, types, onChanged }) {
     return true
   })
 
+  const idRangeActive = idFrom !== '' || idTo !== ''
+
   async function handleDelete(q) {
     const s = summarizeContent(q)
     const ok = window.confirm(`この問題を削除しますか？\n「${s.main}」\n（問題集に含まれている場合は、その紐付けも削除されます）`)
@@ -284,9 +296,43 @@ function ListPanel({ questions, books, categories, types, onChanged }) {
     onChanged('問題を削除しました')
   }
 
+  async function handleBulkDelete() {
+    if (rows.length === 0) return
+    const ok = window.confirm(`管理番号Q${String(idFrom || rows[0].id).padStart(4, '0')}〜Q${String(idTo || rows[rows.length - 1].id).padStart(4, '0')}の範囲で、現在の絞り込み条件に一致する ${rows.length}問 を削除します。\nこの操作は取り消せません。よろしいですか？`)
+    if (!ok) return
+    setBulkBusy(true)
+    try {
+      await bulkDeleteQuestions(rows.map((q) => q.id))
+      await onChanged(`${rows.length}問を一括削除しました`)
+    } finally {
+      setBulkBusy(false)
+    }
+  }
+
+  async function handleBulkUpdate() {
+    if (rows.length === 0) return
+    const patch = {}
+    if (bulkCategory.trim()) patch.category = bulkCategory.trim()
+    if (bulkBook.trim()) patch.source_book = bulkBook.trim()
+    if (bulkPage.trim()) patch.source_page = bulkPage.trim()
+    if (Object.keys(patch).length === 0) { window.alert('更新する項目を1つ以上入力してください'); return }
+    const ok = window.confirm(`絞り込み条件に一致する ${rows.length}問 を、入力した内容で一括更新します。よろしいですか？`)
+    if (!ok) return
+    setBulkBusy(true)
+    try {
+      await bulkUpdateQuestions(rows.map((q) => q.id), patch)
+      setBulkCategory(''); setBulkBook(''); setBulkPage('')
+      await onChanged(`${rows.length}問を一括更新しました`)
+    } finally {
+      setBulkBusy(false)
+    }
+  }
+
   return (
     <div className="card">
       <div className="filters">
+        <input type="number" placeholder="管理番号(開始)" style={{ width: 120 }} value={idFrom} onChange={(e) => setIdFrom(e.target.value)} />
+        <input type="number" placeholder="管理番号(終了)" style={{ width: 120 }} value={idTo} onChange={(e) => setIdTo(e.target.value)} />
         <select value={category} onChange={(e) => setCategory(e.target.value)}>
           <option value="">カテゴリー: すべて</option>
           {categories.map((c) => <option key={c} value={c}>{c}</option>)}
@@ -303,6 +349,23 @@ function ListPanel({ questions, books, categories, types, onChanged }) {
         <input type="number" placeholder="ページ終了" style={{ width: 110 }} value={pageTo} onChange={(e) => setPageTo(e.target.value)} />
         <input type="text" placeholder="キーワードを検索" value={search} onChange={(e) => setSearch(e.target.value)} />
       </div>
+
+      {idRangeActive && (
+        <div className="bulk-panel">
+          <div className="bulk-panel-title">一括操作（絞り込み条件に一致する {rows.length}問 が対象）</div>
+          <div className="bulk-panel-row">
+            <input type="text" placeholder="カテゴリーを一括変更" style={{ width: 160 }} value={bulkCategory} onChange={(e) => setBulkCategory(e.target.value)} />
+            <input type="text" placeholder="出典(問題集名)を一括変更" style={{ width: 180 }} value={bulkBook} onChange={(e) => setBulkBook(e.target.value)} />
+            <input type="text" placeholder="ページを一括変更" style={{ width: 140 }} value={bulkPage} onChange={(e) => setBulkPage(e.target.value)} />
+            <button className="btn btn-primary" disabled={bulkBusy || rows.length === 0} onClick={handleBulkUpdate}>一括更新する</button>
+            <button className="btn btn-danger" disabled={bulkBusy || rows.length === 0} onClick={handleBulkDelete}>この範囲を一括削除</button>
+          </div>
+          <div className="hint" style={{ marginTop: 6, marginBottom: 0 }}>
+            空欄の項目は変更されません。他のフィルター（カテゴリー・出題形式など）と組み合わせて、対象をさらに絞り込めます。
+          </div>
+        </div>
+      )}
+
       <div className="table-scroll">
         <table>
           <thead>
