@@ -108,3 +108,11 @@ tr.reviewed-row td { background: #F4FAF6; }
 .bulk-panel { background: #FFF7E8; border: 1px solid #F0DDBB; border-radius: 10px; padding: 12px 14px; margin-bottom: 14px; }
 .bulk-panel-title { font-size: 13px; font-weight: 700; color: #8A5A1E; margin-bottom: 8px; }
 .bulk-panel-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+
+.csv-dropzone {
+  display: flex; align-items: center; justify-content: center; text-align: center;
+  border: 2px dashed #D9A85C; border-radius: 12px; padding: 24px 16px; margin-bottom: 12px;
+  background: #FFFBEF; color: #8A6D2A; font-size: 13px; font-weight: 700; cursor: pointer;
+  transition: background .15s, border-color .15s;
+}
+.csv-dropzone.drag-active { background: #FFF1D2; border-color: #C9741E; color: #C9741E; }

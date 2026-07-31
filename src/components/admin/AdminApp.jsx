@@ -747,6 +747,7 @@ function ImportPanel({ onImported }) {
   const [csv, setCsv] = useState('')
   const [result, setResult] = useState('')
   const [errors, setErrors] = useState([])
+  const [dragOver, setDragOver] = useState(false)
 
   function parseCsvRows(text) {
     const lines = text.trim().split('\n').filter((l) => l.trim())
@@ -760,6 +761,36 @@ function ImportPanel({ onImported }) {
         headers.forEach((h, i) => { row[h] = cols[i] ?? '' })
         return row
       })
+  }
+
+  function readFile(file) {
+    if (!file) return
+    if (!file.name.toLowerCase().endsWith('.csv') && file.type !== 'text/csv') {
+      window.alert('.csvファイルを選択してください')
+      return
+    }
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      // Excel等が付与するBOM(先頭の見えない文字)を除去しておく
+      const text = String(e.target.result).replace(/^\uFEFF/, '')
+      setCsv(text)
+      setResult('')
+      setErrors([])
+    }
+    reader.readAsText(file, 'utf-8')
+  }
+
+  function handleDrop(e) {
+    e.preventDefault()
+    setDragOver(false)
+    const file = e.dataTransfer.files?.[0]
+    readFile(file)
+  }
+
+  function handleFileSelect(e) {
+    const file = e.target.files?.[0]
+    readFile(file)
+    e.target.value = ''
   }
 
   async function handleImport() {
@@ -794,9 +825,20 @@ function ImportPanel({ onImported }) {
     <div className="card">
       <h2>紙の問題集から作ったCSVを取り込む</h2>
       <p className="lead" style={{ marginBottom: 14 }}>
-        写真から読み取った問題をこのチャットでCSV化してから、ここに貼り付けてください。行ごとの<code>answer_type</code>列から出題形式を自動判定するので、事前に形式を選ぶ必要はありません。使わない列は空欄のままでOKです。
+        写真から読み取った問題をこのチャットでCSV化してから、下に貼り付けるか、CSVファイルをドラッグ&ドロップしてください。行ごとの<code>answer_type</code>列から出題形式を自動判定するので、事前に形式を選ぶ必要はありません。使わない列は空欄のままでOKです。
       </p>
       <div className="format-hint">{UNIFIED_CSV_EXAMPLE}</div>
+
+      <label
+        className={`csv-dropzone ${dragOver ? 'drag-active' : ''}`}
+        onDragOver={(e) => { e.preventDefault(); setDragOver(true) }}
+        onDragLeave={() => setDragOver(false)}
+        onDrop={handleDrop}
+      >
+        <div>📄 CSVファイルをここにドラッグ&ドロップ、またはクリックして選択</div>
+        <input type="file" accept=".csv,text/csv" style={{ display: 'none' }} onChange={handleFileSelect} />
+      </label>
+
       <textarea value={csv} onChange={(e) => setCsv(e.target.value)} placeholder={UNIFIED_CSV_EXAMPLE} />
       <div style={{ marginTop: 12 }}>
         <button className="btn btn-primary" onClick={handleImport}>取り込む</button>
