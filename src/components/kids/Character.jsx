@@ -659,11 +659,65 @@ const DORA_BODY = {
   )
 }
 
+// ---- スポンジくん（オリジナルの四角いスポンジ風キャラ）----
+const SPONGE_BODY = {
+  idle: (
+    <>
+      <ellipse cx="50" cy="85" rx="26" ry="6" fill="#00000012" />
+      <rect x="21" y="26" width="58" height="60" rx="16" fill="#F5C542" />
+      <ellipse cx="30" cy="40" rx="3" ry="2.4" fill="#D9A82A" opacity="0.7" />
+      <ellipse cx="70" cy="44" rx="2.6" ry="2" fill="#D9A82A" opacity="0.7" />
+      <ellipse cx="26" cy="64" rx="2.4" ry="3" fill="#D9A82A" opacity="0.7" />
+      <ellipse cx="73" cy="66" rx="3" ry="2.2" fill="#D9A82A" opacity="0.7" />
+      <ellipse cx="50" cy="32" rx="2.2" ry="2.6" fill="#D9A82A" opacity="0.7" />
+      <rect x="30" y="55" width="40" height="24" rx="10" fill="#FFF3C4" />
+      <circle cx="40" cy="52" r="4.4" fill="#3A2E1E" />
+      <circle cx="60" cy="52" r="4.4" fill="#3A2E1E" />
+      <path d="M46 66 Q50 70 54 66" stroke="#3A2E1E" strokeWidth="2.3" fill="none" strokeLinecap="round" />
+      <path d="M22 20 L26 26 M78 20 L74 26 M50 18 L50 24" stroke="#4FB6E8" strokeWidth="2" strokeLinecap="round" opacity="0.6" />
+    </>
+  ),
+  happy: (
+    <>
+      <ellipse cx="50" cy="85" rx="26" ry="6" fill="#00000012" />
+      <rect x="17" y="21" width="66" height="66" rx="18" fill="#F5C542" />
+      <ellipse cx="28" cy="38" rx="3" ry="2.4" fill="#D9A82A" opacity="0.7" />
+      <ellipse cx="72" cy="42" rx="2.6" ry="2" fill="#D9A82A" opacity="0.7" />
+      <ellipse cx="24" cy="66" rx="2.4" ry="3" fill="#D9A82A" opacity="0.7" />
+      <ellipse cx="75" cy="68" rx="3" ry="2.2" fill="#D9A82A" opacity="0.7" />
+      <rect x="27" y="56" width="46" height="27" rx="12" fill="#FFF3C4" />
+      <path d="M31 51 Q40 42 49 51" stroke="#3A2E1E" strokeWidth="3.2" fill="none" strokeLinecap="round" />
+      <path d="M51 51 Q60 42 69 51" stroke="#3A2E1E" strokeWidth="3.2" fill="none" strokeLinecap="round" />
+      <path d="M38 66 Q50 82 62 66" stroke="#3A2E1E" strokeWidth="2.8" fill="none" strokeLinecap="round" />
+      <circle cx="30" cy="63" r="5" fill="#FFB3A0" opacity="0.8" />
+      <circle cx="70" cy="63" r="5" fill="#FFB3A0" opacity="0.8" />
+      <path d="M12 24 L17 30 M88 24 L83 30" stroke="#FFC53D" strokeWidth="2.4" strokeLinecap="round" />
+    </>
+  ),
+  sad: (
+    <>
+      <ellipse cx="50" cy="85" rx="26" ry="6" fill="#00000012" />
+      <rect x="24" y="32" width="52" height="54" rx="14" fill="#F5C542" />
+      <ellipse cx="32" cy="46" rx="2.6" ry="2" fill="#D9A82A" opacity="0.7" />
+      <ellipse cx="68" cy="50" rx="2.4" ry="1.8" fill="#D9A82A" opacity="0.7" />
+      <rect x="32" y="58" width="36" height="22" rx="9" fill="#FFF3C4" />
+      <path d="M36 55 Q40 52 44 55" stroke="#3A2E1E" strokeWidth="2.3" fill="none" strokeLinecap="round" />
+      <path d="M64 55 Q60 52 56 55" stroke="#3A2E1E" strokeWidth="2.3" fill="none" strokeLinecap="round" />
+      <circle cx="40" cy="59" r="3" fill="#3A2E1E" />
+      <circle cx="60" cy="59" r="3" fill="#3A2E1E" />
+      <path d="M40 64 Q40 70 38 74" stroke="#7EC8F2" strokeWidth="2.2" fill="none" strokeLinecap="round" />
+      <ellipse cx="38" cy="75" rx="2" ry="2.6" fill="#7EC8F2" />
+      <path d="M45 71 Q50 68 55 71" stroke="#3A2E1E" strokeWidth="2.2" fill="none" strokeLinecap="round" />
+    </>
+  )
+}
+
 const BODIES = {
   fox: FOX_BODY, cat: CAT_BODY, dog: DOG_BODY, dragon: DRAGON_BODY,
   lion: LION_BODY, pig: PIG_BODY, cheetah: CHEETAH_BODY, robot: ROBOT_BODY,
   ankylosaurus: ANKY_BODY, trex: TREX_BODY,
-  pika: PIKA_BODY, dora: DORA_BODY
+  pika: PIKA_BODY, dora: DORA_BODY,
+  sponge: SPONGE_BODY
 }
 
 // ============================================================
@@ -1068,6 +1122,53 @@ const ITEM_FRAGMENTS = {
       <ellipse rx="11" ry="13" fill="#2B2A27" />
       <ellipse rx="7" ry="9" fill="#4A4A46" />
       <ellipse rx="3.5" ry="4.5" fill="#171715" />
+    </g>
+  )},
+
+  // ---- スポンジくん専用 ----
+  burger: { front: (
+    <g transform="translate(80,76)">
+      <path d="M-10 -6 Q0 -13 10 -6 Z" fill="#D9A05C" />
+      <rect x="-10" y="-6" width="20" height="3" fill="#6B9E4A" />
+      <rect x="-10" y="-3" width="20" height="4" fill="#8C5A2A" />
+      <rect x="-10" y="1" width="20" height="3" fill="#D94848" />
+      <path d="M-10 4 Q0 9 10 4 Z" fill="#E8B96A" />
+    </g>
+  )},
+  juice: { front: (
+    <g transform="translate(80,76)">
+      <path d="M-6 -10 L6 -10 L5 10 L-5 10 Z" fill="#FFC53D" stroke="#B5860B" strokeWidth="1" />
+      <rect x="-6" y="-13" width="12" height="4" fill="#4CB27A" />
+      <rect x="-1.5" y="-18" width="3" height="6" fill="#4CB27A" />
+      <path d="M-4 -6 L4 -6 M-4 -2 L4 -2 M-4 2 L4 2" stroke="#FFF3C4" strokeWidth="1.2" opacity="0.7" />
+    </g>
+  )},
+  shrimp: { front: (
+    <g transform="translate(80,76) rotate(-10)">
+      <path d="M-10 4 Q-4 -8 8 -4 Q12 -2 8 2 Q2 -2 -2 4 Q-4 8 -10 4 Z" fill="#FF9E7A" stroke="#D9724A" strokeWidth="1" />
+      <path d="M6 -6 L10 -10 M8 -3 L13 -5" stroke="#D9724A" strokeWidth="1.2" strokeLinecap="round" />
+    </g>
+  )},
+  crab: { front: (
+    <g transform="translate(80,76)">
+      <ellipse rx="10" ry="7" fill="#E8654A" stroke="#C9432A" strokeWidth="1" />
+      <path d="M-9 -3 L-15 -8 M9 -3 L15 -8" stroke="#C9432A" strokeWidth="2" strokeLinecap="round" />
+      <circle cx="-15" cy="-9" r="2.5" fill="#E8654A" stroke="#C9432A" strokeWidth="1" />
+      <circle cx="15" cy="-9" r="2.5" fill="#E8654A" stroke="#C9432A" strokeWidth="1" />
+      <path d="M-6 4 L-8 8 M0 5 L0 9 M6 4 L8 8" stroke="#C9432A" strokeWidth="1.3" strokeLinecap="round" />
+    </g>
+  )},
+  bubble: { front: (
+    <g>
+      <circle cx="72" cy="34" r="6" fill="#DCF3FB" opacity="0.8" stroke="#7EC8F2" strokeWidth="1" />
+      <circle cx="80" cy="46" r="4" fill="#DCF3FB" opacity="0.8" stroke="#7EC8F2" strokeWidth="1" />
+      <circle cx="26" cy="30" r="4.5" fill="#DCF3FB" opacity="0.8" stroke="#7EC8F2" strokeWidth="1" />
+    </g>
+  )},
+  chef_hat: { front: (
+    <g>
+      <rect x="38" y="24" width="24" height="12" rx="2" fill="#FFFFFF" stroke="#E4E0D3" strokeWidth="1" />
+      <path d="M36 24 Q36 10 44 14 Q46 6 50 14 Q54 6 56 14 Q64 10 64 24 Z" fill="#FFFFFF" stroke="#E4E0D3" strokeWidth="1" />
     </g>
   )}
 }

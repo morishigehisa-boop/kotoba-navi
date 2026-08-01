@@ -116,7 +116,8 @@ export const CHARACTERS = [
   { id: 'trex', name: 'ティラノザウルス', emoji: '🦖' },
   { id: 'dragon', name: 'ドラゴン', emoji: '🐉' },
   { id: 'pika', name: 'ピカさん', emoji: '⚡' },
-  { id: 'dora', name: 'ドラさん', emoji: '🔵' }
+  { id: 'dora', name: 'ドラさん', emoji: '🔵' },
+  { id: 'sponge', name: 'スポンジくん', emoji: '🧽' }
 ]
 
 // 着せ替えショップのアイテム（キャラクターごとにテーマが違う専用アイテム）
@@ -263,6 +264,18 @@ export const SHOP_ITEMS_BY_CHARACTER = {
     { id: 'big_light', name: '大きくなるライト', cost: 130, emoji: '🔦' },
     { id: 'small_tunnel', name: '小さくなるトンネル', cost: 150, emoji: '🕳️' },
     { id: 'medal', name: 'きんメダル', cost: 200, emoji: '🏅' },
+    { id: 'crown', name: 'きんの かんむり', cost: 300, emoji: '👑' }
+  ],
+  sponge: [
+    { id: 'burger', name: 'バーガー', cost: 50, emoji: '🍔' },
+    { id: 'juice', name: 'ジュース', cost: 60, emoji: '🧃' },
+    { id: 'fish', name: 'さかな', cost: 80, emoji: '🐟' },
+    { id: 'shrimp', name: 'えび', cost: 90, emoji: '🦐' },
+    { id: 'bell', name: 'すずの くびわ', cost: 100, emoji: '🔔' },
+    { id: 'glasses', name: 'サングラス', cost: 120, emoji: '🕶️' },
+    { id: 'crab', name: 'かにさん', cost: 130, emoji: '🦀' },
+    { id: 'bubble', name: 'あわあわ', cost: 150, emoji: '🫧' },
+    { id: 'chef_hat', name: 'コックぼうし', cost: 200, emoji: '🧑‍🍳' },
     { id: 'crown', name: 'きんの かんむり', cost: 300, emoji: '👑' }
   ]
 }
