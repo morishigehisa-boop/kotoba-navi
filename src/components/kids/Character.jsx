@@ -712,12 +712,109 @@ const SPONGE_BODY = {
   )
 }
 
+// ---- くれさん（オリジナルの元気な男の子キャラ）----
+const KURE_BODY = {
+  idle: (
+    <>
+      <ellipse cx="50" cy="85" rx="26" ry="6" fill="#00000012" />
+      <path d="M30 30 Q26 14 38 16 Q42 6 50 14 Q58 6 62 16 Q74 14 70 30 Z" fill="#3A2E1E" />
+      <ellipse cx="50" cy="58" rx="27" ry="25" fill="#FFDDB0" />
+      <ellipse cx="50" cy="66" rx="14" ry="11" fill="#FFEFD6" />
+      <circle cx="40" cy="54" r="4.2" fill="#3A2E1E" />
+      <circle cx="60" cy="54" r="4.2" fill="#3A2E1E" />
+      <circle cx="34" cy="61" r="4" fill="#FFB3A0" opacity="0.7" />
+      <circle cx="66" cy="61" r="4" fill="#FFB3A0" opacity="0.7" />
+      <path d="M45 65 Q50 69 55 65" stroke="#3A2E1E" strokeWidth="2.2" fill="none" strokeLinecap="round" />
+      <rect x="30" y="80" width="40" height="8" rx="4" fill="#4FB6E8" />
+    </>
+  ),
+  happy: (
+    <>
+      <ellipse cx="50" cy="85" rx="26" ry="6" fill="#00000012" />
+      <path d="M27 27 Q22 9 36 12 Q41 1 50 10 Q59 1 64 12 Q78 9 73 27 Z" fill="#3A2E1E" />
+      <ellipse cx="50" cy="58" rx="29" ry="27" fill="#FFDDB0" />
+      <ellipse cx="50" cy="66" rx="15" ry="12" fill="#FFEFD6" />
+      <path d="M31 51 Q40 43 49 51" stroke="#3A2E1E" strokeWidth="3" fill="none" strokeLinecap="round" />
+      <path d="M51 51 Q60 43 69 51" stroke="#3A2E1E" strokeWidth="3" fill="none" strokeLinecap="round" />
+      <path d="M38 63 Q50 78 62 63" stroke="#3A2E1E" strokeWidth="2.6" fill="none" strokeLinecap="round" />
+      <circle cx="32" cy="60" r="5" fill="#FFB3A0" opacity="0.85" />
+      <circle cx="68" cy="60" r="5" fill="#FFB3A0" opacity="0.85" />
+      <rect x="28" y="80" width="44" height="8" rx="4" fill="#4FB6E8" />
+      <path d="M12 22 L17 28 M88 22 L83 28" stroke="#FFC53D" strokeWidth="2.4" strokeLinecap="round" />
+    </>
+  ),
+  sad: (
+    <>
+      <ellipse cx="50" cy="85" rx="26" ry="6" fill="#00000012" />
+      <path d="M32 33 Q29 19 39 21 Q43 12 50 19 Q57 12 61 21 Q71 19 68 33 Z" fill="#3A2E1E" />
+      <ellipse cx="50" cy="60" rx="25" ry="23" fill="#FFDDB0" />
+      <ellipse cx="50" cy="68" rx="13" ry="10" fill="#FFEFD6" />
+      <path d="M35 57 Q39 54 44 57" stroke="#3A2E1E" strokeWidth="2.3" fill="none" strokeLinecap="round" />
+      <path d="M65 57 Q61 54 56 57" stroke="#3A2E1E" strokeWidth="2.3" fill="none" strokeLinecap="round" />
+      <circle cx="40" cy="60" r="3" fill="#3A2E1E" />
+      <circle cx="60" cy="60" r="3" fill="#3A2E1E" />
+      <path d="M40 65 Q40 71 38 75" stroke="#7EC8F2" strokeWidth="2.2" fill="none" strokeLinecap="round" />
+      <ellipse cx="38" cy="76" rx="2" ry="2.6" fill="#7EC8F2" />
+      <path d="M45 72 Q50 69 55 72" stroke="#3A2E1E" strokeWidth="2.2" fill="none" strokeLinecap="round" />
+      <rect x="32" y="82" width="36" height="7" rx="3.5" fill="#4FB6E8" />
+    </>
+  )
+}
+
+// ---- こうらくん（オリジナルの赤いカニキャラ）----
+const CLUB_BODY = {
+  idle: (
+    <>
+      <ellipse cx="50" cy="85" rx="26" ry="6" fill="#00000012" />
+      <path d="M20 55 Q10 50 14 60 Q18 60 22 58 Z" fill="#D9432E" />
+      <path d="M80 55 Q90 50 86 60 Q82 60 78 58 Z" fill="#D9432E" />
+      <ellipse cx="50" cy="60" rx="30" ry="25" fill="#E8543A" />
+      <ellipse cx="50" cy="68" rx="16" ry="12" fill="#FFD9C4" />
+      <circle cx="40" cy="55" r="4.2" fill="#2B1A12" />
+      <circle cx="60" cy="55" r="4.2" fill="#2B1A12" />
+      <path d="M46 66 Q50 70 54 66" stroke="#2B1A12" strokeWidth="2.3" fill="none" strokeLinecap="round" />
+      <path d="M18 62 L10 58 M82 62 L90 58" stroke="#B5321E" strokeWidth="2.5" strokeLinecap="round" />
+    </>
+  ),
+  happy: (
+    <>
+      <ellipse cx="50" cy="85" rx="26" ry="6" fill="#00000012" />
+      <path d="M16 50 Q4 43 9 56 Q14 56 19 53 Z" fill="#D9432E" />
+      <path d="M84 50 Q96 43 91 56 Q86 56 81 53 Z" fill="#D9432E" />
+      <ellipse cx="50" cy="59" rx="33" ry="28" fill="#E8543A" />
+      <ellipse cx="50" cy="68" rx="17" ry="13" fill="#FFD9C4" />
+      <path d="M31 52 Q40 43 49 52" stroke="#2B1A12" strokeWidth="3.2" fill="none" strokeLinecap="round" />
+      <path d="M51 52 Q60 43 69 52" stroke="#2B1A12" strokeWidth="3.2" fill="none" strokeLinecap="round" />
+      <path d="M38 65 Q50 81 62 65" stroke="#2B1A12" strokeWidth="2.8" fill="none" strokeLinecap="round" />
+      <circle cx="30" cy="63" r="5" fill="#FFB3A0" opacity="0.7" />
+      <circle cx="70" cy="63" r="5" fill="#FFB3A0" opacity="0.7" />
+      <path d="M10 20 L15 27 M90 20 L85 27" stroke="#FFC53D" strokeWidth="2.4" strokeLinecap="round" />
+    </>
+  ),
+  sad: (
+    <>
+      <ellipse cx="50" cy="85" rx="26" ry="6" fill="#00000012" />
+      <path d="M23 60 Q14 56 17 65 Q20 65 24 63 Z" fill="#D9432E" />
+      <path d="M77 60 Q86 56 83 65 Q80 65 76 63 Z" fill="#D9432E" />
+      <ellipse cx="50" cy="64" rx="28" ry="23" fill="#E8543A" />
+      <ellipse cx="50" cy="72" rx="14" ry="10" fill="#FFD9C4" />
+      <path d="M36 58 Q40 55 44 58" stroke="#2B1A12" strokeWidth="2.3" fill="none" strokeLinecap="round" />
+      <path d="M64 58 Q60 55 56 58" stroke="#2B1A12" strokeWidth="2.3" fill="none" strokeLinecap="round" />
+      <circle cx="40" cy="61" r="3" fill="#2B1A12" />
+      <circle cx="60" cy="61" r="3" fill="#2B1A12" />
+      <path d="M40 67 Q40 73 38 77" stroke="#7EC8F2" strokeWidth="2.2" fill="none" strokeLinecap="round" />
+      <ellipse cx="38" cy="78" rx="2" ry="2.6" fill="#7EC8F2" />
+      <path d="M45 74 Q50 71 55 74" stroke="#2B1A12" strokeWidth="2.2" fill="none" strokeLinecap="round" />
+    </>
+  )
+}
+
 const BODIES = {
   fox: FOX_BODY, cat: CAT_BODY, dog: DOG_BODY, dragon: DRAGON_BODY,
   lion: LION_BODY, pig: PIG_BODY, cheetah: CHEETAH_BODY, robot: ROBOT_BODY,
   ankylosaurus: ANKY_BODY, trex: TREX_BODY,
   pika: PIKA_BODY, dora: DORA_BODY,
-  sponge: SPONGE_BODY
+  sponge: SPONGE_BODY, kure: KURE_BODY, club: CLUB_BODY
 }
 
 // ============================================================
@@ -1169,6 +1266,94 @@ const ITEM_FRAGMENTS = {
     <g>
       <rect x="38" y="24" width="24" height="12" rx="2" fill="#FFFFFF" stroke="#E4E0D3" strokeWidth="1" />
       <path d="M36 24 Q36 10 44 14 Q46 6 50 14 Q54 6 56 14 Q64 10 64 24 Z" fill="#FFFFFF" stroke="#E4E0D3" strokeWidth="1" />
+    </g>
+  )},
+
+  // ---- くれさん専用 ----
+  cap: { front: (
+    <g>
+      <path d="M34 38 Q50 24 66 38 L64 44 L36 44 Z" fill="#4FB6E8" stroke="#2E7FA6" strokeWidth="1" />
+      <ellipse cx="50" cy="44" rx="20" ry="4" fill="#2E7FA6" />
+    </g>
+  )},
+  crayon: { front: (
+    <g transform="translate(80,74) rotate(20)">
+      <rect x="-3" y="-14" width="6" height="20" rx="1" fill="#FF6F6F" />
+      <path d="M-3 -14 L0 -20 L3 -14 Z" fill="#D94848" />
+      <rect x="-3" y="2" width="6" height="4" fill="#F4F1EE" />
+    </g>
+  )},
+  soccer_ball: { front: (
+    <g transform="translate(80,76)">
+      <circle r="8" fill="#F4F1EE" stroke="#2B2A27" strokeWidth="1" />
+      <path d="M0 -8 L3 -2 L-3 -2 Z M-6 3 L0 -2 L3 3 L0 6 Z" fill="#2B2A27" />
+    </g>
+  )},
+  backpack: { front: (
+    <g>
+      <rect x="36" y="60" width="28" height="26" rx="8" fill="#4CB27A" stroke="#2E8956" strokeWidth="1" />
+      <rect x="42" y="64" width="16" height="8" rx="3" fill="#2E8956" />
+      <path d="M40 60 Q40 52 50 52 Q60 52 60 60" fill="none" stroke="#2E8956" strokeWidth="2.5" />
+    </g>
+  )},
+  toy_robot: { front: (
+    <g transform="translate(80,72)">
+      <rect x="-8" y="-4" width="16" height="14" rx="2" fill="#B0B7C0" stroke="#7A8494" strokeWidth="1" />
+      <circle cx="-4" cy="2" r="1.6" fill="#5FD0F2" />
+      <circle cx="4" cy="2" r="1.6" fill="#5FD0F2" />
+      <rect x="-6" y="-9" width="12" height="6" rx="2" fill="#B0B7C0" stroke="#7A8494" strokeWidth="1" />
+      <rect x="-1" y="-13" width="2" height="4" fill="#7A8494" />
+    </g>
+  )},
+
+  // ---- こうらくん専用 ----
+  pearl: { front: (
+    <g transform="translate(80,76)">
+      <circle r="7" fill="#F4F1EE" stroke="#D8D2C0" strokeWidth="1" />
+      <circle cx="-2.5" cy="-2.5" r="2" fill="#FFFFFF" opacity="0.8" />
+    </g>
+  )},
+  anchor: { front: (
+    <g transform="translate(80,74)">
+      <circle cy="-10" r="2.6" fill="none" stroke="#7A8494" strokeWidth="2" />
+      <rect x="-1.3" y="-7" width="2.6" height="16" fill="#7A8494" />
+      <path d="M-7 6 Q0 13 7 6" fill="none" stroke="#7A8494" strokeWidth="2.4" />
+      <rect x="-6" y="-1" width="12" height="2.4" fill="#7A8494" />
+    </g>
+  )},
+  treasure_chest: { front: (
+    <g transform="translate(80,76)">
+      <rect x="-10" y="-4" width="20" height="12" rx="1" fill="#8A5A2A" stroke="#5C3A1A" strokeWidth="1" />
+      <path d="M-10 -4 Q0 -12 10 -4 Z" fill="#B5793E" stroke="#5C3A1A" strokeWidth="1" />
+      <circle cy="-1" r="1.6" fill="#FFC53D" />
+    </g>
+  )},
+  captain_hat: { front: (
+    <g>
+      <path d="M32 36 Q50 26 68 36 L66 42 L34 42 Z" fill="#2B4A6B" stroke="#1A2E42" strokeWidth="1" />
+      <circle cx="50" cy="33" r="3" fill="#FFC53D" />
+      <rect x="34" y="42" width="32" height="3" fill="#1A2E42" />
+    </g>
+  )},
+  ship_wheel: { front: (
+    <g transform="translate(80,76)">
+      <circle r="9" fill="none" stroke="#8A5A2A" strokeWidth="2.5" />
+      <circle r="3" fill="#8A5A2A" />
+      {[0, 60, 120, 180, 240, 300].map((deg) => (
+        <line key={deg} x1="0" y1="0" x2={9 * Math.cos((deg * Math.PI) / 180)} y2={9 * Math.sin((deg * Math.PI) / 180)} stroke="#8A5A2A" strokeWidth="2" transform={`rotate(${deg})`} />
+      ))}
+    </g>
+  )},
+  coin: { front: (
+    <g transform="translate(80,76)">
+      <circle r="7" fill="#FFC53D" stroke="#B5860B" strokeWidth="1.2" />
+      <text x="0" y="3" textAnchor="middle" fontSize="8" fill="#B5860B" fontWeight="800">¥</text>
+    </g>
+  )},
+  telescope: { front: (
+    <g transform="translate(78,72) rotate(-25)">
+      <rect x="-2" y="-4" width="16" height="6" rx="1" fill="#B5860B" />
+      <rect x="12" y="-5.5" width="6" height="9" rx="1" fill="#8A6D2A" />
     </g>
   )}
 }

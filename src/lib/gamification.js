@@ -117,7 +117,9 @@ export const CHARACTERS = [
   { id: 'dragon', name: 'ドラゴン', emoji: '🐉' },
   { id: 'pika', name: 'ピカさん', emoji: '⚡' },
   { id: 'dora', name: 'ドラさん', emoji: '🔵' },
-  { id: 'sponge', name: 'スポンジくん', emoji: '🧽' }
+  { id: 'sponge', name: 'スポンジくん', emoji: '🧽' },
+  { id: 'kure', name: 'くれさん', emoji: '👦' },
+  { id: 'club', name: 'こうらくん', emoji: '🦀' }
 ]
 
 // 着せ替えショップのアイテム（キャラクターごとにテーマが違う専用アイテム）
@@ -276,6 +278,30 @@ export const SHOP_ITEMS_BY_CHARACTER = {
     { id: 'crab', name: 'かにさん', cost: 130, emoji: '🦀' },
     { id: 'bubble', name: 'あわあわ', cost: 150, emoji: '🫧' },
     { id: 'chef_hat', name: 'コックぼうし', cost: 200, emoji: '🧑‍🍳' },
+    { id: 'crown', name: 'きんの かんむり', cost: 300, emoji: '👑' }
+  ],
+  kure: [
+    { id: 'cap', name: 'ぼうし', cost: 50, emoji: '🧢' },
+    { id: 'crayon', name: 'クレヨン', cost: 60, emoji: '🖍️' },
+    { id: 'soccer_ball', name: 'サッカーボール', cost: 80, emoji: '⚽' },
+    { id: 'backpack', name: 'リュック', cost: 90, emoji: '🎒' },
+    { id: 'bell', name: 'すずの くびわ', cost: 100, emoji: '🔔' },
+    { id: 'glasses', name: 'サングラス', cost: 120, emoji: '🕶️' },
+    { id: 'cape', name: 'ヒーローマント', cost: 130, emoji: '🦸' },
+    { id: 'toy_robot', name: 'ロボットのおもちゃ', cost: 150, emoji: '🤖' },
+    { id: 'star_badge', name: 'きらきらバッジ', cost: 200, emoji: '⭐' },
+    { id: 'crown', name: 'きんの かんむり', cost: 300, emoji: '👑' }
+  ],
+  club: [
+    { id: 'pearl', name: 'しんじゅ', cost: 50, emoji: '💎' },
+    { id: 'anchor', name: 'いかり', cost: 60, emoji: '⚓' },
+    { id: 'treasure_chest', name: 'たからばこ', cost: 80, emoji: '🧰' },
+    { id: 'captain_hat', name: 'せんちょうぼうし', cost: 90, emoji: '🎩' },
+    { id: 'bell', name: 'すずの くびわ', cost: 100, emoji: '🔔' },
+    { id: 'glasses', name: 'サングラス', cost: 120, emoji: '🕶️' },
+    { id: 'ship_wheel', name: 'だりん', cost: 130, emoji: '🕹️' },
+    { id: 'coin', name: 'きんか', cost: 150, emoji: '🪙' },
+    { id: 'telescope', name: 'ぼうえんきょう', cost: 200, emoji: '🔭' },
     { id: 'crown', name: 'きんの かんむり', cost: 300, emoji: '👑' }
   ]
 }
