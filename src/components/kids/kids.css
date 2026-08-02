@@ -66,12 +66,12 @@ body { margin: 0; background: var(--bg); }
 .label-ruigigo { font-size: 15px; padding: 5px 14px; color: white; background: var(--sky); box-shadow: 0 2px 0 #3690B8; }
 .label-taigigo { font-size: 15px; padding: 5px 14px; color: white; background: var(--bad); box-shadow: 0 2px 0 var(--bad-dark); }
 .label.label-2 { left: auto; right: 20px; color: var(--purple); background: #EEEDFE; }
-.sentence { font-size: 17px; font-weight: 700; line-height: 1.9; color: var(--ink); margin-bottom: 14px; text-align: left; width: 100%; word-break: keep-all; line-break: strict; overflow-wrap: normal; }
+.sentence { font-size: 17px; font-weight: 700; line-height: 1.7; color: var(--ink); margin-bottom: 14px; text-align: left; width: 100%; }
 .blank { border-bottom: 2px dashed var(--purple); padding: 0 4px; color: var(--purple); font-weight: 800; }
 .kanji-hint { display: inline-block; border: 2px solid var(--purple); border-radius: 8px; padding: 1px 8px; color: var(--purple); font-weight: 800; margin: 0 2px; }
 .reading-tag { display: inline-block; background: var(--sky); color: white; font-size: 13px; font-weight: 800; padding: 4px 12px; border-radius: 12px; letter-spacing: 1px; }
 
-.meaning { font-size: 19px; font-weight: 700; line-height: 1.65; color: var(--ink); word-break: keep-all; line-break: strict; overflow-wrap: normal; }
+.meaning { font-size: 19px; font-weight: 700; line-height: 1.65; color: var(--ink); }
 .meaning.with-sentence { font-size: 14px; font-weight: 500; color: var(--ink-soft); border-top: 1px dashed #EFE3CB; padding-top: 12px; width: 100%; }
 .shown-proverb { font-size: 21px; font-weight: 800; color: var(--sky); margin-top: 16px; padding-top: 16px; border-top: 2px dashed #EFE3CB; width: 100%; }
 .multi-badge { display: inline-block; background: #FFF1DA; color: var(--fox-dark); font-size: 12px; font-weight: 700; padding: 5px 12px; border-radius: 12px; margin-bottom: 10px; }
@@ -87,7 +87,7 @@ body { margin: 0; background: var(--bg); }
 
 .pair-block { text-align: left; margin-bottom: 12px; width: 100%; }
 .pair-num { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; background: var(--purple); color: white; border-radius: 50%; font-size: 11px; font-weight: 800; margin-right: 6px; flex-shrink: 0; }
-.pair-sentence { display: flex; align-items: flex-start; font-size: 15px; font-weight: 700; line-height: 1.8; color: var(--ink); word-break: keep-all; line-break: strict; overflow-wrap: normal; }
+.pair-sentence { display: flex; align-items: flex-start; font-size: 15px; font-weight: 700; line-height: 1.6; color: var(--ink); }
 .pair-answer { font-size: 20px; font-weight: 800; color: var(--fox-dark); margin: 2px 0 10px 26px; }
 
 .choice-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; width: 100%; }
