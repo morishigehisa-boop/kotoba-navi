@@ -1,9 +1,21 @@
 import { supabase } from './supabase'
 
 export async function fetchQuestions() {
-  const { data, error } = await supabase.from('questions').select('*').order('id', { ascending: true })
-  if (error) throw error
-  return data
+  const PAGE_SIZE = 1000
+  let all = []
+  let from = 0
+  while (true) {
+    const { data, error } = await supabase
+      .from('questions')
+      .select('*')
+      .order('id', { ascending: true })
+      .range(from, from + PAGE_SIZE - 1)
+    if (error) throw error
+    all = all.concat(data)
+    if (data.length < PAGE_SIZE) break
+    from += PAGE_SIZE
+  }
+  return all
 }
 
 export async function fetchQuestionSetsWithItems() {
