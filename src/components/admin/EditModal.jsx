@@ -7,7 +7,7 @@ export const ANSWER_TYPE_LABELS = {
   synonym_reverse: '似た意味(逆)',
   fill_blank: '穴埋め',
   pair_fill: '二文穴埋め',
-  antonym_pair: '対になる',
+  antonym_pair: '対になる表現',
   synonym_pair: '類義語(二文穴埋め)',
   choice: '選択式'
 }
