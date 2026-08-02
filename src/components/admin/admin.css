@@ -64,7 +64,9 @@ select, input[type=text], input[type=number], input[type=datetime-local] {
 textarea { width: 100%; min-height: 130px; font-family: monospace; font-size: 12px; padding: 10px; border-radius: 8px; border: 1px solid #DEDBD0; background: #FAF9F5; }
 .format-hint { background: #FAF9F5; border: 1px solid #EDEAE0; border-radius: 8px; padding: 10px 12px; font-size: 12px; color: #5A5749; margin-bottom: 12px; font-family: monospace; white-space: pre-wrap; line-height: 1.6; }
 
-.toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #2B2A27; color: #fff; padding: 10px 18px; border-radius: 10px; font-size: 13px; }
+.toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #2B2A27; color: #fff; padding: 10px 18px; border-radius: 10px; font-size: 13px; z-index: 300; }
+.toast-error { background: #D94848; }
+.toast-success { background: #2E8956; }
 .empty { text-align: center; color: #B2AE9F; font-size: 13px; padding: 20px 0; }
 .row-actions { display: flex; gap: 6px; white-space: nowrap; }
 
@@ -172,3 +174,10 @@ tr.reviewed-row td { background: #F4FAF6; }
   .furigana-table td:nth-of-type(1)::before { content: "単語"; }
   .furigana-table td:nth-of-type(2)::before { content: "読み"; }
 }
+
+.spinner-inline { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: #8A8678; }
+.spinner {
+  width: 14px; height: 14px; border: 2px solid #DEDBD0; border-top-color: #E36A1E;
+  border-radius: 50%; animation: spin 0.7s linear infinite; display: inline-block;
+}
+@keyframes spin { to { transform: rotate(360deg); } }

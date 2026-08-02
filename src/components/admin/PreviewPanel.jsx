@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { buildPreviewHtml } from './previewHtml'
 import { EditModal } from './EditModal'
 import { addFuriganaEntry, updateFuriganaEntry, deleteFuriganaEntry } from '../../lib/api'
+import { useConfirm } from './useConfirm'
 
 const ANSWER_TYPE_LABELS_LOCAL = {
   self_recall: '自己採点',
@@ -27,6 +28,12 @@ export default function PreviewPanel({ questions, books, categories, types, sets
   const [furiEditingId, setFuriEditingId] = useState(null)
   const [furiEditWord, setFuriEditWord] = useState('')
   const [furiEditReading, setFuriEditReading] = useState('')
+  const [confirm, confirmModal] = useConfirm()
+
+  function resetFilters() {
+    setCategory(''); setType(''); setBook(''); setPageFrom(''); setPageTo(''); setSetId(''); setIndex(0)
+  }
+  const filtersActive = category || type || book || pageFrom !== '' || pageTo !== '' || setId
 
   const filtered = useMemo(() => {
     let base = questions
@@ -131,7 +138,7 @@ export default function PreviewPanel({ questions, books, categories, types, sets
   }
 
   async function handleDeleteFurigana(e) {
-    const ok = window.confirm(`「${e.word}（${e.reading}）」を削除しますか？`)
+    const ok = await confirm(`「${e.word}（${e.reading}）」を削除しますか？`)
     if (!ok) return
     await deleteFuriganaEntry(e.id)
     await onChanged('ふりがなを削除しました')
@@ -163,10 +170,11 @@ export default function PreviewPanel({ questions, books, categories, types, sets
         </select>
         <input type="number" placeholder="ページ開始" style={{ width: 110 }} value={pageFrom} onChange={resetFilter(setPageFrom)} />
         <input type="number" placeholder="ページ終了" style={{ width: 110 }} value={pageTo} onChange={resetFilter(setPageTo)} />
+        {filtersActive && <button className="btn btn-secondary" onClick={resetFilters}>フィルターをリセット</button>}
       </div>
 
       {!item ? (
-        <div className="empty">該当する問題がありません</div>
+        <div className="empty">🔍 該当する問題がありません{filtersActive && '（フィルターを見直してみてください）'}</div>
       ) : (
         <>
           <div className="preview-nav">
@@ -244,6 +252,7 @@ export default function PreviewPanel({ questions, books, categories, types, sets
           }}
         />
       )}
+      {confirmModal}
     </div>
   )
 }

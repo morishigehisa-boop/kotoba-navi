@@ -8,6 +8,7 @@ export default function ShopScreen({
 }) {
   const items = itemsForCharacter(activeCharacter)
   const ownedCount = ownedCountForCharacter(ownedItems, activeCharacter)
+  const nextUpId = CHARACTERS.find((c) => !unlockedCharacters.includes(c.id))?.id
 
   return (
     <div>
@@ -22,19 +23,27 @@ export default function ShopScreen({
           {CHARACTERS.map((c) => {
             const unlocked = unlockedCharacters.includes(c.id)
             const active = activeCharacter === c.id
+            const isNextUp = !unlocked && c.id === nextUpId
             return (
               <button
                 key={c.id}
-                className={`char-chip ${active ? 'char-chip-active' : ''} ${!unlocked ? 'char-chip-locked' : ''}`}
+                className={`char-chip ${active ? 'char-chip-active' : ''} ${!unlocked ? 'char-chip-locked' : ''} ${isNextUp ? 'char-chip-nextup' : ''}`}
                 disabled={!unlocked}
                 onClick={() => onSwitchCharacter(c.id)}
               >
-                <span className="char-chip-emoji">{unlocked ? c.emoji : '🔒'}</span>
-                <span className="char-chip-name">{c.name}</span>
+                <span className={`char-chip-emoji ${isNextUp ? 'char-chip-silhouette' : ''}`}>
+                  {unlocked ? c.emoji : isNextUp ? c.emoji : '🔒'}
+                </span>
+                <span className="char-chip-name">{unlocked ? c.name : isNextUp ? 'つぎは これ！' : '？？？'}</span>
               </button>
             )
           })}
         </div>
+        {nextUpId && (
+          <div className="hint" style={{ marginTop: 4 }}>
+            「{CHARACTERS.find((c) => c.id === activeCharacter)?.name}」のアイテムを あと{items.length - ownedCount}こ 集めると、次のキャラが かいほうされるよ！
+          </div>
+        )}
         <div className="hint" style={{ marginTop: 8 }}>
           「{CHARACTERS.find((c) => c.id === activeCharacter)?.name}」のアイテム：{ownedCount}/{items.length}こ 集めた
           {ownedCount >= items.length && ' 🎉 コンプリート！'}

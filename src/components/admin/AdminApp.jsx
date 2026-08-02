@@ -16,6 +16,7 @@ import {
 } from '../../lib/api'
 import { boxOf } from '../../lib/today'
 import { setCustomFurigana } from '../../lib/furigana'
+import { useConfirm } from './useConfirm'
 import './admin.css'
 import PreviewPanel from './PreviewPanel'
 import { EditModal } from './EditModal'
@@ -109,9 +110,10 @@ function formatGoal(goalAt) {
   return { text: `${label}（あと${diffDays}日）`, cls: 'goal-ok' }
 }
 
-function toastShow(setToast, msg) {
+function toastShow(setToast, msg, setToastType, type = 'success') {
   setToast(msg)
-  setTimeout(() => setToast(''), 1800)
+  if (setToastType) setToastType(type)
+  setTimeout(() => setToast(''), 2200)
 }
 
 export default function AdminApp() {
@@ -121,7 +123,9 @@ export default function AdminApp() {
   const [history, setHistory] = useState([])
   const [furiganaEntries, setFuriganaEntries] = useState([])
   const [toast, setToast] = useState('')
+  const [toastType, setToastType] = useState('success')
   const [loading, setLoading] = useState(true)
+  const [confirm, confirmModal] = useConfirm()
 
   async function reloadAll() {
     const [qs, s, h, fe] = await Promise.all([fetchQuestions(), fetchQuestionSetsWithItems(), fetchFilterHistory(), fetchFuriganaEntries()])
@@ -173,7 +177,7 @@ export default function AdminApp() {
           types={types}
           onChanged={async (msg) => {
             await reloadAll()
-            toastShow(setToast, msg)
+            toastShow(setToast, msg, setToastType)
           }}
         />
       )}
@@ -187,7 +191,7 @@ export default function AdminApp() {
           furiganaEntries={furiganaEntries}
           onChanged={async (msg) => {
             await reloadAll()
-            toastShow(setToast, msg)
+            toastShow(setToast, msg, setToastType)
           }}
         />
       )}
@@ -199,7 +203,7 @@ export default function AdminApp() {
           types={types}
           onSaved={async (name, count) => {
             await reloadAll()
-            toastShow(setToast, `「${name}」を作成しました（${count}問）`)
+            toastShow(setToast, `「${name}」を作成しました（${count}問）`, setToastType)
             setTab('sets')
           }}
         />
@@ -209,11 +213,11 @@ export default function AdminApp() {
           sets={sets}
           questions={questions}
           onDelete={async (set) => {
-            const ok = window.confirm(`「${set.name}」を削除しますか？\n（問題データ自体は削除されません。問題集の紐付けのみ削除されます）`)
+            const ok = await confirm(`「${set.name}」を削除しますか？\n（問題データ自体は削除されません。問題集の紐付けのみ削除されます）`)
             if (!ok) return
             await deleteQuestionSet(set.id)
             await reloadAll()
-            toastShow(setToast, `「${set.name}」を削除しました`)
+            toastShow(setToast, `「${set.name}」を削除しました`, setToastType)
           }}
           onReorder={async (orderedIds) => {
             await reorderQuestionSets(orderedIds)
@@ -222,7 +226,7 @@ export default function AdminApp() {
           onEdit={async (set, patch) => {
             await updateQuestionSet(set.id, patch)
             await reloadAll()
-            toastShow(setToast, `「${patch.name}」を更新しました`)
+            toastShow(setToast, `「${patch.name}」を更新しました`, setToastType)
           }}
           onToggleReviewed={async (set, reviewed) => {
             await updateQuestionSet(set.id, { reviewed })
@@ -235,7 +239,7 @@ export default function AdminApp() {
         <ImportPanel
           onImported={async (count, typeLabel) => {
             await reloadAll()
-            toastShow(setToast, `${count}問を追加しました（${typeLabel}）`)
+            toastShow(setToast, `${count}問を追加しました（${typeLabel}）`, setToastType)
           }}
         />
       )}
@@ -244,12 +248,13 @@ export default function AdminApp() {
           entries={furiganaEntries}
           onChanged={async (msg) => {
             await reloadAll()
-            toastShow(setToast, msg)
+            toastShow(setToast, msg, setToastType)
           }}
         />
       )}
 
-      {toast && <div className="toast show">{toast}</div>}
+      {toast && <div className={`toast show toast-${toastType}`}>{toastType === 'error' ? '⚠️ ' : '✅ '}{toast}</div>}
+      {confirmModal}
     </div>
   )
 }
@@ -268,6 +273,7 @@ function ListPanel({ questions, books, categories, types, onChanged }) {
   const [bulkBook, setBulkBook] = useState('')
   const [bulkPage, setBulkPage] = useState('')
   const [bulkBusy, setBulkBusy] = useState(false)
+  const [confirm, confirmModal] = useConfirm()
 
   const rows = questions.filter((q) => {
     if (idFrom !== '' && q.id < parseInt(idFrom)) return false
@@ -291,10 +297,15 @@ function ListPanel({ questions, books, categories, types, onChanged }) {
   })
 
   const idRangeActive = idFrom !== '' || idTo !== ''
+  const filtersActive = idRangeActive || category || type || book || search || pageFrom !== '' || pageTo !== ''
+
+  function resetFilters() {
+    setIdFrom(''); setIdTo(''); setCategory(''); setType(''); setBook(''); setSearch(''); setPageFrom(''); setPageTo('')
+  }
 
   async function handleDelete(q) {
     const s = summarizeContent(q)
-    const ok = window.confirm(`この問題を削除しますか？\n「${s.main}」\n（問題集に含まれている場合は、その紐付けも削除されます）`)
+    const ok = await confirm(`この問題を削除しますか？\n「${s.main}」\n（問題集に含まれている場合は、その紐付けも削除されます）`)
     if (!ok) return
     await deleteQuestion(q.id)
     onChanged('問題を削除しました')
@@ -302,7 +313,7 @@ function ListPanel({ questions, books, categories, types, onChanged }) {
 
   async function handleBulkDelete() {
     if (rows.length === 0) return
-    const ok = window.confirm(`管理番号Q${String(idFrom || rows[0].id).padStart(4, '0')}〜Q${String(idTo || rows[rows.length - 1].id).padStart(4, '0')}の範囲で、現在の絞り込み条件に一致する ${rows.length}問 を削除します。\nこの操作は取り消せません。よろしいですか？`)
+    const ok = await confirm(`管理番号Q${String(idFrom || rows[0].id).padStart(4, '0')}〜Q${String(idTo || rows[rows.length - 1].id).padStart(4, '0')}の範囲で、現在の絞り込み条件に一致する ${rows.length}問 を削除します。\nこの操作は取り消せません。よろしいですか？`)
     if (!ok) return
     setBulkBusy(true)
     try {
@@ -320,7 +331,7 @@ function ListPanel({ questions, books, categories, types, onChanged }) {
     if (bulkBook.trim()) patch.source_book = bulkBook.trim()
     if (bulkPage.trim()) patch.source_page = bulkPage.trim()
     if (Object.keys(patch).length === 0) { window.alert('更新する項目を1つ以上入力してください'); return }
-    const ok = window.confirm(`絞り込み条件に一致する ${rows.length}問 を、入力した内容で一括更新します。よろしいですか？`)
+    const ok = await confirm(`絞り込み条件に一致する ${rows.length}問 を、入力した内容で一括更新します。よろしいですか？`)
     if (!ok) return
     setBulkBusy(true)
     try {
@@ -352,17 +363,19 @@ function ListPanel({ questions, books, categories, types, onChanged }) {
         <input type="number" placeholder="ページ開始" style={{ width: 110 }} value={pageFrom} onChange={(e) => setPageFrom(e.target.value)} />
         <input type="number" placeholder="ページ終了" style={{ width: 110 }} value={pageTo} onChange={(e) => setPageTo(e.target.value)} />
         <input type="text" placeholder="キーワードを検索" value={search} onChange={(e) => setSearch(e.target.value)} />
+        {filtersActive && <button className="btn btn-secondary" onClick={resetFilters}>フィルターをリセット</button>}
       </div>
 
       {idRangeActive && (
         <div className="bulk-panel">
           <div className="bulk-panel-title">一括操作（絞り込み条件に一致する {rows.length}問 が対象）</div>
           <div className="bulk-panel-row">
-            <input type="text" placeholder="カテゴリーを一括変更" style={{ width: 160 }} value={bulkCategory} onChange={(e) => setBulkCategory(e.target.value)} />
-            <input type="text" placeholder="出典(問題集名)を一括変更" style={{ width: 180 }} value={bulkBook} onChange={(e) => setBulkBook(e.target.value)} />
-            <input type="text" placeholder="ページを一括変更" style={{ width: 140 }} value={bulkPage} onChange={(e) => setBulkPage(e.target.value)} />
+            <input type="text" placeholder="カテゴリーを一括変更" style={{ width: 160 }} value={bulkCategory} onChange={(e) => setBulkCategory(e.target.value)} disabled={bulkBusy} />
+            <input type="text" placeholder="出典(問題集名)を一括変更" style={{ width: 180 }} value={bulkBook} onChange={(e) => setBulkBook(e.target.value)} disabled={bulkBusy} />
+            <input type="text" placeholder="ページを一括変更" style={{ width: 140 }} value={bulkPage} onChange={(e) => setBulkPage(e.target.value)} disabled={bulkBusy} />
             <button className="btn btn-primary" disabled={bulkBusy || rows.length === 0} onClick={handleBulkUpdate}>一括更新する</button>
             <button className="btn btn-danger" disabled={bulkBusy || rows.length === 0} onClick={handleBulkDelete}>この範囲を一括削除</button>
+            {bulkBusy && <span className="spinner-inline"><span className="spinner" />処理中…</span>}
           </div>
           <div className="hint" style={{ marginTop: 6, marginBottom: 0 }}>
             空欄の項目は変更されません。他のフィルター（カテゴリー・出題形式など）と組み合わせて、対象をさらに絞り込めます。
@@ -379,7 +392,7 @@ function ListPanel({ questions, books, categories, types, onChanged }) {
             </tr>
           </thead>
           <tbody>
-            {rows.length === 0 && <tr><td colSpan="11" className="empty">該当する問題がありません</td></tr>}
+            {rows.length === 0 && <tr><td colSpan="11" className="empty">🔍 該当する問題がありません{filtersActive && '（フィルターを見直してみてください）'}</td></tr>}
             {rows.map((q) => {
               const s = summarizeContent(q)
               return (
@@ -412,6 +425,7 @@ function ListPanel({ questions, books, categories, types, onChanged }) {
           onSaved={() => { setEditing(null); onChanged('問題を更新しました') }}
         />
       )}
+      {confirmModal}
     </div>
   )
 }
@@ -535,6 +549,15 @@ function MakePanel({ questions, books, categories, types, onSaved }) {
           </div>
         </div>
         <button className="btn btn-secondary" onClick={() => { setPreviewed(true); setSetName(generateName()) }}>この条件で抽出する</button>
+        {(book || category || type || pageFrom !== '' || pageTo !== '' || maxCorrect !== '' || maxStreak !== '') && (
+          <button
+            className="btn btn-secondary"
+            style={{ marginLeft: 8 }}
+            onClick={() => { setBook(''); setCategory(''); setType(''); setPageFrom(''); setPageTo(''); setMaxCorrect(''); setMaxStreak(''); setPreviewed(false) }}
+          >
+            条件をリセット
+          </button>
+        )}
         {previewed && (
           <>
             <div className="preview-count">条件に一致する問題: <b>{result.length}</b> 問</div>
@@ -763,6 +786,7 @@ function ImportPanel({ onImported }) {
   const [result, setResult] = useState('')
   const [errors, setErrors] = useState([])
   const [dragOver, setDragOver] = useState(false)
+  const [importing, setImporting] = useState(false)
 
   function parseCsvRows(text) {
     const lines = text.trim().split('\n').filter((l) => l.trim())
@@ -825,15 +849,20 @@ function ImportPanel({ onImported }) {
 
     if (records.length === 0) { setResult('取り込める行がありませんでした。'); return }
 
-    await insertQuestions(records)
-    const typeCounts = records.reduce((acc, r) => {
-      acc[r.answer_type] = (acc[r.answer_type] || 0) + 1
-      return acc
-    }, {})
-    const summary = Object.entries(typeCounts).map(([t, n]) => `${ANSWER_TYPE_LABELS[t] || t}${n}問`).join('／')
-    setResult(`${records.length}問を取り込みました（${summary}）`)
-    setCsv('')
-    onImported(records.length, summary)
+    setImporting(true)
+    try {
+      await insertQuestions(records)
+      const typeCounts = records.reduce((acc, r) => {
+        acc[r.answer_type] = (acc[r.answer_type] || 0) + 1
+        return acc
+      }, {})
+      const summary = Object.entries(typeCounts).map(([t, n]) => `${ANSWER_TYPE_LABELS[t] || t}${n}問`).join('／')
+      setResult(`${records.length}問を取り込みました（${summary}）`)
+      setCsv('')
+      onImported(records.length, summary)
+    } finally {
+      setImporting(false)
+    }
   }
 
   return (
@@ -856,7 +885,9 @@ function ImportPanel({ onImported }) {
 
       <textarea value={csv} onChange={(e) => setCsv(e.target.value)} placeholder={UNIFIED_CSV_EXAMPLE} />
       <div style={{ marginTop: 12 }}>
-        <button className="btn btn-primary" onClick={handleImport}>取り込む</button>
+        <button className="btn btn-primary" disabled={importing} onClick={handleImport}>
+          {importing ? <span className="spinner-inline"><span className="spinner" />取り込み中…</span> : '取り込む'}
+        </button>
       </div>
       {result && <div className="preview-count">{result}</div>}
       {errors.length > 0 && (

@@ -29,6 +29,23 @@ import SugorokuScreen from './SugorokuScreen'
 import RoomBackground from './RoomBackground'
 import './kids.css'
 
+// 9. 「今日やる問題」を途中でやめても、次回起動時に続きから再開できるようにする
+const SESSION_KEY = 'kotoba_navi_pending_session'
+function saveSessionSnapshot(snapshot) {
+  try { localStorage.setItem(SESSION_KEY, JSON.stringify(snapshot)) } catch {}
+}
+function loadSessionSnapshot() {
+  try {
+    const raw = localStorage.getItem(SESSION_KEY)
+    return raw ? JSON.parse(raw) : null
+  } catch {
+    return null
+  }
+}
+function clearSessionSnapshot() {
+  try { localStorage.removeItem(SESSION_KEY) } catch {}
+}
+
 function Ruby({ text }) {
   if (!text) return null
   return <span dangerouslySetInnerHTML={{ __html: addFurigana(text) }} />
@@ -75,6 +92,8 @@ export default function KidsApp() {
   const [choiceFeedback, setChoiceFeedback] = useState(null)
   const [confettiOn, setConfettiOn] = useState(false)
   const [struggleToast, setStruggleToast] = useState(false)
+  const [showQuitConfirm, setShowQuitConfirm] = useState(false)
+  const [pendingSession, setPendingSession] = useState(null)
   const categoryTierRef = useRef(new Map())
   const seededCategoryTierRef = useRef(false)
   const masteredQuestionsRef = useRef(new Set())
@@ -97,6 +116,13 @@ export default function KidsApp() {
         setQuestions(qs)
         setAllSets(sets)
         setProgress(prog)
+
+        const snapshot = loadSessionSnapshot()
+        if (snapshot && snapshot.questionIds?.length > 0) {
+          const stillExists = snapshot.questionIds.some((id) => qs.some((q) => q.id === id))
+          if (stillExists) setPendingSession(snapshot)
+          else clearSessionSnapshot()
+        }
       } catch (e) {
         console.error(e)
       } finally {
@@ -293,6 +319,28 @@ export default function KidsApp() {
     setRevealed(false)
     setScreen('quiz')
     setMascot({ state: 'idle', text: 'きょうも いっしょに がんばろう！' })
+    setPendingSession(null)
+  }
+
+  function resumeSession() {
+    if (!pendingSession) return
+    const list = pendingSession.questionIds.map((id) => questionsById.get(id)).filter(Boolean)
+    if (list.length === 0) { setPendingSession(null); clearSessionSnapshot(); return }
+    setSessionQuestions(list)
+    setIdx(Math.min(pendingSession.idx || 0, list.length))
+    setCorrectCount(pendingSession.correctCount || 0)
+    setWrongQuestions((pendingSession.wrongQuestionIds || []).map((id) => questionsById.get(id)).filter(Boolean))
+    setMode('main')
+    setIsTodayAutoSession(!!pendingSession.isTodayAutoSession)
+    setRevealed(false)
+    setScreen('quiz')
+    setMascot({ state: 'idle', text: 'つづきから がんばろう！' })
+    setPendingSession(null)
+  }
+
+  function dismissPendingSession() {
+    setPendingSession(null)
+    clearSessionSnapshot()
   }
 
   function currentList() {
@@ -305,6 +353,23 @@ export default function KidsApp() {
   const i = currentIdx()
   const current = list[i]
   const finished = i >= list.length
+
+  // 「今日やる問題」実行中のセッションを自動保存し、終わったら消す
+  useEffect(() => {
+    if (screen !== 'quiz' || mode !== 'main' || sessionQuestions.length === 0) return
+    if (idx >= sessionQuestions.length) {
+      clearSessionSnapshot()
+      return
+    }
+    saveSessionSnapshot({
+      questionIds: sessionQuestions.map((q) => q.id),
+      idx,
+      correctCount,
+      wrongQuestionIds: wrongQuestions.map((q) => q.id),
+      isTodayAutoSession
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [screen, mode, sessionQuestions, idx, correctCount, wrongQuestions, isTodayAutoSession])
 
   function goNext() {
     setRevealed(false)
@@ -377,8 +442,7 @@ export default function KidsApp() {
   }
 
   function handleQuit() {
-    const ok = window.confirm('とちゅうで やめますか？\nここまでの きろくは のこりません。')
-    if (ok) setScreen('select')
+    setShowQuitConfirm(true)
   }
 
   function restartSameSet() {
@@ -527,6 +591,9 @@ export default function KidsApp() {
           onShowRecord={() => setScreen('record')}
           onShowShop={() => setScreen('shop')}
           onShowSugoroku={() => setScreen('sugoroku')}
+          pendingSession={pendingSession}
+          onResumeSession={resumeSession}
+          onDismissSession={dismissPendingSession}
         />
       )}
 
@@ -598,6 +665,12 @@ export default function KidsApp() {
 
       {milestone && <MilestoneModal milestone={milestone} onClose={() => setMilestone(null)} />}
       {newCharacter && <NewCharacterModal character={newCharacter} onClose={() => setNewCharacter(null)} />}
+      {showQuitConfirm && (
+        <QuitConfirmModal
+          onCancel={() => setShowQuitConfirm(false)}
+          onQuit={() => { setShowQuitConfirm(false); clearSessionSnapshot(); setScreen('select') }}
+        />
+      )}
     </div>
   )
 }
@@ -628,7 +701,21 @@ function NewCharacterModal({ character, onClose }) {
   )
 }
 
-function SelectScreen({ today, overdue, staticSets, questionsById, title, freezeTokens, weeklyCorrectCount, weeklyMissionsClaimed, onStartToday, onStartOverdue, onStartSet, onShowRecord, onShowShop, onShowSugoroku }) {
+function QuitConfirmModal({ onCancel, onQuit }) {
+  return (
+    <div className="milestone-backdrop" onClick={onCancel}>
+      <div className="milestone-card" onClick={(e) => e.stopPropagation()}>
+        <div className="milestone-emoji">🤔</div>
+        <div className="milestone-label">とちゅうで やめますか？</div>
+        <div className="hint">ここまでの きろくは のこりません。</div>
+        <button className="restart" onClick={onCancel}>つづける</button>
+        <button className="restart pick-another" onClick={onQuit}>やめる</button>
+      </div>
+    </div>
+  )
+}
+
+function SelectScreen({ today, overdue, staticSets, questionsById, title, freezeTokens, weeklyCorrectCount, weeklyMissionsClaimed, onStartToday, onStartOverdue, onStartSet, onShowRecord, onShowShop, onShowSugoroku, pendingSession, onResumeSession, onDismissSession }) {
   const todaySub =
     today.picked.length === 0
       ? 'きょうは やることなし！'
@@ -644,6 +731,18 @@ function SelectScreen({ today, overdue, staticSets, questionsById, title, freeze
         <span>🎖️ {title}</span>
         <span className="freeze-badge">🧊 フリーズ ×{freezeTokens}</span>
       </div>
+
+      {pendingSession && (
+        <div className="resume-card">
+          <div className="resume-text">
+            📖 前回の続きが あります（{pendingSession.idx || 0}/{pendingSession.questionIds.length}問目）
+          </div>
+          <div className="resume-buttons">
+            <button className="restart" style={{ marginTop: 0 }} onClick={onResumeSession}>つづきから やる</button>
+            <button className="btn-dismiss-resume" onClick={onDismissSession}>けす</button>
+          </div>
+        </div>
+      )}
 
       <button className="set-card today-card" onClick={onStartToday}>
         <div className="set-icon today-icon">🔥</div>

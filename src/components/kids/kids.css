@@ -184,6 +184,8 @@ body { margin: 0; background: var(--bg); }
 }
 .char-chip-active { border-color: var(--fox); background: #FFF3E1; }
 .char-chip-locked { opacity: 0.5; cursor: default; }
+.char-chip-nextup { opacity: 0.85; border-color: var(--gold); background: #FFFBEB; }
+.char-chip-silhouette { filter: grayscale(1) brightness(0.4); opacity: 0.7; }
 .char-chip-emoji { font-size: 26px; }
 .char-chip-name { font-size: 11px; font-weight: 700; color: var(--ink); }
 .shop-item {
@@ -271,3 +273,10 @@ body { margin: 0; background: var(--bg); }
 .room-option.equipped { border-color: var(--fox); }
 .room-option.locked { opacity: 0.4; cursor: default; }
 .room-option-name { font-size: 12px; font-weight: 700; padding: 6px 0; color: var(--ink); }
+
+/* 続きから再開バナー */
+.resume-card { background: #EEF3FF; border: 2px solid #6E9CE0; border-radius: 16px; padding: 14px 16px; margin-bottom: 12px; }
+.resume-text { font-size: 13px; font-weight: 700; color: #4A6FBF; margin-bottom: 10px; }
+.resume-buttons { display: flex; gap: 8px; align-items: center; }
+.resume-buttons .restart { flex: 1; }
+.btn-dismiss-resume { background: none; border: none; color: #8A8678; font-size: 12px; font-weight: 700; padding: 10px 12px; cursor: pointer; }

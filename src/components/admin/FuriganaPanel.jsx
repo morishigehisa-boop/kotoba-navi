@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
 import { addFuriganaEntry, updateFuriganaEntry, deleteFuriganaEntry } from '../../lib/api'
+import { useConfirm } from './useConfirm'
 
 export default function FuriganaPanel({ entries, onChanged }) {
   const [word, setWord] = useState('')
@@ -10,6 +11,7 @@ export default function FuriganaPanel({ entries, onChanged }) {
   const [editReading, setEditReading] = useState('')
   const [saving, setSaving] = useState(false)
   const wordInputRef = useRef(null)
+  const [confirm, confirmModal] = useConfirm()
 
   const filtered = entries.filter((e) => !search || e.word.includes(search) || e.reading.includes(search))
 
@@ -40,7 +42,7 @@ export default function FuriganaPanel({ entries, onChanged }) {
   }
 
   async function handleDelete(e) {
-    const ok = window.confirm(`「${e.word}（${e.reading}）」を削除しますか？`)
+    const ok = await confirm(`「${e.word}（${e.reading}）」を削除しますか？`)
     if (!ok) return
     await deleteFuriganaEntry(e.id)
     await onChanged('ふりがなを削除しました')
@@ -58,13 +60,14 @@ export default function FuriganaPanel({ entries, onChanged }) {
         <input type="text" placeholder="読み（ひらがな）" style={{ width: 140 }} value={reading} onChange={(e) => setReading(e.target.value)} />
         <button className="btn btn-primary" disabled={saving} onClick={handleAdd}>追加する</button>
         <input type="text" placeholder="検索" style={{ width: 140, marginLeft: 'auto' }} value={search} onChange={(e) => setSearch(e.target.value)} />
+        {search && <button className="btn btn-secondary" onClick={() => setSearch('')}>検索をリセット</button>}
       </div>
 
       <div className="table-scroll">
         <table className="responsive-table furigana-table">
           <thead><tr><th>単語</th><th>読み</th><th></th></tr></thead>
           <tbody>
-            {filtered.length === 0 && <tr><td colSpan="3" className="empty">登録がありません</td></tr>}
+            {filtered.length === 0 && <tr><td colSpan="3" className="empty">🔍 登録がありません{search && '（検索条件を見直してみてください）'}</td></tr>}
             {filtered.map((e) => (
               <tr key={e.id}>
                 {editingId === e.id ? (
@@ -91,6 +94,7 @@ export default function FuriganaPanel({ entries, onChanged }) {
           </tbody>
         </table>
       </div>
+      {confirmModal}
     </div>
   )
 }
