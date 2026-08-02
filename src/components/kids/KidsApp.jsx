@@ -804,14 +804,14 @@ function QuizCard({ item, revealed, reviewMode, choiceFeedback, onReveal, onAnsw
               <span className="pair-num">1</span>
               <Ruby text={c.sentenceA} />
             </div>
-            {revealed && <div className="pair-answer"><Ruby text={c.answerA} /></div>}
+            <div className={`pair-answer ${revealed ? '' : 'pair-answer-hidden'}`}><Ruby text={c.answerA} /></div>
           </div>
           <div className="pair-block">
             <div className="pair-sentence">
               <span className="pair-num">2</span>
               <Ruby text={c.sentenceB} />
             </div>
-            {revealed && <div className="pair-answer"><Ruby text={c.answerB} /></div>}
+            <div className={`pair-answer ${revealed ? '' : 'pair-answer-hidden'}`}><Ruby text={c.answerB} /></div>
           </div>
           {!revealed && <div className="hint">{hintText}</div>}
         </div>

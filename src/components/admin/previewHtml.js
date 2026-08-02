@@ -35,11 +35,11 @@ function cardInner(item, revealed) {
       <div class="${labelClass}">${labelText}</div>
       <div class="pair-block" style="margin-top:20px;">
         <div class="pair-sentence"><span class="pair-num">1</span>${rich(c.sentenceA)}</div>
-        ${revealed ? `<div class="pair-answer">${rich(c.answerA)}</div>` : ''}
+        <div class="pair-answer ${revealed ? '' : 'pair-answer-hidden'}">${rich(c.answerA)}</div>
       </div>
       <div class="pair-block">
         <div class="pair-sentence"><span class="pair-num">2</span>${rich(c.sentenceB)}</div>
-        ${revealed ? `<div class="pair-answer">${rich(c.answerB)}</div>` : ''}
+        <div class="pair-answer ${revealed ? '' : 'pair-answer-hidden'}">${rich(c.answerB)}</div>
       </div>
       ${!revealed ? `<div class="hint">${hintText}</div>` : ''}
     `
