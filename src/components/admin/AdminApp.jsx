@@ -616,6 +616,15 @@ function SetsPanel({ sets, questions, onDelete, onReorder, onEdit, onToggleRevie
     onReorder(next.map((s) => s.id))
   }
 
+  function moveByOffset(index, offset) {
+    const target = index + offset
+    if (target < 0 || target >= order.length) return
+    const next = [...order]
+    ;[next[index], next[target]] = [next[target], next[index]]
+    setOrder(next)
+    onReorder(next.map((s) => s.id))
+  }
+
   return (
     <div className="card">
       <h2>作成した問題集</h2>
@@ -639,7 +648,13 @@ function SetsPanel({ sets, questions, onDelete, onReorder, onEdit, onToggleRevie
                   className={`drag-row ${dragOverId === s.id ? 'drag-over' : ''} ${dragId === s.id ? 'dragging' : ''} ${s.reviewed ? 'reviewed-row' : ''}`}
                 >
                   <td className="drag-handle" title="ドラッグして並び替え">⠿</td>
-                  <td><b>{s.name}</b></td>
+                  <td>
+                    <b>{s.name}</b>
+                    <div className="mobile-reorder-btns">
+                      <button className="btn btn-secondary" disabled={order.indexOf(s) === 0} onClick={() => moveByOffset(order.indexOf(s), -1)}>▲ 上へ</button>
+                      <button className="btn btn-secondary" disabled={order.indexOf(s) === order.length - 1} onClick={() => moveByOffset(order.indexOf(s), 1)}>▼ 下へ</button>
+                    </div>
+                  </td>
                   <td className="count-cell">{s.questionIds.length}</td>
                   <td style={{ minWidth: 160 }}>
                     <div className="progress-stack" title={`未正解${p.boxCounts[0]}・1回${p.boxCounts[1]}・2回${p.boxCounts[2]}・3回${p.boxCounts[3]}・かんぺき${p.boxCounts[4]}`}>

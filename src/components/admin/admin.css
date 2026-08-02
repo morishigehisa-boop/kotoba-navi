@@ -104,6 +104,7 @@ textarea { width: 100%; min-height: 130px; font-family: monospace; font-size: 12
 .furigana-inline { margin-top: 14px; padding-top: 12px; border-top: 1px solid #EDEAE0; }
 
 tr.reviewed-row td { background: #F4FAF6; }
+.mobile-reorder-btns { display: none; }
 
 .bulk-panel { background: #FFF7E8; border: 1px solid #F0DDBB; border-radius: 10px; padding: 12px 14px; margin-bottom: 14px; }
 .bulk-panel-title { font-size: 13px; font-weight: 700; color: #8A5A1E; margin-bottom: 8px; }
@@ -119,6 +120,8 @@ tr.reviewed-row td { background: #F4FAF6; }
 
 /* スマホ幅ではテーブルをカード風の縦積みレイアウトに切り替える（PC表示は変更なし） */
 @media (max-width: 700px) {
+  .mobile-reorder-btns { display: flex; gap: 8px; margin-top: 8px; }
+  .mobile-reorder-btns .btn { flex: 1; font-size: 12px; padding: 8px 6px; }
   .wrap { padding: 16px; }
   .responsive-table thead { display: none; }
   .responsive-table, .responsive-table tbody, .responsive-table tr, .responsive-table td {
@@ -157,7 +160,8 @@ tr.reviewed-row td { background: #F4FAF6; }
   .list-table td:nth-of-type(9)::before { content: "不正解回数"; }
   .list-table td:nth-of-type(10)::before { content: "出典"; }
 
-  .sets-table td:nth-of-type(2)::before { content: "問題集名"; }
+  .sets-table td:nth-of-type(2) { display: block; text-align: left; }
+  .sets-table td:nth-of-type(2)::before { content: "問題集名"; display: block; margin-bottom: 4px; }
   .sets-table td:nth-of-type(3)::before { content: "問題数"; }
   .sets-table td:nth-of-type(4) { display: block; text-align: left; }
   .sets-table td:nth-of-type(4)::before { content: "進捗"; display: block; margin-bottom: 4px; }
