@@ -116,3 +116,55 @@ tr.reviewed-row td { background: #F4FAF6; }
   transition: background .15s, border-color .15s;
 }
 .csv-dropzone.drag-active { background: #FFF1D2; border-color: #C9741E; color: #C9741E; }
+
+/* スマホ幅ではテーブルをカード風の縦積みレイアウトに切り替える（PC表示は変更なし） */
+@media (max-width: 700px) {
+  .wrap { padding: 16px; }
+  .responsive-table thead { display: none; }
+  .responsive-table, .responsive-table tbody, .responsive-table tr, .responsive-table td {
+    display: block; width: 100%;
+  }
+  .responsive-table tr {
+    margin-bottom: 12px; border: 1px solid #EDEAE0; border-radius: 12px;
+    padding: 10px 12px; background: #FAF9F5;
+  }
+  .responsive-table tr:hover td { background: none; }
+  .responsive-table td {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 5px 0; border-bottom: none; text-align: right; gap: 10px;
+  }
+  .responsive-table td::before {
+    content: attr(data-col); font-weight: 700; color: #8A8678; font-size: 11px;
+    text-align: left; flex-shrink: 0;
+  }
+  .responsive-table .row-actions { justify-content: flex-end; padding-top: 8px; }
+  .responsive-table .row-actions::before { content: none; }
+  .responsive-table .drag-handle { display: none; }
+
+  .tabs { overflow-x: auto; flex-wrap: nowrap; padding-bottom: 4px; -webkit-overflow-scrolling: touch; }
+  .tabs .tab { flex-shrink: 0; }
+
+  .list-table td:nth-of-type(1)::before { content: "管理番号"; }
+  .list-table td:nth-of-type(2)::before { content: "カテゴリー"; }
+  .list-table td:nth-of-type(3)::before { content: "出題形式"; }
+  .list-table td:nth-of-type(4)::before { content: "問題内容"; }
+  .list-table td:nth-of-type(4) { display: block; text-align: left; }
+  .list-table td:nth-of-type(4)::before { display: block; margin-bottom: 2px; }
+  .list-table td:nth-of-type(5)::before { content: "最終結果"; }
+  .list-table td:nth-of-type(6)::before { content: "最終正解日時"; }
+  .list-table td:nth-of-type(7)::before { content: "累計正解"; }
+  .list-table td:nth-of-type(8)::before { content: "連続正解"; }
+  .list-table td:nth-of-type(9)::before { content: "不正解回数"; }
+  .list-table td:nth-of-type(10)::before { content: "出典"; }
+
+  .sets-table td:nth-of-type(2)::before { content: "問題集名"; }
+  .sets-table td:nth-of-type(3)::before { content: "問題数"; }
+  .sets-table td:nth-of-type(4) { display: block; text-align: left; }
+  .sets-table td:nth-of-type(4)::before { content: "進捗"; display: block; margin-bottom: 4px; }
+  .sets-table td:nth-of-type(5)::before { content: "目標日時"; }
+  .sets-table td:nth-of-type(6)::before { content: "作成日"; }
+  .sets-table td:nth-of-type(8)::before { content: "レビュー"; }
+
+  .furigana-table td:nth-of-type(1)::before { content: "単語"; }
+  .furigana-table td:nth-of-type(2)::before { content: "読み"; }
+}

@@ -371,7 +371,7 @@ function ListPanel({ questions, books, categories, types, onChanged }) {
       )}
 
       <div className="table-scroll">
-        <table>
+        <table className="responsive-table list-table">
           <thead>
             <tr>
               <th>管理番号</th><th>カテゴリー</th><th>出題形式</th><th>問題内容</th>
@@ -621,7 +621,7 @@ function SetsPanel({ sets, questions, onDelete, onReorder, onEdit, onToggleRevie
       <h2>作成した問題集</h2>
       <p className="lead" style={{ marginBottom: 10 }}>行をドラッグ&ドロップすると、子どもアプリでの表示順を変更できます。「レビュー」は、プレビューで内容をチェックし終わった問題集にチェックを入れてください。</p>
       <div className="table-scroll">
-        <table>
+        <table className="responsive-table sets-table">
           <thead><tr><th></th><th>問題集名</th><th>問題数</th><th>進捗</th><th>目標日時</th><th>作成日</th><th></th><th>レビュー</th></tr></thead>
           <tbody>
             {order.length === 0 && <tr><td colSpan="8" className="empty">まだ問題集がありません</td></tr>}

@@ -61,7 +61,7 @@ export default function FuriganaPanel({ entries, onChanged }) {
       </div>
 
       <div className="table-scroll">
-        <table>
+        <table className="responsive-table furigana-table">
           <thead><tr><th>単語</th><th>読み</th><th></th></tr></thead>
           <tbody>
             {filtered.length === 0 && <tr><td colSpan="3" className="empty">登録がありません</td></tr>}
