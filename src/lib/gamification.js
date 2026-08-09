@@ -124,7 +124,10 @@ export const CHARACTERS = [
   { id: 'creepy', name: 'クリーピー', emoji: '🟩' },
   { id: 'iron_giant', name: 'てつのきょじん', emoji: '🤖' },
   { id: 'dark_man', name: 'やみにんげん', emoji: '🌑' },
-  { id: 'blackdragon', name: 'くろりゅう', emoji: '🐲' }
+  { id: 'blackdragon', name: 'くろりゅう', emoji: '🐲' },
+  { id: 'mari', name: 'マリさん', emoji: '🥸' },
+  { id: 'kourao', name: 'こうらおう', emoji: '🐢' },
+  { id: 'gori', name: 'ゴリさん', emoji: '🦍' }
 ]
 
 // 着せ替えショップのアイテム（キャラクターごとにテーマが違う専用アイテム）
@@ -367,6 +370,42 @@ export const SHOP_ITEMS_BY_CHARACTER = {
     { id: 'cape', name: 'マント', cost: 130, emoji: '🦸' },
     { id: 'star_gem', name: 'ほしの たま', cost: 150, emoji: '🌟' },
     { id: 'meteor_badge', name: 'いんせきバッジ', cost: 200, emoji: '🌠' },
+    { id: 'crown', name: 'きんの かんむり', cost: 300, emoji: '👑' }
+  ],
+  mari: [
+    { id: 'green_mushroom', name: 'みどりのキノコ', cost: 50, emoji: '🍄' },
+    { id: 'red_mushroom', name: 'あかいキノコ', cost: 60, emoji: '🍄' },
+    { id: 'star_badge', name: 'スター', cost: 80, emoji: '⭐' },
+    { id: 'flower_crown', name: 'フラワー', cost: 90, emoji: '🌼' },
+    { id: 'bell', name: 'すずの くびわ', cost: 100, emoji: '🔔' },
+    { id: 'shell', name: 'カメの こうら', cost: 120, emoji: '🐢' },
+    { id: 'coin', name: 'コイン', cost: 130, emoji: '🪙' },
+    { id: 'banana', name: 'バナナ', cost: 150, emoji: '🍌' },
+    { id: 'pipe', name: 'どかん', cost: 200, emoji: '🟢' },
+    { id: 'crown', name: 'きんの かんむり', cost: 300, emoji: '👑' }
+  ],
+  kourao: [
+    { id: 'flame', name: 'ファイア', cost: 50, emoji: '🔥' },
+    { id: 'axe', name: 'おの', cost: 60, emoji: '🪓' },
+    { id: 'castle', name: 'おしろ', cost: 80, emoji: '🏰' },
+    { id: 'spike_crest', name: 'とさかスパイク', cost: 90, emoji: '🔺' },
+    { id: 'bell', name: 'すずの くびわ', cost: 100, emoji: '🔔' },
+    { id: 'glasses', name: 'サングラス', cost: 120, emoji: '🕶️' },
+    { id: 'cape', name: 'マント', cost: 130, emoji: '🦸' },
+    { id: 'claw_gem', name: 'つめかざり', cost: 150, emoji: '💎' },
+    { id: 'lightning_badge', name: 'いなずまバッジ', cost: 200, emoji: '⚡' },
+    { id: 'crown', name: 'きんの かんむり', cost: 300, emoji: '👑' }
+  ],
+  gori: [
+    { id: 'banana', name: 'バナナ', cost: 50, emoji: '🍌' },
+    { id: 'apple', name: 'りんご', cost: 60, emoji: '🍎' },
+    { id: 'barrel', name: 'たる', cost: 80, emoji: '🛢️' },
+    { id: 'star_badge', name: 'きらきらバッジ', cost: 90, emoji: '⭐' },
+    { id: 'bell', name: 'すずの くびわ', cost: 100, emoji: '🔔' },
+    { id: 'glasses', name: 'サングラス', cost: 120, emoji: '🕶️' },
+    { id: 'cape', name: 'マント', cost: 130, emoji: '🦸' },
+    { id: 'medal', name: 'きんメダル', cost: 150, emoji: '🏅' },
+    { id: 'gem', name: 'きらきらいし', cost: 200, emoji: '💎' },
     { id: 'crown', name: 'きんの かんむり', cost: 300, emoji: '👑' }
   ]
 }

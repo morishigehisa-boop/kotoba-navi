@@ -1031,6 +1031,146 @@ const BLACKDRAGON_BODY = {
   )
 }
 
+// ---- マリさん（オリジナルのヒゲ配管工キャラ）----
+const MARI_BODY = {
+  idle: (
+    <>
+      <ellipse cx="50" cy="88" rx="26" ry="5" fill="#00000012" />
+      <path d="M28 32 Q28 16 50 15 Q72 16 72 32 Z" fill="#7A63BD" />
+      <ellipse cx="50" cy="26" rx="9" ry="4" fill="#FFC53D" />
+      <ellipse cx="50" cy="46" rx="24" ry="22" fill="#FFDDB0" />
+      <circle cx="40" cy="44" r="4" fill="#3A2E1E" />
+      <circle cx="60" cy="44" r="4" fill="#3A2E1E" />
+      <path d="M32 54 Q40 60 50 55 Q60 60 68 54 Q60 52 50 54 Q40 52 32 54 Z" fill="#3A2E1E" />
+      <rect x="30" y="66" width="40" height="20" rx="4" fill="#F5C542" />
+    </>
+  ),
+  happy: (
+    <>
+      <ellipse cx="50" cy="88" rx="26" ry="5" fill="#00000012" />
+      <path d="M24 30 Q24 12 50 11 Q76 12 76 30 Z" fill="#7A63BD" />
+      <ellipse cx="50" cy="23" rx="10" ry="4.5" fill="#FFC53D" />
+      <ellipse cx="50" cy="45" rx="27" ry="25" fill="#FFDDB0" />
+      <path d="M31 39 Q40 31 49 39" stroke="#3A2E1E" strokeWidth="3" fill="none" strokeLinecap="round" />
+      <path d="M51 39 Q60 31 69 39" stroke="#3A2E1E" strokeWidth="3" fill="none" strokeLinecap="round" />
+      <path d="M28 56 Q40 64 50 58 Q60 64 72 56 Q60 54 50 56 Q40 54 28 56 Z" fill="#3A2E1E" />
+      <rect x="27" y="68" width="46" height="22" rx="5" fill="#F5C542" />
+      <circle cx="30" cy="52" r="4.5" fill="#FFB3A0" opacity="0.8" />
+      <circle cx="70" cy="52" r="4.5" fill="#FFB3A0" opacity="0.8" />
+      <path d="M12 18 L17 24 M88 18 L83 24" stroke="#FFC53D" strokeWidth="2.4" strokeLinecap="round" />
+    </>
+  ),
+  sad: (
+    <>
+      <ellipse cx="50" cy="88" rx="26" ry="5" fill="#00000012" />
+      <path d="M31 36 Q31 22 50 21 Q69 22 69 36 Z" fill="#7A63BD" />
+      <ellipse cx="50" cy="29" rx="8" ry="3.6" fill="#FFC53D" />
+      <ellipse cx="50" cy="50" rx="22" ry="20" fill="#FFDDB0" />
+      <path d="M36 46 Q39 43 44 46" stroke="#3A2E1E" strokeWidth="2.3" fill="none" strokeLinecap="round" />
+      <path d="M56 46 Q61 43 64 46" stroke="#3A2E1E" strokeWidth="2.3" fill="none" strokeLinecap="round" />
+      <circle cx="40" cy="49" r="3" fill="#3A2E1E" />
+      <circle cx="60" cy="49" r="3" fill="#3A2E1E" />
+      <path d="M35 58 Q42 62 50 59 Q58 62 65 58 Q58 56 50 58 Q42 56 35 58 Z" fill="#3A2E1E" />
+      <rect x="33" y="70" width="34" height="17" rx="4" fill="#F5C542" />
+      <path d="M40 68 Q40 74 38 78" stroke="#7EC8F2" strokeWidth="2.2" fill="none" strokeLinecap="round" />
+      <ellipse cx="38" cy="79" rx="2" ry="2.6" fill="#7EC8F2" />
+    </>
+  )
+}
+
+// ---- こうらおう（オリジナルのこうらを持つ竜のボス）----
+const KOURAO_BODY = {
+  idle: (
+    <>
+      <ellipse cx="50" cy="88" rx="27" ry="5" fill="#00000012" />
+      <path d="M32 20 L36 8 L42 20 M58 20 L64 8 L68 20" fill="#5C7A2E" />
+      <ellipse cx="50" cy="58" rx="31" ry="26" fill="#7C9E3E" />
+      <path d="M50 40 L34 62 L50 76 L66 62 Z" fill="#3E5A20" stroke="#2A3E14" strokeWidth="1.4" />
+      <path d="M50 48 L42 60 L50 68 L58 60 Z" fill="#5C7A2E" />
+      <ellipse cx="50" cy="66" rx="15" ry="10" fill="#E8DDA8" />
+      <circle cx="40" cy="55" r="4.4" fill="#D94848" />
+      <circle cx="60" cy="55" r="4.4" fill="#D94848" />
+      <path d="M40 70 L44 76 L48 68 L52 78 L56 68 L60 76 L64 70" fill="none" stroke="#2A3E14" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </>
+  ),
+  happy: (
+    <>
+      <ellipse cx="50" cy="88" rx="27" ry="5" fill="#00000012" />
+      <path d="M30 14 L35 0 L42 14 M58 14 L65 0 L70 14" fill="#5C7A2E" />
+      <ellipse cx="50" cy="56" rx="34" ry="29" fill="#7C9E3E" />
+      <path d="M50 36 L32 60 L50 76 L68 60 Z" fill="#3E5A20" stroke="#2A3E14" strokeWidth="1.4" />
+      <ellipse cx="50" cy="65" rx="17" ry="11" fill="#E8DDA8" />
+      <path d="M31 49 Q40 40 49 49" stroke="#2A3E14" strokeWidth="3" fill="none" strokeLinecap="round" />
+      <path d="M51 49 Q60 40 69 49" stroke="#2A3E14" strokeWidth="3" fill="none" strokeLinecap="round" />
+      <path d="M36 62 L40 76 L46 62 L50 79 L54 62 L60 76 L64 62" fill="#7A2020" stroke="#2A3E14" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M10 16 L15 23 M90 16 L85 23" stroke="#FF9E45" strokeWidth="2.6" strokeLinecap="round" />
+    </>
+  ),
+  sad: (
+    <>
+      <ellipse cx="50" cy="88" rx="27" ry="5" fill="#00000012" />
+      <path d="M34 26 L38 16 L43 26 M57 26 L62 16 L66 26" fill="#5C7A2E" />
+      <ellipse cx="50" cy="62" rx="28" ry="23" fill="#7C9E3E" />
+      <path d="M50 46 L37 64 L50 76 L63 64 Z" fill="#3E5A20" stroke="#2A3E14" strokeWidth="1.3" />
+      <ellipse cx="50" cy="70" rx="14" ry="9" fill="#E8DDA8" />
+      <path d="M37 58 Q40 55 44 58" stroke="#2A3E14" strokeWidth="2.3" fill="none" strokeLinecap="round" />
+      <path d="M63 58 Q60 55 56 58" stroke="#2A3E14" strokeWidth="2.3" fill="none" strokeLinecap="round" />
+      <circle cx="40" cy="61" r="3.4" fill="#D94848" />
+      <circle cx="60" cy="61" r="3.4" fill="#D94848" />
+      <path d="M40 67 Q40 73 38 77" stroke="#7EC8F2" strokeWidth="2.2" fill="none" strokeLinecap="round" />
+      <ellipse cx="38" cy="78" rx="2" ry="2.6" fill="#7EC8F2" />
+      <path d="M44 74 Q50 71 56 74" stroke="#2A3E14" strokeWidth="2.2" fill="none" strokeLinecap="round" />
+    </>
+  )
+}
+
+// ---- ゴリさん（オリジナルのゴリラキャラ）----
+const GORI_BODY = {
+  idle: (
+    <>
+      <ellipse cx="50" cy="88" rx="27" ry="5" fill="#00000012" />
+      <ellipse cx="24" cy="52" rx="9" ry="12" fill="#5C4A3A" />
+      <ellipse cx="76" cy="52" rx="9" ry="12" fill="#5C4A3A" />
+      <ellipse cx="50" cy="56" rx="30" ry="26" fill="#7A6252" />
+      <ellipse cx="50" cy="66" rx="18" ry="14" fill="#D9C4A8" />
+      <circle cx="40" cy="52" r="4" fill="#2B1A12" />
+      <circle cx="60" cy="52" r="4" fill="#2B1A12" />
+      <ellipse cx="50" cy="66" rx="7" ry="5" fill="#B79A7A" />
+      <path d="M46 72 Q50 75 54 72" stroke="#2B1A12" strokeWidth="2.2" fill="none" strokeLinecap="round" />
+    </>
+  ),
+  happy: (
+    <>
+      <ellipse cx="50" cy="88" rx="27" ry="5" fill="#00000012" />
+      <ellipse cx="20" cy="50" rx="10" ry="13" fill="#5C4A3A" />
+      <ellipse cx="80" cy="50" rx="10" ry="13" fill="#5C4A3A" />
+      <ellipse cx="50" cy="55" rx="33" ry="29" fill="#7A6252" />
+      <ellipse cx="50" cy="66" rx="19" ry="15" fill="#D9C4A8" />
+      <path d="M31 48 Q40 39 49 48" stroke="#2B1A12" strokeWidth="3.2" fill="none" strokeLinecap="round" />
+      <path d="M51 48 Q60 39 69 48" stroke="#2B1A12" strokeWidth="3.2" fill="none" strokeLinecap="round" />
+      <ellipse cx="50" cy="66" rx="8" ry="5.5" fill="#B79A7A" />
+      <path d="M38 74 Q50 84 62 74" stroke="#2B1A12" strokeWidth="2.6" fill="none" strokeLinecap="round" />
+      <path d="M10 20 L15 27 M90 20 L85 27" stroke="#FFC53D" strokeWidth="2.4" strokeLinecap="round" />
+    </>
+  ),
+  sad: (
+    <>
+      <ellipse cx="50" cy="88" rx="27" ry="5" fill="#00000012" />
+      <ellipse cx="27" cy="55" rx="8" ry="11" fill="#5C4A3A" />
+      <ellipse cx="73" cy="55" rx="8" ry="11" fill="#5C4A3A" />
+      <ellipse cx="50" cy="60" rx="27" ry="23" fill="#7A6252" />
+      <ellipse cx="50" cy="69" rx="16" ry="12" fill="#D9C4A8" />
+      <path d="M36 56 Q40 53 44 56" stroke="#2B1A12" strokeWidth="2.3" fill="none" strokeLinecap="round" />
+      <path d="M64 56 Q60 53 56 56" stroke="#2B1A12" strokeWidth="2.3" fill="none" strokeLinecap="round" />
+      <circle cx="40" cy="59" r="3" fill="#2B1A12" />
+      <circle cx="60" cy="59" r="3" fill="#2B1A12" />
+      <ellipse cx="50" cy="70" rx="6" ry="4.2" fill="#B79A7A" />
+      <path d="M40 74 Q40 80 38 84" stroke="#7EC8F2" strokeWidth="2.2" fill="none" strokeLinecap="round" />
+      <ellipse cx="38" cy="85" rx="2" ry="2.6" fill="#7EC8F2" />
+    </>
+  )
+}
+
 const BODIES = {
   fox: FOX_BODY, cat: CAT_BODY, dog: DOG_BODY, dragon: DRAGON_BODY,
   lion: LION_BODY, pig: PIG_BODY, cheetah: CHEETAH_BODY, robot: ROBOT_BODY,
@@ -1038,7 +1178,8 @@ const BODIES = {
   pika: PIKA_BODY, dora: DORA_BODY,
   sponge: SPONGE_BODY, kure: KURE_BODY, club: CLUB_BODY,
   blockman: BLOCKMAN_BODY, creepy: CREEPY_BODY, iron_giant: IRON_GIANT_BODY,
-  dark_man: DARK_MAN_BODY, blackdragon: BLACKDRAGON_BODY
+  dark_man: DARK_MAN_BODY, blackdragon: BLACKDRAGON_BODY,
+  mari: MARI_BODY, kourao: KOURAO_BODY, gori: GORI_BODY
 }
 
 // ============================================================
@@ -1608,6 +1749,63 @@ const ITEM_FRAGMENTS = {
       <rect x="-1.3" y="-11" width="2.6" height="5" fill="#5A5A5A" />
       <path d="M0 -11 Q3 -14 5 -11" stroke="#FF9E45" strokeWidth="1.6" fill="none" strokeLinecap="round" />
       <path d="M-2 -1 L2 3 M2 -1 L-2 3" stroke="#FFC53D" strokeWidth="1.4" strokeLinecap="round" />
+    </g>
+  )},
+
+  // ---- マリさん・こうらおう・ゴリさん専用 ----
+  green_mushroom: { front: (
+    <g transform="translate(80,74)">
+      <path d="M-9 0 Q-9 -10 0 -10 Q9 -10 9 0 Z" fill="#4CB27A" />
+      <circle cx="-3" cy="-6" r="2" fill="#fff" />
+      <circle cx="4" cy="-4" r="1.6" fill="#fff" />
+      <rect x="-5" y="0" width="10" height="8" rx="2" fill="#FFF3E1" />
+    </g>
+  )},
+  red_mushroom: { front: (
+    <g transform="translate(80,74)">
+      <path d="M-9 0 Q-9 -10 0 -10 Q9 -10 9 0 Z" fill="#D94848" />
+      <circle cx="-3" cy="-6" r="2" fill="#fff" />
+      <circle cx="4" cy="-4" r="1.6" fill="#fff" />
+      <rect x="-5" y="0" width="10" height="8" rx="2" fill="#FFF3E1" />
+    </g>
+  )},
+  shell: { front: (
+    <g transform="translate(80,76)">
+      <path d="M-9 4 Q-9 -8 0 -8 Q9 -8 9 4 Z" fill="#4CB27A" stroke="#2E8956" strokeWidth="1" />
+      <path d="M-6 2 L0 -4 L6 2 M-9 4 L9 4" stroke="#2E8956" strokeWidth="1" fill="none" />
+    </g>
+  )},
+  banana: { front: (
+    <g transform="translate(80,76) rotate(-15)">
+      <path d="M-8 4 Q-4 -8 8 -6 Q4 -2 2 2 Q-2 4 -8 4 Z" fill="#FFD93D" stroke="#D9A82A" strokeWidth="1" />
+    </g>
+  )},
+  pipe: { front: (
+    <g transform="translate(80,74)">
+      <rect x="-8" y="-4" width="16" height="18" rx="1" fill="#4CB27A" stroke="#2E8956" strokeWidth="1" />
+      <rect x="-10" y="-8" width="20" height="6" rx="1" fill="#5FCB92" stroke="#2E8956" strokeWidth="1" />
+    </g>
+  )},
+  axe: { front: (
+    <g transform="translate(80,72) rotate(-20)">
+      <rect x="-1.6" y="-4" width="3.2" height="20" fill="#8A6D2A" />
+      <path d="M-8 -8 Q0 -14 8 -8 Q4 -4 0 -5 Q-4 -4 -8 -8 Z" fill="#8B95A3" stroke="#5A6270" strokeWidth="1" />
+    </g>
+  )},
+  castle: { front: (
+    <g>
+      <rect x="34" y="30" width="32" height="16" fill="#D8D2C0" stroke="#8A8678" strokeWidth="1" />
+      <rect x="34" y="24" width="6" height="8" fill="#D8D2C0" stroke="#8A8678" strokeWidth="1" />
+      <rect x="46" y="20" width="8" height="12" fill="#D8D2C0" stroke="#8A8678" strokeWidth="1" />
+      <rect x="60" y="24" width="6" height="8" fill="#D8D2C0" stroke="#8A8678" strokeWidth="1" />
+      <rect x="44" y="38" width="12" height="8" fill="#5A4A3A" />
+    </g>
+  )},
+  barrel: { front: (
+    <g transform="translate(80,74)">
+      <rect x="-8" y="-10" width="16" height="20" rx="4" fill="#B5793E" stroke="#5C3A1A" strokeWidth="1" />
+      <rect x="-8" y="-5" width="16" height="2.5" fill="#5C3A1A" />
+      <rect x="-8" y="3" width="16" height="2.5" fill="#5C3A1A" />
     </g>
   )}
 }
