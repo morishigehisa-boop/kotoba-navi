@@ -127,7 +127,10 @@ export const CHARACTERS = [
   { id: 'blackdragon', name: 'くろりゅう', emoji: '🐲' },
   { id: 'mari', name: 'マリさん', emoji: '🥸' },
   { id: 'kourao', name: 'こうらおう', emoji: '🐢' },
-  { id: 'gori', name: 'ゴリさん', emoji: '🦍' }
+  { id: 'gori', name: 'ゴリさん', emoji: '🦍' },
+  { id: 'akabou', name: 'あかぼう', emoji: '🌱' },
+  { id: 'kiibou', name: 'きいぼう', emoji: '🌼' },
+  { id: 'fuwarin', name: 'ふわりん', emoji: '💫' }
 ]
 
 // 着せ替えショップのアイテム（キャラクターごとにテーマが違う専用アイテム）
@@ -406,6 +409,42 @@ export const SHOP_ITEMS_BY_CHARACTER = {
     { id: 'cape', name: 'マント', cost: 130, emoji: '🦸' },
     { id: 'medal', name: 'きんメダル', cost: 150, emoji: '🏅' },
     { id: 'gem', name: 'きらきらいし', cost: 200, emoji: '💎' },
+    { id: 'crown', name: 'きんの かんむり', cost: 300, emoji: '👑' }
+  ],
+  akabou: [
+    { id: 'flower_crown', name: 'はな', cost: 50, emoji: '🌸' },
+    { id: 'hat_leaf', name: 'はっぱ', cost: 60, emoji: '🍃' },
+    { id: 'bud', name: 'つぼみ', cost: 80, emoji: '🌷' },
+    { id: 'seed', name: 'たね', cost: 90, emoji: '🌰' },
+    { id: 'onion', name: 'たまねぎ', cost: 100, emoji: '🧅' },
+    { id: 'gem', name: 'ほうせき', cost: 120, emoji: '💎' },
+    { id: 'flame', name: 'ほのおバッジ', cost: 130, emoji: '🔥' },
+    { id: 'bell', name: 'すずの くびわ', cost: 150, emoji: '🔔' },
+    { id: 'glasses', name: 'サングラス', cost: 200, emoji: '🕶️' },
+    { id: 'crown', name: 'きんの かんむり', cost: 300, emoji: '👑' }
+  ],
+  kiibou: [
+    { id: 'flower_crown', name: 'はな', cost: 50, emoji: '🌸' },
+    { id: 'hat_leaf', name: 'はっぱ', cost: 60, emoji: '🍃' },
+    { id: 'seed', name: 'たね', cost: 80, emoji: '🌰' },
+    { id: 'lightning_badge', name: 'いなずまバッジ', cost: 90, emoji: '⚡' },
+    { id: 'onion', name: 'たまねぎ', cost: 100, emoji: '🧅' },
+    { id: 'gem', name: 'ほうせき', cost: 120, emoji: '💎' },
+    { id: 'big_ears', name: 'おおきな みみかざり', cost: 130, emoji: '👂' },
+    { id: 'bell', name: 'すずの くびわ', cost: 150, emoji: '🔔' },
+    { id: 'glasses', name: 'サングラス', cost: 200, emoji: '🕶️' },
+    { id: 'crown', name: 'きんの かんむり', cost: 300, emoji: '👑' }
+  ],
+  fuwarin: [
+    { id: 'flower_crown', name: 'はな', cost: 50, emoji: '🌸' },
+    { id: 'star_fragment', name: 'ほしの かけら', cost: 60, emoji: '✨' },
+    { id: 'seed', name: 'たね', cost: 80, emoji: '🌰' },
+    { id: 'lantern', name: 'あかり', cost: 90, emoji: '🏮' },
+    { id: 'onion', name: 'たまねぎ', cost: 100, emoji: '🧅' },
+    { id: 'gem', name: 'ほうせき', cost: 120, emoji: '💎' },
+    { id: 'bubble', name: 'きらきらオーラ', cost: 130, emoji: '🫧' },
+    { id: 'bell', name: 'すずの くびわ', cost: 150, emoji: '🔔' },
+    { id: 'glasses', name: 'サングラス', cost: 200, emoji: '🕶️' },
     { id: 'crown', name: 'きんの かんむり', cost: 300, emoji: '👑' }
   ]
 }

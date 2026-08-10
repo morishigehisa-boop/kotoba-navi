@@ -1171,6 +1171,147 @@ const GORI_BODY = {
   )
 }
 
+// ---- あかぼう（オリジナルの丸っこい赤い植物頭キャラ）----
+const AKABOU_BODY = {
+  idle: (
+    <>
+      <ellipse cx="50" cy="88" rx="24" ry="5" fill="#00000012" />
+      <rect x="48.5" y="14" width="3" height="14" fill="#4CB27A" />
+      <ellipse cx="50" cy="13" rx="8" ry="5" fill="#5FCB92" />
+      <ellipse cx="50" cy="58" rx="26" ry="24" fill="#E85A4A" />
+      <ellipse cx="50" cy="66" rx="14" ry="11" fill="#FFCFC4" />
+      <circle cx="40" cy="55" r="5" fill="#2B1A12" />
+      <circle cx="60" cy="55" r="5" fill="#2B1A12" />
+      <circle cx="41.5" cy="53.5" r="1.6" fill="#fff" opacity="0.8" />
+      <circle cx="61.5" cy="53.5" r="1.6" fill="#fff" opacity="0.8" />
+      <path d="M45 68 Q50 71 55 68" stroke="#2B1A12" strokeWidth="2.2" fill="none" strokeLinecap="round" />
+    </>
+  ),
+  happy: (
+    <>
+      <ellipse cx="50" cy="88" rx="24" ry="5" fill="#00000012" />
+      <rect x="48.5" y="8" width="3" height="16" fill="#4CB27A" />
+      <ellipse cx="50" cy="7" rx="9" ry="5.5" fill="#5FCB92" />
+      <ellipse cx="50" cy="57" rx="30" ry="27" fill="#E85A4A" />
+      <ellipse cx="50" cy="67" rx="16" ry="13" fill="#FFCFC4" />
+      <path d="M31 51 Q40 42 49 51" stroke="#2B1A12" strokeWidth="3.2" fill="none" strokeLinecap="round" />
+      <path d="M51 51 Q60 42 69 51" stroke="#2B1A12" strokeWidth="3.2" fill="none" strokeLinecap="round" />
+      <path d="M38 65 Q50 80 62 65" stroke="#2B1A12" strokeWidth="2.8" fill="none" strokeLinecap="round" />
+      <circle cx="30" cy="63" r="5" fill="#FFB3A0" opacity="0.7" />
+      <circle cx="70" cy="63" r="5" fill="#FFB3A0" opacity="0.7" />
+      <path d="M12 20 L17 27 M88 20 L83 27" stroke="#FFC53D" strokeWidth="2.4" strokeLinecap="round" />
+    </>
+  ),
+  sad: (
+    <>
+      <ellipse cx="50" cy="88" rx="24" ry="5" fill="#00000012" />
+      <rect x="48.5" y="20" width="3" height="12" fill="#4CB27A" />
+      <ellipse cx="50" cy="19" rx="7" ry="4.5" fill="#5FCB92" />
+      <ellipse cx="50" cy="62" rx="23" ry="21" fill="#E85A4A" />
+      <ellipse cx="50" cy="70" rx="13" ry="10" fill="#FFCFC4" />
+      <circle cx="40" cy="60" r="3.6" fill="#2B1A12" />
+      <circle cx="60" cy="60" r="3.6" fill="#2B1A12" />
+      <path d="M40 66 Q40 72 38 76" stroke="#7EC8F2" strokeWidth="2.2" fill="none" strokeLinecap="round" />
+      <ellipse cx="38" cy="77" rx="2" ry="2.6" fill="#7EC8F2" />
+      <path d="M45 73 Q50 70 55 73" stroke="#2B1A12" strokeWidth="2.2" fill="none" strokeLinecap="round" />
+    </>
+  )
+}
+
+// ---- きいぼう（オリジナルの丸っこい黄色植物頭キャラ）----
+const KIIBOU_BODY = {
+  idle: (
+    <>
+      <ellipse cx="50" cy="88" rx="24" ry="5" fill="#00000012" />
+      <rect x="48.5" y="14" width="3" height="12" fill="#4CB27A" />
+      <ellipse cx="46" cy="12" rx="5" ry="6" fill="#F5C542" transform="rotate(-20 46 12)" />
+      <ellipse cx="54" cy="12" rx="5" ry="6" fill="#F5C542" transform="rotate(20 54 12)" />
+      <ellipse cx="50" cy="58" rx="26" ry="24" fill="#F5C542" />
+      <ellipse cx="50" cy="66" rx="14" ry="11" fill="#FFF3C4" />
+      <circle cx="40" cy="55" r="5" fill="#2B1A12" />
+      <circle cx="60" cy="55" r="5" fill="#2B1A12" />
+      <circle cx="41.5" cy="53.5" r="1.6" fill="#fff" opacity="0.8" />
+      <circle cx="61.5" cy="53.5" r="1.6" fill="#fff" opacity="0.8" />
+      <path d="M45 68 Q50 71 55 68" stroke="#2B1A12" strokeWidth="2.2" fill="none" strokeLinecap="round" />
+    </>
+  ),
+  happy: (
+    <>
+      <ellipse cx="50" cy="88" rx="24" ry="5" fill="#00000012" />
+      <rect x="48.5" y="8" width="3" height="14" fill="#4CB27A" />
+      <ellipse cx="44" cy="7" rx="6" ry="7" fill="#F5C542" transform="rotate(-24 44 7)" />
+      <ellipse cx="56" cy="7" rx="6" ry="7" fill="#F5C542" transform="rotate(24 56 7)" />
+      <ellipse cx="50" cy="57" rx="30" ry="27" fill="#F5C542" />
+      <ellipse cx="50" cy="67" rx="16" ry="13" fill="#FFF3C4" />
+      <path d="M31 51 Q40 42 49 51" stroke="#2B1A12" strokeWidth="3.2" fill="none" strokeLinecap="round" />
+      <path d="M51 51 Q60 42 69 51" stroke="#2B1A12" strokeWidth="3.2" fill="none" strokeLinecap="round" />
+      <path d="M38 65 Q50 80 62 65" stroke="#2B1A12" strokeWidth="2.8" fill="none" strokeLinecap="round" />
+      <circle cx="30" cy="63" r="5" fill="#FFB3A0" opacity="0.7" />
+      <circle cx="70" cy="63" r="5" fill="#FFB3A0" opacity="0.7" />
+      <path d="M12 20 L17 27 M88 20 L83 27" stroke="#FFC53D" strokeWidth="2.4" strokeLinecap="round" />
+    </>
+  ),
+  sad: (
+    <>
+      <ellipse cx="50" cy="88" rx="24" ry="5" fill="#00000012" />
+      <rect x="48.5" y="20" width="3" height="10" fill="#4CB27A" />
+      <ellipse cx="47" cy="19" rx="4.2" ry="5" fill="#F5C542" transform="rotate(-18 47 19)" />
+      <ellipse cx="53" cy="19" rx="4.2" ry="5" fill="#F5C542" transform="rotate(18 53 19)" />
+      <ellipse cx="50" cy="62" rx="23" ry="21" fill="#F5C542" />
+      <ellipse cx="50" cy="70" rx="13" ry="10" fill="#FFF3C4" />
+      <circle cx="40" cy="60" r="3.6" fill="#2B1A12" />
+      <circle cx="60" cy="60" r="3.6" fill="#2B1A12" />
+      <path d="M40 66 Q40 72 38 76" stroke="#7EC8F2" strokeWidth="2.2" fill="none" strokeLinecap="round" />
+      <ellipse cx="38" cy="77" rx="2" ry="2.6" fill="#7EC8F2" />
+      <path d="M45 73 Q50 70 55 73" stroke="#2B1A12" strokeWidth="2.2" fill="none" strokeLinecap="round" />
+    </>
+  )
+}
+
+// ---- ふわりん（オリジナルの浮遊する小さな精霊キャラ）----
+const FUWARIN_BODY = {
+  idle: (
+    <>
+      <ellipse cx="50" cy="90" rx="14" ry="3" fill="#00000010" />
+      <circle cx="50" cy="55" r="6" fill="none" stroke="#C9B8F5" strokeWidth="1.5" opacity="0.5" />
+      <ellipse cx="50" cy="55" rx="24" ry="22" fill="#E8DDFF" />
+      <ellipse cx="50" cy="62" rx="13" ry="10" fill="#FBF8FF" />
+      <circle cx="40" cy="52" r="4" fill="#7A63BD" />
+      <circle cx="60" cy="52" r="4" fill="#7A63BD" />
+      <path d="M46 63 Q50 66 54 63" stroke="#7A63BD" strokeWidth="2" fill="none" strokeLinecap="round" />
+      <path d="M25 40 L28 43 M75 40 L72 43 M50 24 L50 28" stroke="#FFC53D" strokeWidth="1.6" strokeLinecap="round" />
+    </>
+  ),
+  happy: (
+    <>
+      <ellipse cx="50" cy="90" rx="16" ry="3" fill="#00000010" />
+      <circle cx="50" cy="52" r="9" fill="none" stroke="#C9B8F5" strokeWidth="1.6" opacity="0.55" />
+      <ellipse cx="50" cy="52" rx="28" ry="26" fill="#E8DDFF" />
+      <ellipse cx="50" cy="61" rx="15" ry="12" fill="#FBF8FF" />
+      <path d="M31 46 Q40 38 49 46" stroke="#7A63BD" strokeWidth="2.8" fill="none" strokeLinecap="round" />
+      <path d="M51 46 Q60 38 69 46" stroke="#7A63BD" strokeWidth="2.8" fill="none" strokeLinecap="round" />
+      <path d="M40 60 Q50 72 60 60" stroke="#7A63BD" strokeWidth="2.4" fill="none" strokeLinecap="round" />
+      <circle cx="32" cy="58" r="4.5" fill="#FFB3A0" opacity="0.6" />
+      <circle cx="68" cy="58" r="4.5" fill="#FFB3A0" opacity="0.6" />
+      <path d="M18 26 L22 30 M82 26 L78 30 M50 14 L50 19" stroke="#FFC53D" strokeWidth="2.2" strokeLinecap="round" />
+    </>
+  ),
+  sad: (
+    <>
+      <ellipse cx="50" cy="90" rx="12" ry="2.6" fill="#00000010" />
+      <circle cx="50" cy="58" r="5" fill="none" stroke="#C9B8F5" strokeWidth="1.4" opacity="0.4" />
+      <ellipse cx="50" cy="58" rx="21" ry="19" fill="#E8DDFF" />
+      <ellipse cx="50" cy="64" rx="12" ry="9" fill="#FBF8FF" />
+      <path d="M37 55 Q40 52 44 55" stroke="#7A63BD" strokeWidth="2" fill="none" strokeLinecap="round" />
+      <path d="M63 55 Q60 52 56 55" stroke="#7A63BD" strokeWidth="2" fill="none" strokeLinecap="round" />
+      <circle cx="40" cy="58" r="2.8" fill="#7A63BD" />
+      <circle cx="60" cy="58" r="2.8" fill="#7A63BD" />
+      <path d="M40 64 Q40 69 38 72" stroke="#7EC8F2" strokeWidth="2" fill="none" strokeLinecap="round" />
+      <ellipse cx="38" cy="73" rx="1.8" ry="2.3" fill="#7EC8F2" />
+    </>
+  )
+}
+
 const BODIES = {
   fox: FOX_BODY, cat: CAT_BODY, dog: DOG_BODY, dragon: DRAGON_BODY,
   lion: LION_BODY, pig: PIG_BODY, cheetah: CHEETAH_BODY, robot: ROBOT_BODY,
@@ -1179,7 +1320,8 @@ const BODIES = {
   sponge: SPONGE_BODY, kure: KURE_BODY, club: CLUB_BODY,
   blockman: BLOCKMAN_BODY, creepy: CREEPY_BODY, iron_giant: IRON_GIANT_BODY,
   dark_man: DARK_MAN_BODY, blackdragon: BLACKDRAGON_BODY,
-  mari: MARI_BODY, kourao: KOURAO_BODY, gori: GORI_BODY
+  mari: MARI_BODY, kourao: KOURAO_BODY, gori: GORI_BODY,
+  akabou: AKABOU_BODY, kiibou: KIIBOU_BODY, fuwarin: FUWARIN_BODY
 }
 
 // ============================================================
@@ -1806,6 +1948,45 @@ const ITEM_FRAGMENTS = {
       <rect x="-8" y="-10" width="16" height="20" rx="4" fill="#B5793E" stroke="#5C3A1A" strokeWidth="1" />
       <rect x="-8" y="-5" width="16" height="2.5" fill="#5C3A1A" />
       <rect x="-8" y="3" width="16" height="2.5" fill="#5C3A1A" />
+    </g>
+  )},
+
+  // ---- あかぼう・きいぼう・ふわりん専用 ----
+  bud: { front: (
+    <g transform="translate(80,74)">
+      <path d="M-5 6 Q-8 -6 0 -10 Q8 -6 5 6 Z" fill="#E85A4A" stroke="#B5321E" strokeWidth="1" />
+      <path d="M0 6 L0 12" stroke="#4CB27A" strokeWidth="2" />
+    </g>
+  )},
+  seed: { front: (
+    <g transform="translate(80,76) rotate(20)">
+      <ellipse rx="5" ry="8" fill="#8A6D2A" stroke="#5C4A1A" strokeWidth="1" />
+      <path d="M0 -8 L0 -12" stroke="#4CB27A" strokeWidth="1.6" />
+    </g>
+  )},
+  onion: { front: (
+    <g transform="translate(80,76)">
+      <ellipse cy="2" rx="9" ry="8" fill="#F0E4D0" stroke="#C9B896" strokeWidth="1" />
+      <path d="M-2 -6 L0 -13 L2 -6" fill="#4CB27A" />
+      <path d="M-4 -4 Q0 0 4 -4 M-5 2 Q0 5 5 2" stroke="#C9B896" strokeWidth="1" fill="none" />
+    </g>
+  )},
+  big_ears: { front: (
+    <g>
+      <ellipse cx="26" cy="46" rx="7" ry="12" fill="#F5C542" stroke="#C9822E" strokeWidth="1" transform="rotate(-15 26 46)" />
+      <ellipse cx="74" cy="46" rx="7" ry="12" fill="#F5C542" stroke="#C9822E" strokeWidth="1" transform="rotate(15 74 46)" />
+    </g>
+  )},
+  star_fragment: { front: (
+    <g transform="translate(80,72)">
+      <path d="M0 -8 L2.4 -2.4 L8 -2 L3.6 1.6 L5 7 L0 3.8 L-5 7 L-3.6 1.6 L-8 -2 L-2.4 -2.4 Z" fill="#C9B8F5" stroke="#7A63BD" strokeWidth="0.8" />
+    </g>
+  )},
+  lantern: { front: (
+    <g transform="translate(80,72)">
+      <rect x="-1.3" y="-13" width="2.6" height="4" fill="#8A6D2A" />
+      <ellipse rx="7" ry="9" fill="#FFC53D" stroke="#B5860B" strokeWidth="1" />
+      <rect x="-6" y="8" width="12" height="2.4" fill="#8A6D2A" />
     </g>
   )}
 }
