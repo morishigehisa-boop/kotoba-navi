@@ -17,12 +17,8 @@ export default function ShopScreen({
     <div>
       <div className="card" style={{ alignItems: 'stretch' }}>
         <div className="label">ショップ</div>
-        <div style={{ textAlign: 'center', marginTop: 20, marginBottom: 4 }}>
-          <div className="hint" style={{ marginTop: 0 }}>いま持っている ポイント</div>
-          <div style={{ fontSize: 32, fontWeight: 800, color: 'var(--purple)' }}>⭐ {points}</div>
-        </div>
 
-        <div className="shop-tabs">
+        <div className="shop-tabs" style={{ marginTop: 20 }}>
           <button className={`shop-tab ${tab === 'char' ? 'shop-tab-active' : ''}`} onClick={() => setTab('char')}>🧑‍🎤 キャラ</button>
           <button className={`shop-tab ${tab === 'item' ? 'shop-tab-active' : ''}`} onClick={() => setTab('item')}>🎁 アイテム</button>
           <button className={`shop-tab ${tab === 'room' ? 'shop-tab-active' : ''}`} onClick={() => setTab('room')}>🏞️ 背景</button>
