@@ -1312,6 +1312,97 @@ const FUWARIN_BODY = {
   )
 }
 
+// ---- ぱんぱん（オリジナルの丸パンヒーローキャラ）----
+const PANPAN_BODY = {
+  idle: (
+    <>
+      <ellipse cx="50" cy="88" rx="27" ry="5" fill="#00000012" />
+      <ellipse cx="50" cy="58" rx="30" ry="26" fill="#E8B96A" />
+      <path d="M28 42 Q50 34 72 42" stroke="#C9945A" strokeWidth="2" fill="none" opacity="0.6" />
+      <ellipse cx="50" cy="66" rx="16" ry="13" fill="#FFF3E1" />
+      <circle cx="40" cy="55" r="4.4" fill="#3A2E1E" />
+      <circle cx="60" cy="55" r="4.4" fill="#3A2E1E" />
+      <path d="M46 68 Q50 71 54 68" stroke="#3A2E1E" strokeWidth="2.2" fill="none" strokeLinecap="round" />
+    </>
+  ),
+  happy: (
+    <>
+      <ellipse cx="50" cy="88" rx="27" ry="5" fill="#00000012" />
+      <ellipse cx="50" cy="57" rx="33" ry="29" fill="#E8B96A" />
+      <path d="M24 38 Q50 28 76 38" stroke="#C9945A" strokeWidth="2.2" fill="none" opacity="0.6" />
+      <ellipse cx="50" cy="66" rx="18" ry="14" fill="#FFF3E1" />
+      <path d="M31 51 Q40 42 49 51" stroke="#3A2E1E" strokeWidth="3.2" fill="none" strokeLinecap="round" />
+      <path d="M51 51 Q60 42 69 51" stroke="#3A2E1E" strokeWidth="3.2" fill="none" strokeLinecap="round" />
+      <path d="M38 65 Q50 80 62 65" stroke="#3A2E1E" strokeWidth="2.8" fill="none" strokeLinecap="round" />
+      <circle cx="30" cy="63" r="5.5" fill="#FFB3A0" opacity="0.85" />
+      <circle cx="70" cy="63" r="5.5" fill="#FFB3A0" opacity="0.85" />
+      <path d="M12 22 L17 28 M88 22 L83 28" stroke="#FFC53D" strokeWidth="2.4" strokeLinecap="round" />
+    </>
+  ),
+  sad: (
+    <>
+      <ellipse cx="50" cy="88" rx="27" ry="5" fill="#00000012" />
+      <ellipse cx="50" cy="62" rx="27" ry="23" fill="#E8B96A" />
+      <path d="M32 48 Q50 42 68 48" stroke="#C9945A" strokeWidth="1.8" fill="none" opacity="0.6" />
+      <ellipse cx="50" cy="70" rx="14" ry="11" fill="#FFF3E1" />
+      <path d="M36 58 Q40 55 44 58" stroke="#3A2E1E" strokeWidth="2.3" fill="none" strokeLinecap="round" />
+      <path d="M64 58 Q60 55 56 58" stroke="#3A2E1E" strokeWidth="2.3" fill="none" strokeLinecap="round" />
+      <circle cx="40" cy="61" r="3" fill="#3A2E1E" />
+      <circle cx="60" cy="61" r="3" fill="#3A2E1E" />
+      <path d="M40 67 Q40 73 38 77" stroke="#7EC8F2" strokeWidth="2.2" fill="none" strokeLinecap="round" />
+      <ellipse cx="38" cy="78" rx="2" ry="2.6" fill="#7EC8F2" />
+      <path d="M45 74 Q50 71 55 74" stroke="#3A2E1E" strokeWidth="2.2" fill="none" strokeLinecap="round" />
+    </>
+  )
+}
+
+// ---- ばいきん（オリジナルの紫黒ばい菌風キャラ）----
+const BAIKIN_BODY = {
+  idle: (
+    <>
+      <ellipse cx="50" cy="88" rx="26" ry="5" fill="#00000012" />
+      <ellipse cx="50" cy="58" rx="28" ry="25" fill="#2E1A38" />
+      <circle cx="30" cy="40" r="3" fill="#4A2E5C" opacity="0.7" />
+      <circle cx="68" cy="46" r="2.4" fill="#4A2E5C" opacity="0.7" />
+      <circle cx="62" cy="72" r="2.6" fill="#4A2E5C" opacity="0.7" />
+      <ellipse cx="50" cy="66" rx="15" ry="11" fill="#5C3A6E" />
+      <circle cx="40" cy="55" r="4.4" fill="#D94848" />
+      <circle cx="60" cy="55" r="4.4" fill="#D94848" />
+      <path d="M42 68 L46 71 L50 68 L54 71 L58 68" fill="none" stroke="#1A0E22" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+    </>
+  ),
+  happy: (
+    <>
+      <ellipse cx="50" cy="88" rx="26" ry="5" fill="#00000012" />
+      <ellipse cx="50" cy="57" rx="31" ry="28" fill="#2E1A38" />
+      <circle cx="27" cy="37" r="3.4" fill="#4A2E5C" opacity="0.7" />
+      <circle cx="72" cy="44" r="2.8" fill="#4A2E5C" opacity="0.7" />
+      <circle cx="66" cy="75" r="3" fill="#4A2E5C" opacity="0.7" />
+      <ellipse cx="50" cy="66" rx="17" ry="13" fill="#5C3A6E" />
+      <path d="M31 51 Q40 42 49 51" stroke="#1A0E22" strokeWidth="3" fill="none" strokeLinecap="round" />
+      <path d="M51 51 Q60 42 69 51" stroke="#1A0E22" strokeWidth="3" fill="none" strokeLinecap="round" />
+      <path d="M36 66 L41 72 L46 65 L50 74 L54 65 L59 72 L64 66" fill="#7A2020" stroke="#1A0E22" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx="34" cy="55" r="4" fill="#D94848" />
+      <circle cx="66" cy="55" r="4" fill="#D94848" />
+      <path d="M10 20 L15 27 M90 20 L85 27" stroke="#B76CE8" strokeWidth="2.4" strokeLinecap="round" />
+    </>
+  ),
+  sad: (
+    <>
+      <ellipse cx="50" cy="88" rx="26" ry="5" fill="#00000012" />
+      <ellipse cx="50" cy="62" rx="26" ry="22" fill="#2E1A38" />
+      <ellipse cx="50" cy="70" rx="13" ry="9" fill="#5C3A6E" />
+      <path d="M36 58 Q40 55 44 58" stroke="#1A0E22" strokeWidth="2.3" fill="none" strokeLinecap="round" />
+      <path d="M64 58 Q60 55 56 58" stroke="#1A0E22" strokeWidth="2.3" fill="none" strokeLinecap="round" />
+      <circle cx="40" cy="61" r="3.4" fill="#D94848" />
+      <circle cx="60" cy="61" r="3.4" fill="#D94848" />
+      <path d="M40 67 Q40 73 38 77" stroke="#7EC8F2" strokeWidth="2.2" fill="none" strokeLinecap="round" />
+      <ellipse cx="38" cy="78" rx="2" ry="2.6" fill="#7EC8F2" />
+      <path d="M44 73 L48 76 L52 73 L56 76" fill="none" stroke="#1A0E22" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+    </>
+  )
+}
+
 const BODIES = {
   fox: FOX_BODY, cat: CAT_BODY, dog: DOG_BODY, dragon: DRAGON_BODY,
   lion: LION_BODY, pig: PIG_BODY, cheetah: CHEETAH_BODY, robot: ROBOT_BODY,
@@ -1321,7 +1412,8 @@ const BODIES = {
   blockman: BLOCKMAN_BODY, creepy: CREEPY_BODY, iron_giant: IRON_GIANT_BODY,
   dark_man: DARK_MAN_BODY, blackdragon: BLACKDRAGON_BODY,
   mari: MARI_BODY, kourao: KOURAO_BODY, gori: GORI_BODY,
-  akabou: AKABOU_BODY, kiibou: KIIBOU_BODY, fuwarin: FUWARIN_BODY
+  akabou: AKABOU_BODY, kiibou: KIIBOU_BODY, fuwarin: FUWARIN_BODY,
+  panpan: PANPAN_BODY, baikin: BAIKIN_BODY
 }
 
 // ============================================================
@@ -1987,6 +2079,40 @@ const ITEM_FRAGMENTS = {
       <rect x="-1.3" y="-13" width="2.6" height="4" fill="#8A6D2A" />
       <ellipse rx="7" ry="9" fill="#FFC53D" stroke="#B5860B" strokeWidth="1" />
       <rect x="-6" y="8" width="12" height="2.4" fill="#8A6D2A" />
+    </g>
+  )},
+
+  // ---- ぱんぱん・ばいきん専用 ----
+  jam: { front: (
+    <g transform="translate(80,76)">
+      <rect x="-6" y="-8" width="12" height="14" rx="2" fill="#F4F1EE" stroke="#8A8678" strokeWidth="1" />
+      <rect x="-6" y="-8" width="12" height="8" fill="#D94848" />
+      <rect x="-2" y="-11" width="4" height="3" fill="#8A8678" />
+    </g>
+  )},
+  butter: { front: (
+    <g transform="translate(80,76)">
+      <rect x="-8" y="-5" width="16" height="10" rx="1" fill="#FFE9A0" stroke="#D9A82A" strokeWidth="1" />
+    </g>
+  )},
+  honey: { front: (
+    <g transform="translate(80,76)">
+      <path d="M-6 -8 Q-8 0 -6 8 Q0 11 6 8 Q8 0 6 -8 Q0 -11 -6 -8 Z" fill="#F5C542" stroke="#B5860B" strokeWidth="1" />
+      <rect x="-2" y="-13" width="4" height="5" fill="#8A6D2A" />
+    </g>
+  )},
+  spear: { front: (
+    <g transform="translate(80,70) rotate(-20)">
+      <rect x="-1.4" y="-4" width="2.8" height="22" fill="#8A6D2A" />
+      <path d="M0 -14 L-4 -4 L4 -4 Z" fill="#B0B7C0" stroke="#7A8494" strokeWidth="1" />
+    </g>
+  )},
+  poison_bottle: { front: (
+    <g transform="translate(80,76)">
+      <rect x="-5" y="-6" width="10" height="14" rx="2" fill="#B76CE8" opacity="0.85" stroke="#7A2E9E" strokeWidth="1" />
+      <rect x="-2" y="-10" width="4" height="4" fill="#7A8494" />
+      <circle cx="-1.5" cy="0" r="1.3" fill="#2E1A38" />
+      <circle cx="1.5" cy="3" r="1" fill="#2E1A38" />
     </g>
   )}
 }

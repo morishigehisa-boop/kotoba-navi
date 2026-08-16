@@ -130,7 +130,9 @@ export const CHARACTERS = [
   { id: 'gori', name: 'ゴリさん', emoji: '🦍' },
   { id: 'akabou', name: 'あかぼう', emoji: '🌱' },
   { id: 'kiibou', name: 'きいぼう', emoji: '🌼' },
-  { id: 'fuwarin', name: 'ふわりん', emoji: '💫' }
+  { id: 'fuwarin', name: 'ふわりん', emoji: '💫' },
+  { id: 'panpan', name: 'ぱんぱん', emoji: '🍞' },
+  { id: 'baikin', name: 'ばいきん', emoji: '🟣' }
 ]
 
 // 着せ替えショップのアイテム（キャラクターごとにテーマが違う専用アイテム）
@@ -445,6 +447,30 @@ export const SHOP_ITEMS_BY_CHARACTER = {
     { id: 'bubble', name: 'きらきらオーラ', cost: 130, emoji: '🫧' },
     { id: 'bell', name: 'すずの くびわ', cost: 150, emoji: '🔔' },
     { id: 'glasses', name: 'サングラス', cost: 200, emoji: '🕶️' },
+    { id: 'crown', name: 'きんの かんむり', cost: 300, emoji: '👑' }
+  ],
+  panpan: [
+    { id: 'jam', name: 'ジャム', cost: 50, emoji: '🍓' },
+    { id: 'butter', name: 'バター', cost: 60, emoji: '🧈' },
+    { id: 'shield', name: 'たて', cost: 80, emoji: '🛡️' },
+    { id: 'cape', name: 'マント', cost: 90, emoji: '🦸' },
+    { id: 'bell', name: 'すずの くびわ', cost: 100, emoji: '🔔' },
+    { id: 'glasses', name: 'サングラス', cost: 120, emoji: '🕶️' },
+    { id: 'honey', name: 'はちみつ', cost: 130, emoji: '🍯' },
+    { id: 'star_badge', name: 'きらきらバッジ', cost: 150, emoji: '⭐' },
+    { id: 'medal', name: 'きんメダル', cost: 200, emoji: '🏅' },
+    { id: 'crown', name: 'きんの かんむり', cost: 300, emoji: '👑' }
+  ],
+  baikin: [
+    { id: 'spear', name: 'やり', cost: 50, emoji: '🔱' },
+    { id: 'poison_bottle', name: 'どくびん', cost: 60, emoji: '🧪' },
+    { id: 'bandana', name: 'バンダナ', cost: 80, emoji: '🧣' },
+    { id: 'gem', name: 'きらきらいし', cost: 90, emoji: '💎' },
+    { id: 'bell', name: 'すずの くびわ', cost: 100, emoji: '🔔' },
+    { id: 'glasses', name: 'サングラス', cost: 120, emoji: '🕶️' },
+    { id: 'cape', name: 'マント', cost: 130, emoji: '🦸' },
+    { id: 'medal', name: 'きんメダル', cost: 150, emoji: '🏅' },
+    { id: 'star_gem', name: 'ほしの たま', cost: 200, emoji: '🌟' },
     { id: 'crown', name: 'きんの かんむり', cost: 300, emoji: '👑' }
   ]
 }
