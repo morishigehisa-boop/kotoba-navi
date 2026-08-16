@@ -139,7 +139,12 @@ export const CHARACTERS = [
   { id: 'kiibou', name: 'きいぼう', emoji: '🌼' },
   { id: 'fuwarin', name: 'ふわりん', emoji: '💫' },
   { id: 'panpan', name: 'ぱんぱん', emoji: '🍞' },
-  { id: 'baikin', name: 'ばいきん', emoji: '🟣' }
+  { id: 'baikin', name: 'ばいきん', emoji: '🟣' },
+  { id: 'yukidaruma', name: 'ゆきだるマン', emoji: '⛄' },
+  { id: 'kabocha', name: 'かぼちゃおに', emoji: '🎃' },
+  { id: 'rakugaki', name: 'らくがきくん', emoji: '🖍️' },
+  { id: 'kaminari', name: 'カミナリ坊', emoji: '⚡' },
+  { id: 'ninja', name: 'にんじゃ丸', emoji: '🥷' }
 ]
 
 // 着せ替えショップのアイテム（キャラクターごとにテーマが違う専用アイテム）
@@ -478,6 +483,66 @@ export const SHOP_ITEMS_BY_CHARACTER = {
     { id: 'cape', name: 'マント', cost: 130, emoji: '🦸' },
     { id: 'medal', name: 'きんメダル', cost: 150, emoji: '🏅' },
     { id: 'star_gem', name: 'ほしの たま', cost: 200, emoji: '🌟' },
+    { id: 'crown', name: 'きんの かんむり', cost: 300, emoji: '👑' }
+  ],
+  yukidaruma: [
+    { id: 'scarf_red', name: 'マフラー', cost: 50, emoji: '🧣' },
+    { id: 'sled', name: 'そり', cost: 60, emoji: '🛷' },
+    { id: 'snowflake', name: 'ゆきの けっしょう', cost: 80, emoji: '❄️' },
+    { id: 'mittens', name: 'てぶくろ', cost: 90, emoji: '🧤' },
+    { id: 'bell', name: 'すずの くびわ', cost: 100, emoji: '🔔' },
+    { id: 'glasses', name: 'サングラス', cost: 120, emoji: '🕶️' },
+    { id: 'tophat', name: 'シルクハット', cost: 130, emoji: '🎩' },
+    { id: 'medal', name: 'きんメダル', cost: 150, emoji: '🏅' },
+    { id: 'star_badge', name: 'きらきらバッジ', cost: 200, emoji: '⭐' },
+    { id: 'crown', name: 'きんの かんむり', cost: 300, emoji: '👑' }
+  ],
+  kabocha: [
+    { id: 'broom', name: 'ほうき', cost: 50, emoji: '🧹' },
+    { id: 'bat', name: 'こうもり', cost: 60, emoji: '🦇' },
+    { id: 'candy', name: 'キャンディ', cost: 80, emoji: '🍬' },
+    { id: 'gem', name: 'きらきらいし', cost: 90, emoji: '💎' },
+    { id: 'bell', name: 'すずの くびわ', cost: 100, emoji: '🔔' },
+    { id: 'glasses', name: 'サングラス', cost: 120, emoji: '🕶️' },
+    { id: 'cape', name: 'マント', cost: 130, emoji: '🦸' },
+    { id: 'star_badge', name: 'きらきらバッジ', cost: 150, emoji: '⭐' },
+    { id: 'medal', name: 'きんメダル', cost: 200, emoji: '🏅' },
+    { id: 'crown', name: 'きんの かんむり', cost: 300, emoji: '👑' }
+  ],
+  rakugaki: [
+    { id: 'crayon', name: 'クレヨン', cost: 50, emoji: '🖍️' },
+    { id: 'eraser', name: 'けしゴム', cost: 60, emoji: '🧽' },
+    { id: 'ruler', name: 'じょうぎ', cost: 80, emoji: '📏' },
+    { id: 'glue', name: 'のり', cost: 90, emoji: '🧴' },
+    { id: 'bell', name: 'すずの くびわ', cost: 100, emoji: '🔔' },
+    { id: 'glasses', name: 'サングラス', cost: 120, emoji: '🕶️' },
+    { id: 'cape', name: 'マント', cost: 130, emoji: '🦸' },
+    { id: 'star_badge', name: 'きらきらバッジ', cost: 150, emoji: '⭐' },
+    { id: 'medal', name: 'きんメダル', cost: 200, emoji: '🏅' },
+    { id: 'crown', name: 'きんの かんむり', cost: 300, emoji: '👑' }
+  ],
+  kaminari: [
+    { id: 'drum', name: 'たいこ', cost: 50, emoji: '🥁' },
+    { id: 'cloud', name: 'くも', cost: 60, emoji: '☁️' },
+    { id: 'lightning_badge', name: 'いなずまバッジ', cost: 80, emoji: '⚡' },
+    { id: 'gem', name: 'きらきらいし', cost: 90, emoji: '💎' },
+    { id: 'bell', name: 'すずの くびわ', cost: 100, emoji: '🔔' },
+    { id: 'glasses', name: 'サングラス', cost: 120, emoji: '🕶️' },
+    { id: 'cape', name: 'マント', cost: 130, emoji: '🦸' },
+    { id: 'star_badge', name: 'きらきらバッジ', cost: 150, emoji: '⭐' },
+    { id: 'medal', name: 'きんメダル', cost: 200, emoji: '🏅' },
+    { id: 'crown', name: 'きんの かんむり', cost: 300, emoji: '👑' }
+  ],
+  ninja: [
+    { id: 'shuriken', name: 'しゅりけん', cost: 50, emoji: '⭐' },
+    { id: 'caltrop', name: 'まきびし', cost: 60, emoji: '⚙️' },
+    { id: 'scroll', name: 'まきもの', cost: 80, emoji: '📜' },
+    { id: 'bandana', name: 'バンダナ', cost: 90, emoji: '🧣' },
+    { id: 'bell', name: 'すずの くびわ', cost: 100, emoji: '🔔' },
+    { id: 'glasses', name: 'サングラス', cost: 120, emoji: '🕶️' },
+    { id: 'cape', name: 'マント', cost: 130, emoji: '🦸' },
+    { id: 'gem', name: 'きらきらいし', cost: 150, emoji: '💎' },
+    { id: 'medal', name: 'きんメダル', cost: 200, emoji: '🏅' },
     { id: 'crown', name: 'きんの かんむり', cost: 300, emoji: '👑' }
   ]
 }

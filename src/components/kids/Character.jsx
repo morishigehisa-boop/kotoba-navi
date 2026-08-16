@@ -1403,6 +1403,214 @@ const BAIKIN_BODY = {
   )
 }
 
+// ---- ゆきだるマン（オリジナルの雪だるまキャラ）----
+const YUKIDARUMA_BODY = {
+  idle: (
+    <>
+      <ellipse cx="50" cy="88" rx="26" ry="5" fill="#00000012" />
+      <circle cx="50" cy="70" r="22" fill="#F4F8FF" stroke="#D4E4F0" strokeWidth="1.5" />
+      <circle cx="50" cy="38" r="16" fill="#F4F8FF" stroke="#D4E4F0" strokeWidth="1.5" />
+      <circle cx="43" cy="35" r="2.6" fill="#2B2A27" />
+      <circle cx="57" cy="35" r="2.6" fill="#2B2A27" />
+      <path d="M50 39 L58 42 L50 44 Z" fill="#FF9E45" />
+      <circle cx="50" cy="60" r="2" fill="#2B2A27" />
+      <circle cx="50" cy="68" r="2" fill="#2B2A27" />
+      <circle cx="50" cy="76" r="2" fill="#2B2A27" />
+    </>
+  ),
+  happy: (
+    <>
+      <ellipse cx="50" cy="88" rx="26" ry="5" fill="#00000012" />
+      <circle cx="50" cy="68" r="25" fill="#F4F8FF" stroke="#D4E4F0" strokeWidth="1.5" />
+      <circle cx="50" cy="32" r="18" fill="#F4F8FF" stroke="#D4E4F0" strokeWidth="1.5" />
+      <path d="M34 30 Q39 23 44 30" stroke="#2B2A27" strokeWidth="2.6" fill="none" strokeLinecap="round" />
+      <path d="M56 30 Q61 23 66 30" stroke="#2B2A27" strokeWidth="2.6" fill="none" strokeLinecap="round" />
+      <path d="M50 33 L60 37 L50 40 Z" fill="#FF9E45" />
+      <path d="M42 45 Q50 52 58 45" stroke="#2B2A27" strokeWidth="2.2" fill="none" strokeLinecap="round" />
+      <circle cx="50" cy="58" r="2.2" fill="#2B2A27" />
+      <circle cx="50" cy="66" r="2.2" fill="#2B2A27" />
+      <circle cx="50" cy="74" r="2.2" fill="#2B2A27" />
+      <path d="M12 20 L17 27 M88 20 L83 27" stroke="#FFC53D" strokeWidth="2.4" strokeLinecap="round" />
+    </>
+  ),
+  sad: (
+    <>
+      <ellipse cx="50" cy="88" rx="26" ry="5" fill="#00000012" />
+      <circle cx="50" cy="72" r="20" fill="#F4F8FF" stroke="#D4E4F0" strokeWidth="1.5" />
+      <circle cx="50" cy="44" r="14" fill="#F4F8FF" stroke="#D4E4F0" strokeWidth="1.5" />
+      <path d="M40 42 Q43 39 47 42" stroke="#2B2A27" strokeWidth="2.2" fill="none" strokeLinecap="round" />
+      <path d="M53 42 Q57 39 60 42" stroke="#2B2A27" strokeWidth="2.2" fill="none" strokeLinecap="round" />
+      <path d="M50 46 L57 49 L50 51 Z" fill="#FF9E45" />
+      <path d="M40 75 Q40 81 38 85" stroke="#7EC8F2" strokeWidth="2.2" fill="none" strokeLinecap="round" />
+      <ellipse cx="38" cy="86" rx="2" ry="2.6" fill="#7EC8F2" />
+    </>
+  )
+}
+
+// ---- かぼちゃおに（オリジナルのかぼちゃキャラ）----
+const KABOCHA_BODY = {
+  idle: (
+    <>
+      <ellipse cx="50" cy="88" rx="26" ry="5" fill="#00000012" />
+      <rect x="47" y="10" width="6" height="8" fill="#5C7A2E" />
+      <ellipse cx="50" cy="58" rx="30" ry="26" fill="#FF9E45" />
+      <path d="M26 40 Q30 58 26 76 M74 40 Q70 58 74 76 M50 32 Q54 58 50 84" stroke="#D97A2E" strokeWidth="1.6" fill="none" opacity="0.6" />
+      <path d="M33 52 L40 58 L33 62 Z" fill="#2B1A12" />
+      <path d="M67 52 L60 58 L67 62 Z" fill="#2B1A12" />
+      <path d="M40 70 L44 76 L48 68 L52 78 L56 68 L60 76 L64 70" fill="#2B1A12" />
+    </>
+  ),
+  happy: (
+    <>
+      <ellipse cx="50" cy="88" rx="26" ry="5" fill="#00000012" />
+      <rect x="47" y="6" width="6" height="8" fill="#5C7A2E" />
+      <ellipse cx="50" cy="57" rx="33" ry="29" fill="#FF9E45" />
+      <path d="M24 38 Q29 57 24 76 M76 38 Q71 57 76 76 M50 30 Q55 57 50 84" stroke="#D97A2E" strokeWidth="1.6" fill="none" opacity="0.6" />
+      <path d="M28 48 L38 56 L28 62 Z" fill="#2B1A12" />
+      <path d="M72 48 L62 56 L72 62 Z" fill="#2B1A12" />
+      <path d="M34 66 L40 74 L46 64 L50 78 L54 64 L60 74 L66 66" fill="#2B1A12" />
+      <path d="M10 18 L15 25 M90 18 L85 25" stroke="#FFC53D" strokeWidth="2.4" strokeLinecap="round" />
+    </>
+  ),
+  sad: (
+    <>
+      <ellipse cx="50" cy="88" rx="26" ry="5" fill="#00000012" />
+      <rect x="47" y="16" width="6" height="7" fill="#5C7A2E" />
+      <ellipse cx="50" cy="62" rx="27" ry="23" fill="#FF9E45" />
+      <path d="M28 46 Q32 62 28 78 M72 46 Q68 62 72 78" stroke="#D97A2E" strokeWidth="1.4" fill="none" opacity="0.6" />
+      <path d="M37 56 Q40 53 44 56" stroke="#2B1A12" strokeWidth="2.2" fill="none" strokeLinecap="round" />
+      <path d="M63 56 Q60 53 56 56" stroke="#2B1A12" strokeWidth="2.2" fill="none" strokeLinecap="round" />
+      <path d="M42 73 Q50 70 58 73" stroke="#2B1A12" strokeWidth="2.4" fill="none" strokeLinecap="round" />
+      <path d="M40 68 Q40 74 38 78" stroke="#7EC8F2" strokeWidth="2.2" fill="none" strokeLinecap="round" />
+      <ellipse cx="38" cy="79" rx="2" ry="2.6" fill="#7EC8F2" />
+    </>
+  )
+}
+
+// ---- らくがきくん（オリジナルの線画タッチキャラ）----
+const RAKUGAKI_BODY = {
+  idle: (
+    <>
+      <ellipse cx="50" cy="88" rx="26" ry="5" fill="#00000010" />
+      <circle cx="50" cy="58" r="26" fill="#FFFDF5" stroke="#2B2A27" strokeWidth="2.5" />
+      <path d="M38 52 L44 56" stroke="#2B2A27" strokeWidth="2.5" strokeLinecap="round" />
+      <path d="M62 52 L56 56" stroke="#2B2A27" strokeWidth="2.5" strokeLinecap="round" />
+      <path d="M44 68 Q50 72 56 68" stroke="#2B2A27" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+      <circle cx="34" cy="63" r="4" fill="#FF9E7A" opacity="0.6" />
+      <circle cx="66" cy="63" r="4" fill="#FF9E7A" opacity="0.6" />
+    </>
+  ),
+  happy: (
+    <>
+      <ellipse cx="50" cy="88" rx="26" ry="5" fill="#00000010" />
+      <circle cx="50" cy="56" r="29" fill="#FFFDF5" stroke="#2B2A27" strokeWidth="2.8" />
+      <path d="M32 48 Q40 40 48 48" stroke="#2B2A27" strokeWidth="3" fill="none" strokeLinecap="round" />
+      <path d="M52 48 Q60 40 68 48" stroke="#2B2A27" strokeWidth="3" fill="none" strokeLinecap="round" />
+      <path d="M38 62 Q50 76 62 62" stroke="#2B2A27" strokeWidth="2.8" fill="none" strokeLinecap="round" />
+      <circle cx="30" cy="60" r="5" fill="#FF9E7A" opacity="0.7" />
+      <circle cx="70" cy="60" r="5" fill="#FF9E7A" opacity="0.7" />
+      <path d="M10 18 L15 25 M90 18 L85 25" stroke="#4CB27A" strokeWidth="2.6" strokeLinecap="round" />
+    </>
+  ),
+  sad: (
+    <>
+      <ellipse cx="50" cy="88" rx="26" ry="5" fill="#00000010" />
+      <circle cx="50" cy="60" r="23" fill="#FFFDF5" stroke="#2B2A27" strokeWidth="2.4" />
+      <path d="M37 55 Q40 52 44 55" stroke="#2B2A27" strokeWidth="2.3" fill="none" strokeLinecap="round" />
+      <path d="M63 55 Q60 52 56 55" stroke="#2B2A27" strokeWidth="2.3" fill="none" strokeLinecap="round" />
+      <path d="M44 71 Q50 67 56 71" stroke="#2B2A27" strokeWidth="2.4" fill="none" strokeLinecap="round" />
+      <path d="M40 66 Q40 72 38 76" stroke="#7EC8F2" strokeWidth="2.2" fill="none" strokeLinecap="round" />
+      <ellipse cx="38" cy="77" rx="2" ry="2.6" fill="#7EC8F2" />
+    </>
+  )
+}
+
+// ---- カミナリ坊（オリジナルの元気な雷キャラ）----
+const KAMINARI_BODY = {
+  idle: (
+    <>
+      <ellipse cx="50" cy="88" rx="26" ry="5" fill="#00000012" />
+      <path d="M18 44 Q30 34 44 40 Q50 32 56 40 Q70 34 82 44 Q76 52 50 50 Q24 52 18 44 Z" fill="#B8C6E0" />
+      <ellipse cx="50" cy="60" rx="24" ry="21" fill="#7A63BD" />
+      <ellipse cx="50" cy="66" rx="13" ry="10" fill="#E8DDFF" />
+      <circle cx="40" cy="56" r="4" fill="#2B1A12" />
+      <circle cx="60" cy="56" r="4" fill="#2B1A12" />
+      <path d="M46 68 Q50 71 54 68" stroke="#2B1A12" strokeWidth="2.2" fill="none" strokeLinecap="round" />
+      <path d="M52 76 L48 84 L52 84 L48 92" stroke="#FFC53D" strokeWidth="2.6" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+    </>
+  ),
+  happy: (
+    <>
+      <ellipse cx="50" cy="88" rx="26" ry="5" fill="#00000012" />
+      <path d="M14 40 Q28 28 44 36 Q50 26 56 36 Q72 28 86 40 Q78 50 50 47 Q22 50 14 40 Z" fill="#B8C6E0" />
+      <ellipse cx="50" cy="58" rx="27" ry="24" fill="#7A63BD" />
+      <ellipse cx="50" cy="65" rx="15" ry="12" fill="#E8DDFF" />
+      <path d="M31 51 Q40 42 49 51" stroke="#2B1A12" strokeWidth="3" fill="none" strokeLinecap="round" />
+      <path d="M51 51 Q60 42 69 51" stroke="#2B1A12" strokeWidth="3" fill="none" strokeLinecap="round" />
+      <path d="M38 64 Q50 78 62 64" stroke="#2B1A12" strokeWidth="2.6" fill="none" strokeLinecap="round" />
+      <circle cx="32" cy="62" r="4.5" fill="#FFB3A0" opacity="0.7" />
+      <circle cx="68" cy="62" r="4.5" fill="#FFB3A0" opacity="0.7" />
+      <path d="M10 16 L15 23 M90 16 L85 23" stroke="#FFC53D" strokeWidth="2.4" strokeLinecap="round" />
+    </>
+  ),
+  sad: (
+    <>
+      <ellipse cx="50" cy="88" rx="26" ry="5" fill="#00000012" />
+      <path d="M24 48 Q34 40 46 45 Q50 39 54 45 Q66 40 76 48 Q71 54 50 52 Q29 54 24 48 Z" fill="#B8C6E0" />
+      <ellipse cx="50" cy="64" rx="21" ry="18" fill="#7A63BD" />
+      <ellipse cx="50" cy="69" rx="11" ry="9" fill="#E8DDFF" />
+      <path d="M37 60 Q40 57 44 60" stroke="#2B1A12" strokeWidth="2.2" fill="none" strokeLinecap="round" />
+      <path d="M63 60 Q60 57 56 60" stroke="#2B1A12" strokeWidth="2.2" fill="none" strokeLinecap="round" />
+      <circle cx="40" cy="63" r="3" fill="#2B1A12" />
+      <circle cx="60" cy="63" r="3" fill="#2B1A12" />
+      <path d="M40 70 Q40 76 38 80" stroke="#7EC8F2" strokeWidth="2.2" fill="none" strokeLinecap="round" />
+      <ellipse cx="38" cy="81" rx="2" ry="2.6" fill="#7EC8F2" />
+    </>
+  )
+}
+
+// ---- にんじゃ丸（オリジナルの忍者キャラ）----
+const NINJA_BODY = {
+  idle: (
+    <>
+      <ellipse cx="50" cy="88" rx="26" ry="5" fill="#00000012" />
+      <ellipse cx="50" cy="58" rx="26" ry="24" fill="#2E3A4A" />
+      <rect x="24" y="48" width="52" height="10" fill="#1A222E" />
+      <path d="M76 50 L86 46 M76 56 L86 58" stroke="#1A222E" strokeWidth="2.5" strokeLinecap="round" />
+      <ellipse cx="50" cy="62" rx="15" ry="11" fill="#FFDDB0" />
+      <circle cx="40" cy="58" r="4" fill="#2B1A12" />
+      <circle cx="60" cy="58" r="4" fill="#2B1A12" />
+    </>
+  ),
+  happy: (
+    <>
+      <ellipse cx="50" cy="88" rx="26" ry="5" fill="#00000012" />
+      <ellipse cx="50" cy="56" rx="29" ry="27" fill="#2E3A4A" />
+      <rect x="20" y="45" width="60" height="11" fill="#1A222E" />
+      <path d="M80 46 L92 41 M80 54 L92 57" stroke="#1A222E" strokeWidth="2.8" strokeLinecap="round" />
+      <ellipse cx="50" cy="62" rx="17" ry="13" fill="#FFDDB0" />
+      <path d="M31 55 Q40 47 49 55" stroke="#2B1A12" strokeWidth="3" fill="none" strokeLinecap="round" />
+      <path d="M51 55 Q60 47 69 55" stroke="#2B1A12" strokeWidth="3" fill="none" strokeLinecap="round" />
+      <path d="M38 68 Q50 78 62 68" stroke="#2B1A12" strokeWidth="2.6" fill="none" strokeLinecap="round" />
+      <path d="M10 20 L15 27 M90 20 L85 27" stroke="#FFC53D" strokeWidth="2.4" strokeLinecap="round" />
+    </>
+  ),
+  sad: (
+    <>
+      <ellipse cx="50" cy="88" rx="26" ry="5" fill="#00000012" />
+      <ellipse cx="50" cy="62" rx="23" ry="21" fill="#2E3A4A" />
+      <rect x="29" y="53" width="42" height="9" fill="#1A222E" />
+      <ellipse cx="50" cy="67" rx="13" ry="9" fill="#FFDDB0" />
+      <path d="M37 63 Q40 60 44 63" stroke="#2B1A12" strokeWidth="2.2" fill="none" strokeLinecap="round" />
+      <path d="M63 63 Q60 60 56 63" stroke="#2B1A12" strokeWidth="2.2" fill="none" strokeLinecap="round" />
+      <circle cx="40" cy="66" r="2.8" fill="#2B1A12" />
+      <circle cx="60" cy="66" r="2.8" fill="#2B1A12" />
+      <path d="M40 71 Q40 77 38 81" stroke="#7EC8F2" strokeWidth="2.2" fill="none" strokeLinecap="round" />
+      <ellipse cx="38" cy="82" rx="2" ry="2.6" fill="#7EC8F2" />
+    </>
+  )
+}
+
 const BODIES = {
   fox: FOX_BODY, cat: CAT_BODY, dog: DOG_BODY, dragon: DRAGON_BODY,
   lion: LION_BODY, pig: PIG_BODY, cheetah: CHEETAH_BODY, robot: ROBOT_BODY,
@@ -1413,7 +1621,9 @@ const BODIES = {
   dark_man: DARK_MAN_BODY, blackdragon: BLACKDRAGON_BODY,
   mari: MARI_BODY, kourao: KOURAO_BODY, gori: GORI_BODY,
   akabou: AKABOU_BODY, kiibou: KIIBOU_BODY, fuwarin: FUWARIN_BODY,
-  panpan: PANPAN_BODY, baikin: BAIKIN_BODY
+  panpan: PANPAN_BODY, baikin: BAIKIN_BODY,
+  yukidaruma: YUKIDARUMA_BODY, kabocha: KABOCHA_BODY, rakugaki: RAKUGAKI_BODY,
+  kaminari: KAMINARI_BODY, ninja: NINJA_BODY
 }
 
 // ============================================================
@@ -2113,6 +2323,107 @@ const ITEM_FRAGMENTS = {
       <rect x="-2" y="-10" width="4" height="4" fill="#7A8494" />
       <circle cx="-1.5" cy="0" r="1.3" fill="#2E1A38" />
       <circle cx="1.5" cy="3" r="1" fill="#2E1A38" />
+    </g>
+  )},
+
+  // ---- ゆきだるマン専用 ----
+  sled: { front: (
+    <g transform="translate(80,78)">
+      <path d="M-10 4 Q-10 -2 -6 -2 L8 -2 L8 4 Z" fill="#D94848" stroke="#8A2E2E" strokeWidth="1" />
+      <path d="M-10 4 Q-12 8 -8 8 M8 4 Q10 8 6 8" stroke="#8A6D2A" strokeWidth="1.6" fill="none" />
+    </g>
+  )},
+  snowflake: { front: (
+    <g transform="translate(80,72)">
+      <path d="M0 -8 L0 8 M-7 -4 L7 4 M-7 4 L7 -4" stroke="#7EC8F2" strokeWidth="2" strokeLinecap="round" />
+    </g>
+  )},
+  mittens: { front: (
+    <g transform="translate(80,76)">
+      <ellipse rx="7" ry="8" fill="#D94848" stroke="#8A2E2E" strokeWidth="1" />
+      <ellipse cx="-6" cy="2" rx="3" ry="4" fill="#D94848" stroke="#8A2E2E" strokeWidth="1" />
+    </g>
+  )},
+  tophat: { front: (
+    <g>
+      <rect x="38" y="16" width="24" height="18" fill="#2B2A27" />
+      <rect x="32" y="32" width="36" height="4" fill="#2B2A27" />
+      <rect x="38" y="27" width="24" height="3" fill="#D94848" />
+    </g>
+  )},
+
+  // ---- かぼちゃおに専用 ----
+  broom: { front: (
+    <g transform="translate(80,70) rotate(-15)">
+      <rect x="-1.4" y="-10" width="2.8" height="20" fill="#8A6D2A" />
+      <path d="M-6 10 L-8 20 M-2 10 L-3 20 M2 10 L3 20 M6 10 L8 20 M-6 10 L6 10 Z" stroke="#D9A85C" strokeWidth="1.6" fill="none" strokeLinecap="round" />
+    </g>
+  )},
+  bat: { front: (
+    <g transform="translate(80,72)">
+      <ellipse rx="4" ry="5" fill="#2E2A4A" />
+      <path d="M-4 -2 Q-14 -6 -12 4 Q-8 2 -4 3 Z" fill="#2E2A4A" />
+      <path d="M4 -2 Q14 -6 12 4 Q8 2 4 3 Z" fill="#2E2A4A" />
+      <path d="M-3 -3 L-1 -6 M3 -3 L1 -6" stroke="#2E2A4A" strokeWidth="1.4" strokeLinecap="round" />
+    </g>
+  )},
+  candy: { front: (
+    <g transform="translate(80,76) rotate(10)">
+      <circle r="6" fill="#B76CE8" stroke="#7A2E9E" strokeWidth="1" />
+      <path d="M-6 0 L-11 -3 M-6 0 L-11 3 M6 0 L11 -3 M6 0 L11 3" stroke="#7A2E9E" strokeWidth="1.4" strokeLinecap="round" />
+    </g>
+  )},
+
+  // ---- らくがきくん専用 ----
+  eraser: { front: (
+    <g transform="translate(80,76)">
+      <rect x="-8" y="-5" width="16" height="10" rx="2" fill="#F4F1EE" stroke="#2B2A27" strokeWidth="1.5" />
+      <rect x="-8" y="-5" width="16" height="4" fill="#FF9E7A" />
+    </g>
+  )},
+  ruler: { front: (
+    <g transform="translate(80,74) rotate(-15)">
+      <rect x="-14" y="-3" width="28" height="6" fill="#FFF3C4" stroke="#2B2A27" strokeWidth="1.2" />
+      <path d="M-10 -3 L-10 0 M-4 -3 L-4 0 M2 -3 L2 0 M8 -3 L8 0" stroke="#2B2A27" strokeWidth="1" />
+    </g>
+  )},
+  glue: { front: (
+    <g transform="translate(80,76)">
+      <rect x="-5" y="-8" width="10" height="16" rx="2" fill="#F4F1EE" stroke="#2B2A27" strokeWidth="1.3" />
+      <rect x="-3" y="-11" width="6" height="3" fill="#D94848" />
+    </g>
+  )},
+
+  // ---- カミナリ坊専用 ----
+  drum: { front: (
+    <g transform="translate(80,76)">
+      <rect x="-8" y="-6" width="16" height="12" rx="1" fill="#D94848" stroke="#8A2E2E" strokeWidth="1" />
+      <ellipse cx="0" cy="-6" rx="8" ry="2.4" fill="#F4F1EE" stroke="#8A2E2E" strokeWidth="1" />
+    </g>
+  )},
+  cloud: { front: (
+    <g transform="translate(80,74)">
+      <ellipse rx="10" ry="6" fill="#F4F8FF" stroke="#B8C6E0" strokeWidth="1" />
+      <circle cx="-5" cy="-2" r="5" fill="#F4F8FF" stroke="#B8C6E0" strokeWidth="1" />
+      <circle cx="5" cy="-3" r="6" fill="#F4F8FF" stroke="#B8C6E0" strokeWidth="1" />
+    </g>
+  )},
+
+  // ---- にんじゃ丸専用 ----
+  shuriken: { front: (
+    <g transform="translate(80,74)">
+      <path d="M0 -8 L2 -2 L8 0 L2 2 L0 8 L-2 2 L-8 0 L-2 -2 Z" fill="#7A8494" stroke="#3A3F47" strokeWidth="1" />
+    </g>
+  )},
+  caltrop: { front: (
+    <g transform="translate(80,76)">
+      <path d="M0 -6 L2 2 L-2 2 Z M-6 3 L2 -1 L2 3 Z M6 3 L-2 -1 L-2 3 Z" fill="#3A3F47" />
+    </g>
+  )},
+  scroll: { front: (
+    <g transform="translate(80,74) rotate(-10)">
+      <rect x="-2" y="-10" width="4" height="20" fill="#D9A85C" />
+      <rect x="-8" y="-8" width="16" height="16" fill="#F0E4D0" stroke="#B5860B" strokeWidth="1" />
     </g>
   )}
 }
