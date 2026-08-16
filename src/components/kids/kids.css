@@ -280,3 +280,11 @@ body { margin: 0; background: var(--bg); }
 .resume-buttons { display: flex; gap: 8px; align-items: center; }
 .resume-buttons .restart { flex: 1; }
 .btn-dismiss-resume { background: none; border: none; color: #8A8678; font-size: 12px; font-weight: 700; padding: 10px 12px; cursor: pointer; }
+
+/* ショップ内タブ */
+.shop-tabs { display: flex; gap: 6px; margin-top: 18px; margin-bottom: 4px; }
+.shop-tab {
+  flex: 1; padding: 10px 6px; border-radius: 12px; border: 2px solid #EEDFC0; background: #FAF7EE;
+  font-size: 13px; font-weight: 700; color: var(--ink-soft); cursor: pointer;
+}
+.shop-tab-active { background: var(--fox); border-color: var(--fox-dark); color: #fff; }
