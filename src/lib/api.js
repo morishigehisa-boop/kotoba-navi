@@ -25,11 +25,20 @@ export async function fetchQuestionSetsWithItems() {
     .order('sort_order', { ascending: true })
   if (e1) throw e1
 
-  const { data: items, error: e2 } = await supabase
-    .from('question_set_items')
-    .select('question_set_id, question_id, position')
-    .order('position', { ascending: true })
-  if (e2) throw e2
+  const PAGE_SIZE = 1000
+  let items = []
+  let from = 0
+  while (true) {
+    const { data, error: e2 } = await supabase
+      .from('question_set_items')
+      .select('question_set_id, question_id, position')
+      .order('position', { ascending: true })
+      .range(from, from + PAGE_SIZE - 1)
+    if (e2) throw e2
+    items = items.concat(data)
+    if (data.length < PAGE_SIZE) break
+    from += PAGE_SIZE
+  }
 
   return sets.map((set) => ({
     ...set,
