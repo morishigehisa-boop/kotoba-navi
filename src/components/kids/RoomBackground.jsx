@@ -23,6 +23,20 @@ function Decor({ themeId }) {
       return (<><path d="M20 80 L50 25 L80 80 Z" fill="#7C93B0" /><path d="M40 45 L50 25 L60 45 Q50 40 40 45 Z" fill="#fff" /></>)
     case 'swamp':
       return (<><path d="M0 85 Q30 78 60 85 T100 85 V100 H0 Z" fill="#3A4E36" /><rect x="20" y="55" width="3" height="30" fill="#2E3D28" /><rect x="70" y="50" width="3" height="35" fill="#2E3D28" /><ellipse cx="21" cy="53" rx="7" ry="3" fill="#4E6B4A" /><ellipse cx="71" cy="48" rx="7" ry="3" fill="#4E6B4A" /></>)
+    case 'jungle':
+      return (<><path d="M0 90 Q30 80 60 90 T100 90 V100 H0 Z" fill="#2E5C24" /><path d="M10 60 Q6 40 16 30 Q20 45 14 60 Z" fill="#4E8A3E" /><path d="M85 55 Q92 35 82 24 Q78 42 84 55 Z" fill="#4E8A3E" /><path d="M45 65 Q40 45 50 32 Q56 50 52 65 Z" fill="#5FA84E" /></>)
+    case 'pond':
+      return (<><ellipse cx="50" cy="82" rx="46" ry="14" fill="#5FB0C4" /><ellipse cx="50" cy="82" rx="46" ry="14" fill="none" stroke="#3A8A9E" strokeWidth="1.5" opacity="0.5" /><ellipse cx="30" cy="60" rx="8" ry="4" fill="#4E8A3E" /><ellipse cx="72" cy="66" rx="7" ry="3.5" fill="#4E8A3E" /><circle cx="55" cy="76" r="3" fill="#FBEEDA" /></>)
+    case 'park':
+      return (<><path d="M0 82 Q30 74 60 82 T100 82 V100 H0 Z" fill="#7CB84E" /><ellipse cx="24" cy="55" rx="12" ry="14" fill="#5FA23A" /><rect x="22.5" y="66" width="3" height="14" fill="#8A6D2A" /><rect x="12" y="68" width="16" height="3" fill="#8A5A2A" /><rect x="10" y="68" width="4" height="10" fill="#8A5A2A" /><rect x="26" y="68" width="4" height="10" fill="#8A5A2A" /></>)
+    case 'space':
+      return (<><circle cx="20" cy="25" r="1.4" fill="#fff" opacity="0.9" /><circle cx="40" cy="15" r="1" fill="#fff" opacity="0.7" /><circle cx="70" cy="20" r="1.6" fill="#fff" opacity="0.9" /><circle cx="85" cy="40" r="1" fill="#fff" opacity="0.7" /><circle cx="15" cy="55" r="1.2" fill="#fff" opacity="0.8" /><circle cx="60" cy="60" r="14" fill="#8A5CD9" /><ellipse cx="60" cy="60" rx="22" ry="5" fill="none" stroke="#B76CE8" strokeWidth="1.5" opacity="0.7" transform="rotate(-20 60 60)" /></>)
+    case 'moon':
+      return (<><circle cx="50" cy="55" r="26" fill="#D8D4E0" /><circle cx="40" cy="46" r="4" fill="#B8B4C4" opacity="0.7" /><circle cx="58" cy="60" r="6" fill="#B8B4C4" opacity="0.7" /><circle cx="62" cy="42" r="3" fill="#B8B4C4" opacity="0.7" /><circle cx="15" cy="20" r="1.2" fill="#fff" opacity="0.8" /><circle cx="85" cy="25" r="1" fill="#fff" opacity="0.7" /></>)
+    case 'sun':
+      return (<><circle cx="50" cy="55" r="22" fill="#FFC542" />{[0, 45, 90, 135, 180, 225, 270, 315].map((deg) => (<line key={deg} x1={50 + 26 * Math.cos((deg * Math.PI) / 180)} y1={55 + 26 * Math.sin((deg * Math.PI) / 180)} x2={50 + 34 * Math.cos((deg * Math.PI) / 180)} y2={55 + 34 * Math.sin((deg * Math.PI) / 180)} stroke="#FF9E45" strokeWidth="3" strokeLinecap="round" />))}</>)
+    case 'star':
+      return (<><circle cx="20" cy="25" r="1.4" fill="#fff" opacity="0.8" /><circle cx="75" cy="18" r="1" fill="#fff" opacity="0.7" /><circle cx="85" cy="50" r="1.2" fill="#fff" opacity="0.8" /><path d="M50 30 L56 46 L73 46 L59 56 L64 73 L50 62 L36 73 L41 56 L27 46 L44 46 Z" fill="#FFE9A0" stroke="#FFC542" strokeWidth="1" /></>)
     default:
       return null
   }

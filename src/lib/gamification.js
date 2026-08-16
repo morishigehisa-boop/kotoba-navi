@@ -86,7 +86,14 @@ export const STAGE_THEMES = [
   { id: 'city', name: '都会の町', sky: ['#B8C6E0', '#E6ECF5'], ground: '#8E97A6', accent: '#5A6478' },
   { id: 'sky', name: '空', sky: ['#7FC4F0', '#DCF0FB'], ground: '#FFFFFF', accent: '#FFFFFF' },
   { id: 'fuji', name: '富士山', sky: ['#F7C6D9', '#FDE7C8'], ground: '#7C93B0', accent: '#FFFFFF' },
-  { id: 'swamp', name: '沼地', sky: ['#8FA88C', '#C9D9B0'], ground: '#4E6B4A', accent: '#3A4E36' }
+  { id: 'swamp', name: '沼地', sky: ['#8FA88C', '#C9D9B0'], ground: '#4E6B4A', accent: '#3A4E36' },
+  { id: 'jungle', name: 'ジャングル', sky: ['#B8E0A0', '#E4F5D0'], ground: '#4E8A3E', accent: '#2E5C24' },
+  { id: 'pond', name: '池', sky: ['#C6E8D8', '#EAF7EE'], ground: '#5FB0C4', accent: '#3A8A9E' },
+  { id: 'park', name: '公園', sky: ['#BEE6F5', '#F5FAE0'], ground: '#7CB84E', accent: '#E8946A' },
+  { id: 'space', name: '宇宙', sky: ['#1A1440', '#3A2A6B'], ground: '#0D0A24', accent: '#B76CE8' },
+  { id: 'moon', name: '月', sky: ['#1A1830', '#3A3560'], ground: '#B8B4C4', accent: '#8A85A0' },
+  { id: 'sun', name: '太陽', sky: ['#FFC542', '#FFE9A0'], ground: '#FF9E45', accent: '#D96A1E' },
+  { id: 'star', name: '星', sky: ['#0D0A2E', '#2A2258'], ground: '#1A1440', accent: '#FFE9A0' }
 ]
 
 export function stageInfo(masteryEventTotal) {
