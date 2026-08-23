@@ -104,7 +104,7 @@ function formatGoal(goalAt) {
   const now = new Date()
   const diffMs = goal - now
   const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24))
-  const label = `${goal.getFullYear()}/${String(goal.getMonth() + 1).padStart(2, '0')}/${String(goal.getDate()).padStart(2, '0')} ${String(goal.getHours()).padStart(2, '0')}:${String(goal.getMinutes()).padStart(2, '0')}`
+  const label = `${goal.getFullYear()}/${String(goal.getMonth() + 1).padStart(2, '0')}/${String(goal.getDate()).padStart(2, '0')}`
   if (diffMs < 0) return { text: `${label}（期限切れ）`, cls: 'goal-over' }
   if (diffDays <= 3) return { text: `${label}（あと${diffDays}日）`, cls: 'goal-soon' }
   return { text: `${label}（あと${diffDays}日）`, cls: 'goal-ok' }
@@ -594,8 +594,8 @@ function MakePanel({ questions, books, categories, types, onSaved }) {
             <input type="text" value={setName} onChange={(e) => setSetName(e.target.value)} />
           </div>
           <div className="form-row">
-            <label className="f-label">全問記憶の目標日時（任意）</label>
-            <input type="datetime-local" value={goalAt} onChange={(e) => setGoalAt(e.target.value)} />
+            <label className="f-label">全問記憶の目標完了日（任意）</label>
+            <input type="date" value={goalAt} onChange={(e) => setGoalAt(e.target.value)} />
           </div>
           <button className="btn btn-primary" disabled={saving} onClick={handleSave}>
             {saving ? '保存中…' : 'この条件で問題集を作成する'}
@@ -654,7 +654,7 @@ function SetsPanel({ sets, questions, onDelete, onReorder, onEdit, onToggleRevie
       <p className="lead" style={{ marginBottom: 10 }}>行をドラッグ&ドロップすると、子どもアプリでの表示順を変更できます。「レビュー」は、プレビューで内容をチェックし終わった問題集にチェックを入れてください。</p>
       <div className="table-scroll">
         <table className="responsive-table sets-table">
-          <thead><tr><th></th><th>問題集名</th><th>問題数</th><th>進捗</th><th>目標日時</th><th>作成日</th><th></th><th>レビュー</th></tr></thead>
+          <thead><tr><th></th><th>問題集名</th><th>問題数</th><th>進捗</th><th>目標完了日</th><th>作成日</th><th></th><th>レビュー</th></tr></thead>
           <tbody>
             {order.length === 0 && <tr><td colSpan="8" className="empty">まだ問題集がありません</td></tr>}
             {order.map((s) => {
@@ -716,16 +716,16 @@ function SetsPanel({ sets, questions, onDelete, onReorder, onEdit, onToggleRevie
   )
 }
 
-function toDatetimeLocalValue(iso) {
+function toDateInputValue(iso) {
   if (!iso) return ''
   const d = new Date(iso)
   const pad = (n) => String(n).padStart(2, '0')
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
 }
 
 function SetEditModal({ set, onClose, onSave }) {
   const [name, setName] = useState(set.name)
-  const [goalAt, setGoalAt] = useState(toDatetimeLocalValue(set.goal_at))
+  const [goalAt, setGoalAt] = useState(toDateInputValue(set.goal_at))
   const [saving, setSaving] = useState(false)
 
   async function handleSave() {
@@ -747,11 +747,11 @@ function SetEditModal({ set, onClose, onSave }) {
           <input type="text" value={name} onChange={(e) => setName(e.target.value)} />
         </div>
         <div className="form-row" style={{ maxWidth: 'none' }}>
-          <label className="f-label">全問記憶の目標日時（任意）</label>
-          <input type="datetime-local" value={goalAt} onChange={(e) => setGoalAt(e.target.value)} />
+          <label className="f-label">全問記憶の目標完了日（任意）</label>
+          <input type="date" value={goalAt} onChange={(e) => setGoalAt(e.target.value)} />
           {goalAt && (
             <button className="btn btn-secondary" style={{ marginTop: 8 }} onClick={() => setGoalAt('')}>
-              目標日時をクリア
+              目標完了日をクリア
             </button>
           )}
         </div>
