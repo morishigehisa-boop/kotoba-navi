@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import Character from './Character'
 import Confetti from './Confetti'
 import { addFurigana, setCustomFurigana } from '../../lib/furigana'
-import { playCorrect, playWrong, playFanfareBig, playCharacterUnlock, playItemGet, playLevelUp, playBadgeGet, playComeback } from '../../lib/sound'
+import { playCorrect, playWrong, playFanfareBig, playCharacterUnlock, playItemGet, playLevelUp, playBadgeGet, playComeback, isMuted, setMuted } from '../../lib/sound'
 import { fetchQuestions, fetchQuestionSetsWithItems, recordAnswer, fetchProgress, updateProgress, fetchFuriganaEntries } from '../../lib/api'
 import { buildTodaySet, buildOverdueSet } from '../../lib/today'
 import {
@@ -93,6 +93,7 @@ export default function KidsApp() {
   const [confettiOn, setConfettiOn] = useState(false)
   const [struggleToast, setStruggleToast] = useState(false)
   const [showQuitConfirm, setShowQuitConfirm] = useState(false)
+  const [soundMuted, setSoundMuted] = useState(() => isMuted())
   const [pendingSession, setPendingSession] = useState(null)
   const categoryTierRef = useRef(new Map())
   const seededCategoryTierRef = useRef(false)
@@ -538,6 +539,13 @@ export default function KidsApp() {
           <span className="flame">🔥</span>
           {progress.streak_count} 日連続
         </div>
+        <button
+          className="stat mute-btn"
+          title={soundMuted ? '音を オンにする' : '音を オフにする'}
+          onClick={() => { const next = !soundMuted; setMuted(next); setSoundMuted(next) }}
+        >
+          {soundMuted ? '🔇' : '🔊'}
+        </button>
         <div className="stat point">⭐ {progress.points} ポイント</div>
       </div>
 

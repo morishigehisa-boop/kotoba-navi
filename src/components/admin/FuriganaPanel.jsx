@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import { addFuriganaEntry, updateFuriganaEntry, deleteFuriganaEntry } from '../../lib/api'
 import { useConfirm } from './useConfirm'
+import { useToast } from './useToast'
 
 export default function FuriganaPanel({ entries, onChanged }) {
   const [word, setWord] = useState('')
@@ -12,18 +13,19 @@ export default function FuriganaPanel({ entries, onChanged }) {
   const [saving, setSaving] = useState(false)
   const wordInputRef = useRef(null)
   const [confirm, confirmModal] = useConfirm()
+  const [notify, toastEl] = useToast()
 
   const filtered = entries.filter((e) => !search || e.word.includes(search) || e.reading.includes(search))
 
   async function handleAdd() {
-    if (!word.trim() || !reading.trim()) { window.alert('単語と読みの両方を入力してください'); return }
+    if (!word.trim() || !reading.trim()) { notify('単語と読みの両方を入力してください'); return }
     setSaving(true)
     try {
       await addFuriganaEntry(word.trim(), reading.trim())
       setWord(''); setReading('')
       await onChanged('ふりがなを追加しました')
     } catch (e) {
-      window.alert('追加に失敗しました（同じ単語が既に登録されている可能性があります）')
+      notify('追加に失敗しました（同じ単語が既に登録されている可能性があります）')
     } finally {
       setSaving(false)
       wordInputRef.current?.focus()
@@ -95,6 +97,7 @@ export default function FuriganaPanel({ entries, onChanged }) {
         </table>
       </div>
       {confirmModal}
+      {toastEl}
     </div>
   )
 }

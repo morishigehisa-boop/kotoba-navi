@@ -17,6 +17,7 @@ import {
 import { boxOf } from '../../lib/today'
 import { setCustomFurigana } from '../../lib/furigana'
 import { useConfirm } from './useConfirm'
+import { useToast } from './useToast'
 import './admin.css'
 import PreviewPanel from './PreviewPanel'
 import { EditModal } from './EditModal'
@@ -274,6 +275,7 @@ function ListPanel({ questions, books, categories, types, onChanged }) {
   const [bulkPage, setBulkPage] = useState('')
   const [bulkBusy, setBulkBusy] = useState(false)
   const [confirm, confirmModal] = useConfirm()
+  const [notify, toastEl] = useToast()
 
   const rows = questions.filter((q) => {
     if (idFrom !== '' && q.id < parseInt(idFrom)) return false
@@ -330,7 +332,7 @@ function ListPanel({ questions, books, categories, types, onChanged }) {
     if (bulkCategory.trim()) patch.category = bulkCategory.trim()
     if (bulkBook.trim()) patch.source_book = bulkBook.trim()
     if (bulkPage.trim()) patch.source_page = bulkPage.trim()
-    if (Object.keys(patch).length === 0) { window.alert('更新する項目を1つ以上入力してください'); return }
+    if (Object.keys(patch).length === 0) { notify('更新する項目を1つ以上入力してください'); return }
     const ok = await confirm(`絞り込み条件に一致する ${rows.length}問 を、入力した内容で一括更新します。よろしいですか？`)
     if (!ok) return
     setBulkBusy(true)
@@ -426,6 +428,7 @@ function ListPanel({ questions, books, categories, types, onChanged }) {
         />
       )}
       {confirmModal}
+      {toastEl}
     </div>
   )
 }
@@ -433,6 +436,7 @@ function ListPanel({ questions, books, categories, types, onChanged }) {
 
 
 function MakePanel({ questions, books, categories, types, onSaved }) {
+  const [notify, toastEl] = useToast()
   const [book, setBook] = useState('')
   const [category, setCategory] = useState('')
   const [type, setType] = useState('')
@@ -489,9 +493,9 @@ function MakePanel({ questions, books, categories, types, onSaved }) {
   const result = previewed ? extract() : []
 
   async function handleSave() {
-    if (!setName.trim()) { window.alert('問題集の名前を入力してください'); return }
+    if (!setName.trim()) { notify('問題集の名前を入力してください'); return }
     const finalResult = extract()
-    if (finalResult.length === 0) { window.alert('該当する問題がありません'); return }
+    if (finalResult.length === 0) { notify('該当する問題がありません'); return }
     setSaving(true)
     try {
       const condition = {
@@ -712,6 +716,7 @@ function SetsPanel({ sets, questions, onDelete, onReorder, onEdit, onToggleRevie
           onSave={async (patch) => { await onEdit(editing, patch); setEditing(null) }}
         />
       )}
+      {toastEl}
     </div>
   )
 }
@@ -724,12 +729,13 @@ function toDateInputValue(iso) {
 }
 
 function SetEditModal({ set, onClose, onSave }) {
+  const [notify, toastEl] = useToast()
   const [name, setName] = useState(set.name)
   const [goalAt, setGoalAt] = useState(toDateInputValue(set.goal_at))
   const [saving, setSaving] = useState(false)
 
   async function handleSave() {
-    if (!name.trim()) { window.alert('問題集の名前を入力してください'); return }
+    if (!name.trim()) { notify('問題集の名前を入力してください'); return }
     setSaving(true)
     try {
       await onSave({ name: name.trim(), goal_at: goalAt ? new Date(goalAt).toISOString() : null })
@@ -760,6 +766,7 @@ function SetEditModal({ set, onClose, onSave }) {
           <button className="btn btn-primary" disabled={saving} onClick={handleSave}>{saving ? '保存中…' : '保存する'}</button>
         </div>
       </div>
+      {toastEl}
     </div>
   )
 }
@@ -782,6 +789,7 @@ function HistoryPanel({ history }) {
 }
 
 function ImportPanel({ onImported }) {
+  const [notify, toastEl] = useToast()
   const [csv, setCsv] = useState('')
   const [result, setResult] = useState('')
   const [errors, setErrors] = useState([])
@@ -805,7 +813,7 @@ function ImportPanel({ onImported }) {
   function readFile(file) {
     if (!file) return
     if (!file.name.toLowerCase().endsWith('.csv') && file.type !== 'text/csv') {
-      window.alert('.csvファイルを選択してください')
+      notify('.csvファイルを選択してください')
       return
     }
     const reader = new FileReader()
@@ -896,6 +904,7 @@ function ImportPanel({ onImported }) {
           {errors.map((e, i) => <div key={i}>{e}</div>)}
         </div>
       )}
+      {toastEl}
     </div>
   )
 }

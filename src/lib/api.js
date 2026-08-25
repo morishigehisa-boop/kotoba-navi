@@ -136,10 +136,10 @@ export async function updateProgress(patch) {
 }
 // がんばりカレンダー用：学習した日の一覧（YYYY-MM-DD、重複なし）を取得
 export async function fetchActivityDates() {
-  const { data, error } = await supabase.from('answer_logs').select('answered_at')
+  // answer_logsは件数が多くなるため、DB側で日付を集計して返す関数を使う
+  const { data, error } = await supabase.rpc('get_activity_dates')
   if (error) throw error
-  const set = new Set(data.map((r) => r.answered_at.slice(0, 10)))
-  return [...set]
+  return data.map((r) => r.activity_date)
 }
 
 // ふりがな辞書（管理画面から編集する追加分）

@@ -288,3 +288,6 @@ body { margin: 0; background: var(--bg); }
   font-size: 13px; font-weight: 700; color: var(--ink-soft); cursor: pointer;
 }
 .shop-tab-active { background: var(--fox); border-color: var(--fox-dark); color: #fff; }
+
+/* 音のオン/オフボタン */
+.mute-btn { border: none; cursor: pointer; font-size: 16px; padding: 8px 12px; }

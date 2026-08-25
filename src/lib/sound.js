@@ -1,10 +1,26 @@
 // Web Audio APIで効果音をその場で生成する（音声ファイル不要 = ランニングコストゼロ）
 let actx = null
+
+// 音のオン/オフ設定（localStorageに保存して次回起動時も引き継ぐ）
+const MUTE_KEY = 'kotoba_navi_muted'
+let muted = (() => {
+  try { return localStorage.getItem(MUTE_KEY) === '1' } catch { return false }
+})()
+
+export function isMuted() {
+  return muted
+}
+export function setMuted(value) {
+  muted = value
+  try { localStorage.setItem(MUTE_KEY, value ? '1' : '0') } catch {}
+}
+
 function ac() {
   if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)()
   return actx
 }
 function tone(freq, start, dur, type, gain) {
+  if (muted) return
   const c = ac()
   const o = c.createOscillator()
   const g = c.createGain()

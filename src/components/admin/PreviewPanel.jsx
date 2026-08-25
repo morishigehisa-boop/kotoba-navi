@@ -3,6 +3,7 @@ import { buildPreviewHtml } from './previewHtml'
 import { EditModal } from './EditModal'
 import { addFuriganaEntry, updateFuriganaEntry, deleteFuriganaEntry } from '../../lib/api'
 import { useConfirm } from './useConfirm'
+import { useToast } from './useToast'
 
 const ANSWER_TYPE_LABELS_LOCAL = {
   self_recall: '自己採点',
@@ -29,6 +30,7 @@ export default function PreviewPanel({ questions, books, categories, types, sets
   const [furiEditWord, setFuriEditWord] = useState('')
   const [furiEditReading, setFuriEditReading] = useState('')
   const [confirm, confirmModal] = useConfirm()
+  const [notify, toastEl] = useToast()
 
   function resetFilters() {
     setCategory(''); setType(''); setBook(''); setPageFrom(''); setPageTo(''); setSetId(''); setIndex(0)
@@ -114,13 +116,13 @@ export default function PreviewPanel({ questions, books, categories, types, sets
   const furiWordInputRef = useRef(null)
 
   async function handleAddFurigana() {
-    if (!furiWord.trim() || !furiReading.trim()) { window.alert('単語と読みの両方を入力してください'); return }
+    if (!furiWord.trim() || !furiReading.trim()) { notify('単語と読みの両方を入力してください'); return }
     try {
       await addFuriganaEntry(furiWord.trim(), furiReading.trim())
       setFuriWord(''); setFuriReading('')
       await onChanged('ふりがなを追加しました')
     } catch {
-      window.alert('追加に失敗しました（同じ単語が既に登録されている可能性があります）')
+      notify('追加に失敗しました（同じ単語が既に登録されている可能性があります）')
     } finally {
       furiWordInputRef.current?.focus()
     }
@@ -253,6 +255,7 @@ export default function PreviewPanel({ questions, books, categories, types, sets
         />
       )}
       {confirmModal}
+      {toastEl}
     </div>
   )
 }
