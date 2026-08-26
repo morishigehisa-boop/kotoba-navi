@@ -181,3 +181,42 @@ tr.reviewed-row td { background: #F4FAF6; }
   border-radius: 50%; animation: spin 0.7s linear infinite; display: inline-block;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
+
+/* 日付ピッカー（目標完了日） */
+.dp { width: 100%; }
+.dp-value { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.dp-value-set { font-size: 14px; font-weight: 700; color: #E36A1E; }
+.dp-value-none { font-size: 14px; color: #A8A496; }
+.dp-clear { background: none; border: none; color: #8A8678; font-size: 12px; text-decoration: underline; cursor: pointer; padding: 0; }
+
+.dp-quick { display: flex; flex-wrap: wrap; gap: 6px; }
+.dp-quick-btn {
+  font-family: inherit; font-size: 12.5px; font-weight: 700; padding: 8px 12px; border-radius: 10px;
+  border: 1px solid #DEDBD0; background: #FAF9F5; color: #5A5749; cursor: pointer; transition: all .15s;
+}
+.dp-quick-btn:hover { background: #F2EFE6; }
+.dp-quick-active { background: #E36A1E; border-color: #C9561A; color: #fff; }
+.dp-quick-cal { margin-left: auto; }
+
+.dp-calendar { margin-top: 10px; border: 1px solid #EDEAE0; border-radius: 12px; padding: 12px; background: #FEFDFA; }
+.dp-cal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.dp-cal-title { font-size: 14px; font-weight: 700; color: #3A3833; }
+.dp-nav {
+  background: #FAF9F5; border: 1px solid #DEDBD0; border-radius: 8px; padding: 5px 12px;
+  font-size: 12px; cursor: pointer; color: #5A5749;
+}
+.dp-nav:hover { background: #F2EFE6; }
+.dp-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
+.dp-weekday { text-align: center; font-size: 11px; font-weight: 700; color: #8A8678; padding-bottom: 4px; }
+.dp-cell { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 13px; }
+.dp-empty { visibility: hidden; }
+.dp-day {
+  font-family: inherit; border: none; background: none; border-radius: 8px;
+  color: #3A3833; cursor: pointer; width: 100%; transition: background .12s;
+}
+.dp-day:hover { background: #FFF1DA; }
+.dp-today { border: 1.5px solid #E8C177; font-weight: 700; }
+.dp-selected { background: #E36A1E !important; color: #fff !important; font-weight: 700; }
+.dp-sun { color: #D94848; }
+.dp-sat { color: #4A80C9; }
+.dp-selected.dp-sun, .dp-selected.dp-sat { color: #fff; }

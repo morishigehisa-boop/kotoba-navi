@@ -18,6 +18,7 @@ import { boxOf } from '../../lib/today'
 import { setCustomFurigana } from '../../lib/furigana'
 import { useConfirm } from './useConfirm'
 import { useToast } from './useToast'
+import DatePicker from './DatePicker'
 import './admin.css'
 import PreviewPanel from './PreviewPanel'
 import { EditModal } from './EditModal'
@@ -597,9 +598,9 @@ function MakePanel({ questions, books, categories, types, onSaved }) {
             <label className="f-label">問題集の名前</label>
             <input type="text" value={setName} onChange={(e) => setSetName(e.target.value)} />
           </div>
-          <div className="form-row">
+          <div className="form-row" style={{ maxWidth: 'none' }}>
             <label className="f-label">全問記憶の目標完了日（任意）</label>
-            <input type="date" value={goalAt} onChange={(e) => setGoalAt(e.target.value)} />
+            <DatePicker value={goalAt} onChange={setGoalAt} />
           </div>
           <button className="btn btn-primary" disabled={saving} onClick={handleSave}>
             {saving ? '保存中…' : 'この条件で問題集を作成する'}
@@ -754,12 +755,7 @@ function SetEditModal({ set, onClose, onSave }) {
         </div>
         <div className="form-row" style={{ maxWidth: 'none' }}>
           <label className="f-label">全問記憶の目標完了日（任意）</label>
-          <input type="date" value={goalAt} onChange={(e) => setGoalAt(e.target.value)} />
-          {goalAt && (
-            <button className="btn btn-secondary" style={{ marginTop: 8 }} onClick={() => setGoalAt('')}>
-              目標完了日をクリア
-            </button>
-          )}
+          <DatePicker value={goalAt} onChange={setGoalAt} />
         </div>
         <div className="modal-actions">
           <button className="btn btn-secondary" onClick={onClose}>キャンセル</button>
