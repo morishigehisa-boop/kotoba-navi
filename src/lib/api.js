@@ -53,7 +53,7 @@ export async function reorderQuestionSets(orderedIds) {
   )
 }
 
-export async function createQuestionSet({ name, filter_condition, goal_at, questionIds }) {
+export async function createQuestionSet({ name, filter_condition, goal_at, shuffle, questionIds }) {
   const { data: maxRow } = await supabase
     .from('question_sets')
     .select('sort_order')
@@ -64,7 +64,7 @@ export async function createQuestionSet({ name, filter_condition, goal_at, quest
 
   const { data: set, error: e1 } = await supabase
     .from('question_sets')
-    .insert({ name, filter_condition, goal_at: goal_at || null, sort_order: nextSortOrder })
+    .insert({ name, filter_condition, goal_at: goal_at || null, shuffle: !!shuffle, sort_order: nextSortOrder })
     .select()
     .single()
   if (e1) throw e1

@@ -220,3 +220,8 @@ tr.reviewed-row td { background: #F4FAF6; }
 .dp-sun { color: #D94848; }
 .dp-sat { color: #4A80C9; }
 .dp-selected.dp-sun, .dp-selected.dp-sat { color: #fff; }
+
+/* チェックボックス付きの設定行 */
+.toggle-row { display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px; color: #3A3833; }
+.toggle-row input { width: auto; cursor: pointer; margin: 0; }
+.pill-shuffle { background: #EEF3FF; color: #4A6FBF; margin-left: 8px; }

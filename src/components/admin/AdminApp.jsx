@@ -448,6 +448,7 @@ function MakePanel({ questions, books, categories, types, onSaved }) {
   const [previewed, setPreviewed] = useState(false)
   const [setName, setSetName] = useState('')
   const [goalAt, setGoalAt] = useState('')
+  const [shuffle, setShuffle] = useState(false)
   const [saving, setSaving] = useState(false)
 
   function extract() {
@@ -509,11 +510,12 @@ function MakePanel({ questions, books, categories, types, onSaved }) {
         name: setName.trim(),
         filter_condition: condition,
         goal_at: goalAt ? new Date(goalAt).toISOString() : null,
+        shuffle,
         questionIds: finalResult.map((q) => q.id)
       })
       await saveFilterHistory({ name: setName.trim(), filter_condition: condition, result_count: finalResult.length })
       onSaved(setName.trim(), finalResult.length)
-      setSetName(''); setGoalAt(''); setPreviewed(false)
+      setSetName(''); setGoalAt(''); setShuffle(false); setPreviewed(false)
     } finally {
       setSaving(false)
     }
@@ -602,6 +604,12 @@ function MakePanel({ questions, books, categories, types, onSaved }) {
             <label className="f-label">全問記憶の目標完了日（任意）</label>
             <DatePicker value={goalAt} onChange={setGoalAt} />
           </div>
+          <div className="form-row" style={{ maxWidth: 'none' }}>
+            <label className="toggle-row">
+              <input type="checkbox" checked={shuffle} onChange={(e) => setShuffle(e.target.checked)} />
+              <span>ランダム出題（開くたびに問題の順番を入れかえる）</span>
+            </label>
+          </div>
           <button className="btn btn-primary" disabled={saving} onClick={handleSave}>
             {saving ? '保存中…' : 'この条件で問題集を作成する'}
           </button>
@@ -679,6 +687,7 @@ function SetsPanel({ sets, questions, onDelete, onReorder, onEdit, onToggleRevie
                   <td className="drag-handle" title="ドラッグして並び替え">⠿</td>
                   <td>
                     <b>{s.name}</b>
+                    {s.shuffle && <span className="pill pill-shuffle">🔀 ランダム</span>}
                     <div className="mobile-reorder-btns">
                       <button className="btn btn-secondary" disabled={order.indexOf(s) === 0} onClick={() => moveByOffset(order.indexOf(s), -1)}>▲ 上へ</button>
                       <button className="btn btn-secondary" disabled={order.indexOf(s) === order.length - 1} onClick={() => moveByOffset(order.indexOf(s), 1)}>▼ 下へ</button>
@@ -733,13 +742,14 @@ function SetEditModal({ set, onClose, onSave }) {
   const [notify, toastEl] = useToast()
   const [name, setName] = useState(set.name)
   const [goalAt, setGoalAt] = useState(toDateInputValue(set.goal_at))
+  const [shuffle, setShuffle] = useState(!!set.shuffle)
   const [saving, setSaving] = useState(false)
 
   async function handleSave() {
     if (!name.trim()) { notify('問題集の名前を入力してください'); return }
     setSaving(true)
     try {
-      await onSave({ name: name.trim(), goal_at: goalAt ? new Date(goalAt).toISOString() : null })
+      await onSave({ name: name.trim(), goal_at: goalAt ? new Date(goalAt).toISOString() : null, shuffle })
     } finally {
       setSaving(false)
     }
@@ -756,6 +766,12 @@ function SetEditModal({ set, onClose, onSave }) {
         <div className="form-row" style={{ maxWidth: 'none' }}>
           <label className="f-label">全問記憶の目標完了日（任意）</label>
           <DatePicker value={goalAt} onChange={setGoalAt} />
+        </div>
+        <div className="form-row" style={{ maxWidth: 'none' }}>
+          <label className="toggle-row">
+            <input type="checkbox" checked={shuffle} onChange={(e) => setShuffle(e.target.checked)} />
+            <span>ランダム出題（開くたびに問題の順番を入れかえる）</span>
+          </label>
         </div>
         <div className="modal-actions">
           <button className="btn btn-secondary" onClick={onClose}>キャンセル</button>

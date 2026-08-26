@@ -310,8 +310,8 @@ export default function KidsApp() {
     })
   }
 
-  function startSet(list, { isToday = false } = {}) {
-    setSessionQuestions(shuffle(list))
+  function startSet(list, { isToday = false, randomize = true } = {}) {
+    setSessionQuestions(randomize ? shuffle(list) : [...list])
     setIdx(0)
     setCorrectCount(0)
     setWrongQuestions([])
@@ -594,7 +594,8 @@ export default function KidsApp() {
           onStartOverdue={() => startSet(overdue.picked, { isToday: false })}
           onStartSet={(set) => {
             const list = set.questionIds.map((id) => questionsById.get(id)).filter(Boolean)
-            startSet(list, { isToday: false })
+            // 管理画面でランダム出題がオンの問題集は、開くたびに順番を入れ替える
+            startSet(list, { isToday: false, randomize: !!set.shuffle })
           }}
           onShowRecord={() => setScreen('record')}
           onShowShop={() => setScreen('shop')}
