@@ -606,6 +606,7 @@ function MakePanel({ questions, books, categories, types, onSaved }) {
           </button>
         </div>
       )}
+      {toastEl}
     </>
   )
 }
@@ -716,7 +717,6 @@ function SetsPanel({ sets, questions, onDelete, onReorder, onEdit, onToggleRevie
           onSave={async (patch) => { await onEdit(editing, patch); setEditing(null) }}
         />
       )}
-      {toastEl}
     </div>
   )
 }
