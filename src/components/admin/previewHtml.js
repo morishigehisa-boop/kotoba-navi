@@ -46,10 +46,13 @@ function cardInner(item, revealed) {
   }
 
   const isArrayAnswer = Array.isArray(c.a)
-  const sentenceBlock = c.sentence
+  const meaningFirst = item.answer_type === 'meaning_first_fill'
+  const sentenceBlock = meaningFirst
+    ? ''
+    : c.sentence
     ? `<div class="label">れいぶん</div><div class="sentence">${rich(c.sentence)}</div><div class="label label-2">いみ</div>`
     : `<div class="label">いみ</div>`
-  const hintText = c.shown ? 'にた いみの ことわざは？' : item.answer_type === 'wago_fill' ? 'あてはまる 和語は？' : c.sentence ? 'あてはまる 慣用句は？' : 'こたえを かんがえてみよう'
+  const hintText = c.shown ? 'にた いみの ことわざは？' : meaningFirst ? 'あてはまる 三字熟語は？' : item.answer_type === 'wago_fill' ? 'あてはまる 和語は？' : c.sentence ? 'あてはまる 慣用句は？' : 'こたえを かんがえてみよう'
   let answerBlock = ''
   if (revealed) {
     if (isArrayAnswer) {
@@ -58,6 +61,15 @@ function cardInner(item, revealed) {
     } else {
       answerBlock = `<div class="answer">${rich(c.a)}</div>`
     }
+  }
+  if (meaningFirst) {
+    return `
+      <div class="label">いみ</div>
+      <div class="meaning">${rich(c.q)}</div>
+      <div class="label label-2">れいぶん</div>
+      <div class="sentence with-meaning">${rich(c.sentence)}</div>
+      ${!revealed ? `<div class="hint">${hintText}</div>` : answerBlock}
+    `
   }
   return `
     ${sentenceBlock}

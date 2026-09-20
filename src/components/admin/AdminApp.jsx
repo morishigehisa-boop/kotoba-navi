@@ -36,6 +36,7 @@ const ANSWER_TYPE_LABELS = {
   antonym_pair: '対になる表現',
   synonym_pair: '類義語(二文穴埋め)',
   wago_fill: '和語(穴埋め)',
+  meaning_first_fill: '意味→穴埋め',
   choice: '選択式'
 }
 
@@ -53,6 +54,7 @@ const UNIFIED_CSV_EXAMPLE = [
   'ことわざ(対になる),antonym_pair,,,,,,危険な手段を用いること。,危ない橋を渡る,用心に用心を重ねること。,石橋を叩いて渡る,,,言葉ナビ上巻,37',
   '類義語,synonym_pair,,,,,,外国から届いた手紙に（　　）を書く。,返事,管制塔の呼びかけに（　　）する。,応答,,,言葉ナビ上巻,88',
   '和語,wago_fill,相手の話にうなずいてうまく調子を合わせること。,「（　　）を打つ」,,あいづち,,,,,,,,和語①,13',
+  '三字熟語,meaning_first_fill,人に対して威圧的な態度をとるさま。,「あの人はとたんに（　　）にふるまう」,,居丈高,,,,,,,,漢字とことば 5年下,33',
   '同音異義語,choice,,（　　）技術の発展による恩恵を受ける。,,科学,,,,,,カガク,科学／化学,言葉ナビ上巻,144'
 ].join('\n')
 
@@ -68,6 +70,7 @@ function buildQuestionFromRow(row) {
       return { ...base, content: { q: row.question_text, a: row.answer } }
     case 'fill_blank':
     case 'wago_fill':
+    case 'meaning_first_fill':
       return { ...base, content: { sentence: row.sentence, q: row.question_text, a: row.answer } }
     case 'synonym_forward':
     case 'synonym_reverse':
@@ -89,6 +92,7 @@ function summarizeContent(q) {
     case 'self_recall':
     case 'fill_blank':
     case 'wago_fill':
+    case 'meaning_first_fill':
       return { main: c.a, sub: c.q }
     case 'synonym_forward':
     case 'synonym_reverse':

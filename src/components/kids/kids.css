@@ -291,3 +291,9 @@ body { margin: 0; background: var(--bg); }
 
 /* 音のオン/オフボタン */
 .mute-btn { border: none; cursor: pointer; font-size: 16px; padding: 8px 12px; }
+
+/* 意味を先に表示するタイプ（三字熟語など）の例文 */
+.sentence.with-meaning {
+  font-size: 15px; font-weight: 500; color: var(--ink-soft);
+  border-top: 1px dashed #EFE3CB; padding-top: 12px; margin-bottom: 0;
+}

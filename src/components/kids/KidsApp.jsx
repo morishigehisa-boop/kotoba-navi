@@ -942,23 +942,36 @@ function QuizCard({ item, revealed, reviewMode, choiceFeedback, onReveal, onAnsw
     <div>
       {reviewMode && <div className="hint" style={{ marginBottom: 8 }}>📖 復習タイム（正解数にはカウントされません）</div>}
       <div className="card">
-        {c.sentence ? (
+        {item.answer_type === 'meaning_first_fill' ? (
           <>
-            <div className="label">れいぶん</div>
-            <div className="sentence"><Ruby text={c.sentence} /></div>
-            <div className="label label-2">いみ</div>
+            <div className="label">いみ</div>
+            <div className="meaning"><Ruby text={c.q} /></div>
+            <div className="label label-2">れいぶん</div>
+            <div className="sentence with-meaning"><Ruby text={c.sentence} /></div>
           </>
         ) : (
-          <div className="label">いみ</div>
+          <>
+            {c.sentence ? (
+              <>
+                <div className="label">れいぶん</div>
+                <div className="sentence"><Ruby text={c.sentence} /></div>
+                <div className="label label-2">いみ</div>
+              </>
+            ) : (
+              <div className="label">いみ</div>
+            )}
+            <div className={`meaning${c.sentence ? ' with-sentence' : ''}`}>
+              <Ruby text={c.q} />
+            </div>
+          </>
         )}
-        <div className={`meaning${c.sentence ? ' with-sentence' : ''}`}>
-          <Ruby text={c.q} />
-        </div>
         {c.shown && <div className="shown-proverb"><Ruby text={c.shown} /></div>}
         {!revealed ? (
           <div className="hint">
             {c.shown
               ? 'にた いみの ことわざは？'
+              : item.answer_type === 'meaning_first_fill'
+              ? 'あてはまる 三字熟語は？'
               : item.answer_type === 'wago_fill'
               ? 'あてはまる 和語は？'
               : c.sentence
