@@ -4,6 +4,7 @@ import { EditModal } from './EditModal'
 import { addFuriganaEntry, updateFuriganaEntry, deleteFuriganaEntry } from '../../lib/api'
 import { useConfirm } from './useConfirm'
 import { useToast } from './useToast'
+import { useImeReading } from './useImeReading'
 
 const ANSWER_TYPE_LABELS_LOCAL = {
   self_recall: '自己採点',
@@ -114,6 +115,10 @@ export default function PreviewPanel({ questions, books, categories, types, sets
   }, [item, furiganaEntries])
 
   const furiWordInputRef = useRef(null)
+  // 漢字を変換確定したとき、その読みを自動で「読み」欄に入れる（すでに入力済みなら上書きしない）
+  const furiIme = useImeReading((reading) => {
+    setFuriReading((prev) => (prev ? prev : reading))
+  })
 
   async function handleAddFurigana() {
     if (!furiWord.trim() || !furiReading.trim()) { notify('単語と読みの両方を入力してください'); return }
@@ -236,7 +241,7 @@ export default function PreviewPanel({ questions, books, categories, types, sets
               </div>
             )}
             <div className="filters" style={{ marginBottom: 0 }}>
-              <input ref={furiWordInputRef} type="text" placeholder="単語（例: 竹馬）" style={{ width: 140 }} value={furiWord} onChange={(e) => setFuriWord(e.target.value)} />
+              <input ref={furiWordInputRef} type="text" placeholder="単語（例: 竹馬）" style={{ width: 140 }} value={furiWord} onChange={(e) => setFuriWord(e.target.value)} onCompositionUpdate={furiIme.onCompositionUpdate} onCompositionEnd={furiIme.onCompositionEnd} />
               <input type="text" placeholder="読み（例: ちくば）" style={{ width: 140 }} value={furiReading} onChange={(e) => setFuriReading(e.target.value)} />
               <button className="btn btn-primary" onClick={handleAddFurigana}>ふりがなを追加</button>
             </div>

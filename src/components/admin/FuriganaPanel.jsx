@@ -2,6 +2,7 @@ import { useRef, useState } from 'react'
 import { addFuriganaEntry, updateFuriganaEntry, deleteFuriganaEntry } from '../../lib/api'
 import { useConfirm } from './useConfirm'
 import { useToast } from './useToast'
+import { useImeReading } from './useImeReading'
 
 export default function FuriganaPanel({ entries, onChanged }) {
   const [word, setWord] = useState('')
@@ -12,6 +13,8 @@ export default function FuriganaPanel({ entries, onChanged }) {
   const [editReading, setEditReading] = useState('')
   const [saving, setSaving] = useState(false)
   const wordInputRef = useRef(null)
+  // 漢字を変換確定したとき、その読みを自動で「読み」欄に入れる（すでに入力済みなら上書きしない）
+  const ime = useImeReading((r) => setReading((prev) => (prev ? prev : r)))
   const [confirm, confirmModal] = useConfirm()
   const [notify, toastEl] = useToast()
 
@@ -58,7 +61,7 @@ export default function FuriganaPanel({ entries, onChanged }) {
       </p>
 
       <div className="filters">
-        <input ref={wordInputRef} type="text" placeholder="単語" style={{ width: 140 }} value={word} onChange={(e) => setWord(e.target.value)} />
+        <input ref={wordInputRef} type="text" placeholder="単語" style={{ width: 140 }} value={word} onChange={(e) => setWord(e.target.value)} onCompositionUpdate={ime.onCompositionUpdate} onCompositionEnd={ime.onCompositionEnd} />
         <input type="text" placeholder="読み（ひらがな）" style={{ width: 140 }} value={reading} onChange={(e) => setReading(e.target.value)} />
         <button className="btn btn-primary" disabled={saving} onClick={handleAdd}>追加する</button>
         <input type="text" placeholder="検索" style={{ width: 140, marginLeft: 'auto' }} value={search} onChange={(e) => setSearch(e.target.value)} />

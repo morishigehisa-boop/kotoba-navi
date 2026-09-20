@@ -160,7 +160,7 @@ export default function AdminApp() {
 
   return (
     <div className="wrap">
-      <h1>ことばナビ 管理画面</h1>
+      <h1>管理画面</h1>
       <p className="lead">問題の登録・成績確認・問題集の作成をおこないます</p>
 
       <div className="tabs">
