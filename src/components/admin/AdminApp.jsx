@@ -448,7 +448,7 @@ function MakePanel({ questions, books, categories, types, onSaved }) {
   const [previewed, setPreviewed] = useState(false)
   const [setName, setSetName] = useState('')
   const [goalAt, setGoalAt] = useState('')
-  const [shuffle, setShuffle] = useState(false)
+  const [shuffle, setShuffle] = useState(true)
   const [saving, setSaving] = useState(false)
 
   function extract() {
@@ -515,7 +515,7 @@ function MakePanel({ questions, books, categories, types, onSaved }) {
       })
       await saveFilterHistory({ name: setName.trim(), filter_condition: condition, result_count: finalResult.length })
       onSaved(setName.trim(), finalResult.length)
-      setSetName(''); setGoalAt(''); setShuffle(false); setPreviewed(false)
+      setSetName(''); setGoalAt(''); setShuffle(true); setPreviewed(false)
     } finally {
       setSaving(false)
     }
