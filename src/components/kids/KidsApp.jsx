@@ -971,7 +971,7 @@ function QuizCard({ item, revealed, reviewMode, choiceFeedback, onReveal, onAnsw
             {c.shown
               ? 'にた いみの ことわざは？'
               : item.answer_type === 'meaning_first_fill'
-              ? 'あてはまる 三字熟語は？'
+              ? `あてはまる ${item.category}は？`
               : item.answer_type === 'wago_fill'
               ? 'あてはまる 和語は？'
               : c.sentence

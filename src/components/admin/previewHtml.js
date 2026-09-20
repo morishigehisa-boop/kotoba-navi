@@ -52,7 +52,7 @@ function cardInner(item, revealed) {
     : c.sentence
     ? `<div class="label">れいぶん</div><div class="sentence">${rich(c.sentence)}</div><div class="label label-2">いみ</div>`
     : `<div class="label">いみ</div>`
-  const hintText = c.shown ? 'にた いみの ことわざは？' : meaningFirst ? 'あてはまる 三字熟語は？' : item.answer_type === 'wago_fill' ? 'あてはまる 和語は？' : c.sentence ? 'あてはまる 慣用句は？' : 'こたえを かんがえてみよう'
+  const hintText = c.shown ? 'にた いみの ことわざは？' : meaningFirst ? `あてはまる ${esc(item.category)}は？` : item.answer_type === 'wago_fill' ? 'あてはまる 和語は？' : c.sentence ? 'あてはまる 慣用句は？' : 'こたえを かんがえてみよう'
   let answerBlock = ''
   if (revealed) {
     if (isArrayAnswer) {
