@@ -956,7 +956,15 @@ function QuizCard({ item, revealed, reviewMode, choiceFeedback, onReveal, onAnsw
         </div>
         {c.shown && <div className="shown-proverb"><Ruby text={c.shown} /></div>}
         {!revealed ? (
-          <div className="hint">{c.shown ? 'にた いみの ことわざは？' : c.sentence ? 'あてはまる 慣用句は？' : 'こたえを かんがえてみよう'}</div>
+          <div className="hint">
+            {c.shown
+              ? 'にた いみの ことわざは？'
+              : item.answer_type === 'wago_fill'
+              ? 'あてはまる 和語は？'
+              : c.sentence
+              ? 'あてはまる 慣用句は？'
+              : 'こたえを かんがえてみよう'}
+          </div>
         ) : isArrayAnswer ? (
           <>
             {c.a.length > 1 && <div className="multi-badge">こたえは {c.a.length}つ あります</div>}

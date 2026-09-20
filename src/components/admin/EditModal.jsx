@@ -9,6 +9,7 @@ export const ANSWER_TYPE_LABELS = {
   pair_fill: '二文穴埋め',
   antonym_pair: '対になる表現',
   synonym_pair: '類義語(二文穴埋め)',
+  wago_fill: '和語(穴埋め)',
   choice: '選択式'
 }
 
@@ -66,9 +67,9 @@ export function EditModal({ question, onClose, onSaved }) {
 
         <hr />
 
-        {(t === 'self_recall' || t === 'fill_blank') && (
+        {(t === 'self_recall' || t === 'fill_blank' || t === 'wago_fill') && (
           <>
-            {t === 'fill_blank' && (
+            {(t === 'fill_blank' || t === 'wago_fill') && (
               <div className="form-row" style={{ maxWidth: 'none' }}>
                 <label className="f-label">穴埋め例文</label>
                 <textarea value={content.sentence || ''} onChange={(e) => setField('sentence', e.target.value)} />

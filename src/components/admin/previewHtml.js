@@ -49,7 +49,7 @@ function cardInner(item, revealed) {
   const sentenceBlock = c.sentence
     ? `<div class="label">れいぶん</div><div class="sentence">${rich(c.sentence)}</div><div class="label label-2">いみ</div>`
     : `<div class="label">いみ</div>`
-  const hintText = c.shown ? 'にた いみの ことわざは？' : c.sentence ? 'あてはまる 慣用句は？' : 'こたえを かんがえてみよう'
+  const hintText = c.shown ? 'にた いみの ことわざは？' : item.answer_type === 'wago_fill' ? 'あてはまる 和語は？' : c.sentence ? 'あてはまる 慣用句は？' : 'こたえを かんがえてみよう'
   let answerBlock = ''
   if (revealed) {
     if (isArrayAnswer) {
