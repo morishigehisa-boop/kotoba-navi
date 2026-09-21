@@ -870,6 +870,12 @@ function QuizCard({ item, revealed, reviewMode, choiceFeedback, onReveal, onAnsw
           <div className="sentence" style={{ marginTop: 12 }}>
             <Ruby text={c.sentence} />
           </div>
+          {c.q && (
+            <>
+              <div className="label label-2">いみ</div>
+              <div className="meaning with-sentence"><Ruby text={c.q} /></div>
+            </>
+          )}
         </div>
         <div className="choice-grid">
           {c.choices.map((choice) => {
