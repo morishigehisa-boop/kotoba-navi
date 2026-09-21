@@ -18,7 +18,7 @@ function cardInner(item, revealed) {
       return `<button class="${cls}" disabled>${rich(choice)}</button>`
     }).join('')
     return `
-      <div class="label">どうおん</div>
+      <div class="label">${item.category === '同訓異字' ? 'どうくん' : 'どうおん'}</div>
       <div class="reading-tag" style="margin-top:20px;">${esc(c.reading)}</div>
       <div class="sentence" style="margin-top:12px;">${rich(c.sentence)}</div>
       ${c.q ? `<div class="label label-2">いみ</div><div class="meaning with-sentence">${rich(c.q)}</div>` : ''}

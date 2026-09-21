@@ -863,7 +863,7 @@ function QuizCard({ item, revealed, reviewMode, choiceFeedback, onReveal, onAnsw
       <div>
         {reviewMode && <div className="hint" style={{ marginBottom: 8 }}>📖 復習タイム（正解数にはカウントされません）</div>}
         <div className="card" style={{ alignItems: 'flex-start' }}>
-          <div className="label">どうおん</div>
+          <div className="label">{item.category === '同訓異字' ? 'どうくん' : 'どうおん'}</div>
           <div className="reading-tag" style={{ marginTop: 20 }}>
             {c.reading}
           </div>
