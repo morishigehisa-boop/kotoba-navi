@@ -73,15 +73,22 @@ export function occursOn(task, iso) {
 
 const key = (taskId, iso) => `${taskId}|${iso}`
 
+// '2026-10-08' → '10/8（木）'
+export function formatMD(iso) {
+  const d = parseISO(iso)
+  return `${d.getMonth() + 1}/${d.getDate()}（${WEEKDAY_LABELS[d.getDay()]}）`
+}
+
 /**
  * ホームに出す一覧をつくる。
- * - todayItems : 今日の分 ＋ 期限をすぎた「1どだけ」の未完了（overdue: true）
+ * 「くり返し」は、設定した曜日・日ごとに「期限が当日の1件」として扱う。
+ * - todayItems : 今日の分 ＋ 過去の分で未完了のもの（late: true）。完了するまで毎日出し続ける
  * - upcoming   : 3日以内に期日がくる「1どだけ」
- * - doneToday  : 今日の分で完了ずみのもの（まちがえて押したとき戻せる）
- * 繰り返しタスクの過去の取りこぼしは、たまらないように消える。
+ * - doneToday  : 今日完了したもの（過去の分を今日やった場合も含む。まちがえて押したとき戻せる）
+ * @param completions [{ task_id, occurrence_date, completed_at? }]
  */
 export function buildHomeTasks(tasks, completions, todayISO) {
-  const done = new Set(completions.map((c) => key(c.task_id, c.occurrence_date)))
+  const completedAt = new Map(completions.map((c) => [key(c.task_id, c.occurrence_date), c.completed_at]))
   const limit = addDays(todayISO, UPCOMING_DAYS)
   const todayItems = []
   const doneToday = []
@@ -89,15 +96,19 @@ export function buildHomeTasks(tasks, completions, todayISO) {
 
   tasks.forEach((t) => {
     if (!t.is_active) return
-    if (t.frequency === 'once') {
-      const isDone = done.has(key(t.id, t.due_date))
-      if (t.due_date < todayISO && !isDone) todayItems.push({ task: t, date: t.due_date, overdue: true })
-      else if (t.due_date === todayISO) (isDone ? doneToday : todayItems).push({ task: t, date: todayISO, overdue: false })
-      else if (t.due_date > todayISO && t.due_date <= limit && !isDone) upcoming.push({ task: t, date: t.due_date })
+    if (t.frequency === 'once' && t.due_date > todayISO) {
+      if (t.due_date <= limit && !completedAt.has(key(t.id, t.due_date))) upcoming.push({ task: t, date: t.due_date })
       return
     }
-    if (occursOn(t, todayISO)) {
-      (done.has(key(t.id, todayISO)) ? doneToday : todayItems).push({ task: t, date: todayISO, overdue: false })
+    // 期日から今日（終了日があればその日）までの「出番」を1件ずつ数える
+    const last = t.end_date && t.end_date < todayISO ? t.end_date : todayISO
+    for (let d = t.due_date; d <= last; d = addDays(d, 1)) {
+      if (!occursOn(t, d)) continue
+      const doneAt = completedAt.get(key(t.id, d))
+      const late = d < todayISO
+      if (doneAt === undefined) todayItems.push({ task: t, date: d, late, overdue: late })
+      // 今日完了したものだけ「きょうおわったこと」に出す（完了日時が不明なときは今日の分だけ）
+      else if (doneAt ? toISODate(new Date(doneAt)) === todayISO : d === todayISO) doneToday.push({ task: t, date: d, late, overdue: false })
     }
   })
 
@@ -106,7 +117,7 @@ export function buildHomeTasks(tasks, completions, todayISO) {
   const byOrder = (a, b) => a.task.sort_order - b.task.sort_order
   todayItems.sort((a, b) => Number(b.overdue) - Number(a.overdue) || a.date.localeCompare(b.date) || bySubject(a, b) || byOrder(a, b))
   upcoming.sort((a, b) => a.date.localeCompare(b.date) || bySubject(a, b) || byOrder(a, b))
-  doneToday.sort((a, b) => bySubject(a, b) || byOrder(a, b))
+  doneToday.sort((a, b) => bySubject(a, b) || byOrder(a, b) || a.date.localeCompare(b.date))
   return { todayItems, upcoming, doneToday }
 }
 
@@ -138,7 +149,7 @@ export const fetchTasks = () =>
   fetchAll('tasks', (q) => q.select('*').order('sort_order', { ascending: true }).order('created_at', { ascending: true }).order('id', { ascending: true }))
 
 export const fetchTaskCompletions = () =>
-  fetchAll('task_completions', (q) => q.select('task_id, occurrence_date').order('id', { ascending: true }))
+  fetchAll('task_completions', (q) => q.select('task_id, occurrence_date, completed_at').order('id', { ascending: true }))
 
 export async function saveTask(values, id) {
   const q = id ? supabase.from('tasks').update(values).eq('id', id) : supabase.from('tasks').insert(values)

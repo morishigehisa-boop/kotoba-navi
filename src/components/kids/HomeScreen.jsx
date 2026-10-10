@@ -1,20 +1,15 @@
 import { useEffect, useMemo, useState } from 'react'
-import { SUBJECTS, SUBJECT_EMOJI, subjectStyle, toISODate, buildHomeTasks, fetchTasks, fetchTaskCompletions, completeTask, uncompleteTask } from '../../lib/tasks'
-
-function formatShort(iso) {
-  const [, m, d] = iso.split('-').map(Number)
-  return `${m}/${d}`
-}
+import { SUBJECTS, SUBJECT_EMOJI, subjectStyle, formatMD, toISODate, buildHomeTasks, fetchTasks, fetchTaskCompletions, completeTask, uncompleteTask } from '../../lib/tasks'
 
 function TaskRow({ item, onToggle, done, soon }) {
-  const { task, overdue } = item
+  const { task, late } = item
   return (
-    <button className={`task-row ${done ? 'done' : ''} ${overdue ? 'overdue' : ''} ${soon ? 'soon' : ''}`} onClick={() => onToggle(item, !done)} disabled={soon} style={subjectStyle(task.subject)}>
+    <button className={`task-row ${done ? 'done' : ''} ${item.overdue ? 'overdue' : ''} ${soon ? 'soon' : ''}`} onClick={() => onToggle(item, !done)} disabled={soon} style={subjectStyle(task.subject)}>
       <span className="task-check">{done ? '✓' : ''}</span>
       <span className="task-text">
         <span className="task-title">{task.title}</span>
-        {overdue && <span className="task-note">⚠️ {formatShort(item.date)} までだったよ</span>}
-        {soon && <span className="task-note">{formatShort(item.date)} まで</span>}
+        {late && <span className="task-note">{done ? '' : '⚠️ '}{task.frequency === 'once' ? `${formatMD(item.date)} までだったよ` : `${formatMD(item.date)} の分`}</span>}
+        {soon && <span className="task-note">{formatMD(item.date)} まで</span>}
       </span>
     </button>
   )
@@ -50,7 +45,7 @@ export default function HomeScreen({ onStartKotoba, pendingSession, onResumeSess
     const { id } = item.task
     const prev = completions
     // 先に画面へ反映して、通信が失敗したら元にもどす
-    setCompletions(toDone ? [...prev, { task_id: id, occurrence_date: item.date }] : prev.filter((c) => !(c.task_id === id && c.occurrence_date === item.date)))
+    setCompletions(toDone ? [...prev, { task_id: id, occurrence_date: item.date, completed_at: new Date().toISOString() }] : prev.filter((c) => !(c.task_id === id && c.occurrence_date === item.date)))
     setError('')
     try {
       await (toDone ? completeTask(id, item.date) : uncompleteTask(id, item.date))
@@ -83,7 +78,7 @@ export default function HomeScreen({ onStartKotoba, pendingSession, onResumeSess
       {upcoming.length > 0 && (
         <section className="task-group">
           <div className="task-subject soon-label">⏰ もうすぐ</div>
-          {upcoming.map((item) => <TaskRow key={`${item.task.id}|${item.date}`} item={{ ...item, overdue: false }} soon />)}
+          {upcoming.map((item) => <TaskRow key={`${item.task.id}|${item.date}`} item={item} soon />)}
         </section>
       )}
 
