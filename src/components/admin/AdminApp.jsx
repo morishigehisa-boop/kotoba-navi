@@ -127,8 +127,22 @@ function toastShow(setToast, msg, setToastType, type = 'success') {
   setTimeout(() => setToast(''), 2200)
 }
 
+const AREA_KEY = 'kotoba_navi_admin_area'
+const AREAS = [
+  ['home', '🏠 ホーム（やること）'],
+  ['kotoba', '📚 ことばナビ']
+]
+
 export default function AdminApp() {
   const [tab, setTab] = useState('list')
+  // 管理画面を「ホーム（やること）」と「ことばナビ」に分ける。最後に開いた方を覚えておく
+  const [area, setAreaState] = useState(() => {
+    try { return localStorage.getItem(AREA_KEY) === 'home' ? 'home' : 'kotoba' } catch { return 'kotoba' }
+  })
+  const setArea = (a) => {
+    setAreaState(a)
+    try { localStorage.setItem(AREA_KEY, a) } catch {}
+  }
   const [questions, setQuestions] = useState([])
   const [sets, setSets] = useState([])
   const [history, setHistory] = useState([])
@@ -157,11 +171,26 @@ export default function AdminApp() {
   const categories = useMemo(() => [...new Set(questions.map((q) => q.category))].filter(Boolean), [questions])
   const types = useMemo(() => [...new Set(questions.map((q) => q.answer_type))].filter(Boolean), [questions])
 
-  if (loading) return <div className="wrap"><p>よみこみちゅう…</p></div>
-
   return (
     <div className="wrap">
       <h1>管理画面</h1>
+      <div className="area-switch">
+        {AREAS.map(([key, label]) => (
+          <button key={key} className={`area-btn ${area === key ? 'active' : ''}`} onClick={() => setArea(key)}>{label}</button>
+        ))}
+      </div>
+
+      {area === 'home' && (
+        <>
+          <p className="lead">子どもアプリのホームに出る「やること」の登録・並べ替えをおこないます</p>
+          <TasksPanel />
+        </>
+      )}
+
+      {area === 'kotoba' && loading && <p className="lead">よみこみちゅう…</p>}
+
+      {area === 'kotoba' && !loading && (
+        <>
       <p className="lead">問題の登録・成績確認・問題集の作成をおこないます</p>
 
       <div className="tabs">
@@ -172,8 +201,7 @@ export default function AdminApp() {
           ['sets', '問題集一覧'],
           ['history', '抽出条件履歴'],
           ['import', 'インポート'],
-          ['furigana', 'ふりがな辞書'],
-          ['tasks', 'やること']
+          ['furigana', 'ふりがな辞書']
         ].map(([key, label]) => (
           <button key={key} className={`tab ${tab === key ? 'active' : ''}`} onClick={() => setTab(key)}>
             {label}
@@ -247,7 +275,6 @@ export default function AdminApp() {
         />
       )}
       {tab === 'history' && <HistoryPanel history={history} />}
-      {tab === 'tasks' && <TasksPanel />}
       {tab === 'import' && (
         <ImportPanel
           onImported={async (count, typeLabel) => {
@@ -264,6 +291,9 @@ export default function AdminApp() {
             toastShow(setToast, msg, setToastType)
           }}
         />
+      )}
+
+        </>
       )}
 
       {toast && <div className={`toast show toast-${toastType}`}>{toastType === 'error' ? '⚠️ ' : '✅ '}{toast}</div>}
