@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { SUBJECTS, SUBJECT_EMOJI, toISODate, buildHomeTasks, fetchTasks, fetchTaskCompletions, completeTask, uncompleteTask } from '../../lib/tasks'
+import { SUBJECTS, SUBJECT_EMOJI, subjectStyle, toISODate, buildHomeTasks, fetchTasks, fetchTaskCompletions, completeTask, uncompleteTask } from '../../lib/tasks'
 
 function formatShort(iso) {
   const [, m, d] = iso.split('-').map(Number)
@@ -9,7 +9,7 @@ function formatShort(iso) {
 function TaskRow({ item, onToggle, done, soon }) {
   const { task, overdue } = item
   return (
-    <button className={`task-row ${done ? 'done' : ''} ${overdue ? 'overdue' : ''} ${soon ? 'soon' : ''}`} onClick={() => onToggle(item, !done)} disabled={soon}>
+    <button className={`task-row ${done ? 'done' : ''} ${overdue ? 'overdue' : ''} ${soon ? 'soon' : ''}`} onClick={() => onToggle(item, !done)} disabled={soon} style={subjectStyle(task.subject)}>
       <span className="task-check">{done ? '✓' : ''}</span>
       <span className="task-text">
         <span className="task-title">{task.title}</span>
@@ -75,7 +75,7 @@ export default function HomeScreen({ onStartKotoba, pendingSession, onResumeSess
 
       {groups.map(([subject, list]) => (
         <section key={subject} className="task-group">
-          <div className="task-subject">{SUBJECT_EMOJI[subject]} {subject}</div>
+          <div className="task-subject" style={subjectStyle(subject)}>{SUBJECT_EMOJI[subject]} {subject}</div>
           {list.map((item) => <TaskRow key={`${item.task.id}|${item.date}`} item={item} onToggle={handleToggle} />)}
         </section>
       ))}

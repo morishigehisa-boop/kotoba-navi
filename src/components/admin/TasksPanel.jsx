@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { SUBJECTS, SUBJECT_EMOJI, FREQUENCIES, WEEKDAY_LABELS, toISODate, describeSchedule, fetchTasks, saveTask, deleteTask } from '../../lib/tasks'
+import { SUBJECTS, SUBJECT_EMOJI, SUBJECT_COLORS, FREQUENCIES, WEEKDAY_LABELS, toISODate, describeSchedule, fetchTasks, saveTask, deleteTask } from '../../lib/tasks'
 import { useConfirm } from './useConfirm'
 import { useToast } from './useToast'
 
@@ -146,7 +146,7 @@ export default function TasksPanel() {
                 const finished = t.end_date && t.end_date < today
                 return (
                   <tr key={t.id} style={{ opacity: t.is_active && !finished ? 1 : 0.5 }}>
-                    <td>{SUBJECT_EMOJI[t.subject]} {t.subject}</td>
+                    <td><span className="pill" style={{ background: SUBJECT_COLORS[t.subject]?.soft, color: SUBJECT_COLORS[t.subject]?.main }}>{SUBJECT_EMOJI[t.subject]} {t.subject}</span></td>
                     <td>{t.title}</td>
                     <td>{describeSchedule(t)}</td>
                     <td>{t.due_date}</td>

@@ -5,6 +5,15 @@ import { supabase } from './supabase'
 
 export const SUBJECTS = ['算数', '国語', '理科', '社会']
 export const SUBJECT_EMOJI = { 算数: '🔢', 国語: '📖', 理科: '🔬', 社会: '🌏' }
+// 教科ごとのテーマカラー（main=濃い色 / soft=うすい背景）
+export const SUBJECT_COLORS = {
+  算数: { main: '#3B82D6', soft: '#E8F1FC' },
+  国語: { main: '#E5484D', soft: '#FDECEC' },
+  理科: { main: '#F08A24', soft: '#FFF0DD' },
+  社会: { main: '#3AA76D', soft: '#E5F5EC' }
+}
+export const subjectStyle = (s) => ({ '--c': SUBJECT_COLORS[s]?.main, '--soft': SUBJECT_COLORS[s]?.soft })
+
 export const FREQUENCIES = [
   { value: 'once', label: '1どだけ' },
   { value: 'daily', label: 'まいにち' },
