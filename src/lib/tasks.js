@@ -102,9 +102,11 @@ export function buildHomeTasks(tasks, completions, todayISO) {
   })
 
   const bySubject = (a, b) => SUBJECTS.indexOf(a.task.subject) - SUBJECTS.indexOf(b.task.subject)
-  todayItems.sort((a, b) => Number(b.overdue) - Number(a.overdue) || a.date.localeCompare(b.date) || bySubject(a, b))
-  upcoming.sort((a, b) => a.date.localeCompare(b.date) || bySubject(a, b))
-  doneToday.sort(bySubject)
+  // 同じ条件のときは、管理画面で並べた順（sort_order）にする
+  const byOrder = (a, b) => a.task.sort_order - b.task.sort_order
+  todayItems.sort((a, b) => Number(b.overdue) - Number(a.overdue) || a.date.localeCompare(b.date) || bySubject(a, b) || byOrder(a, b))
+  upcoming.sort((a, b) => a.date.localeCompare(b.date) || bySubject(a, b) || byOrder(a, b))
+  doneToday.sort((a, b) => bySubject(a, b) || byOrder(a, b))
   return { todayItems, upcoming, doneToday }
 }
 
@@ -133,7 +135,7 @@ async function fetchAll(table, build) {
 }
 
 export const fetchTasks = () =>
-  fetchAll('tasks', (q) => q.select('*').order('due_date', { ascending: true }).order('created_at', { ascending: true }))
+  fetchAll('tasks', (q) => q.select('*').order('sort_order', { ascending: true }).order('created_at', { ascending: true }).order('id', { ascending: true }))
 
 export const fetchTaskCompletions = () =>
   fetchAll('task_completions', (q) => q.select('task_id, occurrence_date').order('id', { ascending: true }))
@@ -142,6 +144,14 @@ export async function saveTask(values, id) {
   const q = id ? supabase.from('tasks').update(values).eq('id', id) : supabase.from('tasks').insert(values)
   const { error } = await q
   if (error) throw error
+}
+
+// 並べ替え：順番が変わった行だけ sort_order を更新する（1始まりの連番）
+export async function reorderTasks(ordered) {
+  const changed = ordered.map((t, i) => ({ id: t.id, order: i + 1, old: t.sort_order })).filter((r) => r.order !== r.old)
+  const results = await Promise.all(changed.map((r) => supabase.from('tasks').update({ sort_order: r.order }).eq('id', r.id)))
+  const failed = results.find((r) => r.error)
+  if (failed) throw failed.error
 }
 
 export async function deleteTask(id) {

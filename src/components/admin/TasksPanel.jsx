@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { SUBJECTS, SUBJECT_EMOJI, SUBJECT_COLORS, FREQUENCIES, WEEKDAY_LABELS, toISODate, describeSchedule, fetchTasks, saveTask, deleteTask } from '../../lib/tasks'
+import { SUBJECTS, SUBJECT_EMOJI, SUBJECT_COLORS, FREQUENCIES, WEEKDAY_LABELS, toISODate, describeSchedule, fetchTasks, saveTask, deleteTask, reorderTasks } from '../../lib/tasks'
 import { useConfirm } from './useConfirm'
 import { useToast } from './useToast'
 
@@ -12,6 +12,8 @@ export default function TasksPanel() {
   const [form, setForm] = useState(emptyForm())
   const [editingId, setEditingId] = useState(null)
   const [saving, setSaving] = useState(false)
+  const [dragId, setDragId] = useState(null)
+  const [dragOverId, setDragOverId] = useState(null)
   const [confirm, confirmModal] = useConfirm()
   const [notify, toastEl] = useToast()
 
@@ -50,7 +52,9 @@ export default function TasksPanel() {
           due_date: form.due_date,
           frequency: form.frequency,
           weekdays: form.frequency === 'weekly' ? form.weekdays : [],
-          end_date: form.frequency === 'once' ? null : form.end_date || null
+          end_date: form.frequency === 'once' ? null : form.end_date || null,
+          // 新規は一番下に追加する
+          ...(editingId ? {} : { sort_order: tasks.reduce((m, t) => Math.max(m, t.sort_order), 0) + 1 })
         },
         editingId
       )
@@ -62,6 +66,36 @@ export default function TasksPanel() {
     } finally {
       setSaving(false)
     }
+  }
+
+  // 並び順を画面に先に反映し、保存に失敗したら元に戻す
+  async function applyOrder(next) {
+    const prev = tasks
+    setTasks(next.map((t, i) => ({ ...t, sort_order: i + 1 })))
+    try {
+      await reorderTasks(next)
+    } catch (e) {
+      setTasks(prev)
+      notify(`並べ替えに失敗しました：${e.message}`)
+    }
+  }
+
+  function handleDrop(targetId) {
+    setDragOverId(null)
+    if (dragId === null || dragId === targetId) return setDragId(null)
+    const next = [...tasks]
+    const [moved] = next.splice(tasks.findIndex((t) => t.id === dragId), 1)
+    next.splice(tasks.findIndex((t) => t.id === targetId), 0, moved)
+    setDragId(null)
+    applyOrder(next)
+  }
+
+  function moveByOffset(index, offset) {
+    const target = index + offset
+    if (target < 0 || target >= tasks.length) return
+    const next = [...tasks]
+    ;[next[index], next[target]] = [next[target], next[index]]
+    applyOrder(next)
   }
 
   async function toggleActive(t) {
@@ -136,16 +170,27 @@ export default function TasksPanel() {
 
       <div className="card">
         <h2>登録ずみのやること（{tasks.length}件）</h2>
+        <p className="lead" style={{ marginBottom: 10 }}>行をドラッグ&ドロップするか、▲▼で順番を変えられます。子どもの画面では、同じ教科の中でこの順に並びます。</p>
         {loading ? <p className="empty">よみこみちゅう…</p> : tasks.length === 0 ? <p className="empty">まだ登録がありません</p> : (
           <table>
             <thead>
-              <tr><th>教科</th><th>やること</th><th>くり返し</th><th>期日</th><th>終了日</th><th>表示</th><th></th></tr>
+              <tr><th></th><th>教科</th><th>やること</th><th>くり返し</th><th>期日</th><th>終了日</th><th>表示</th><th></th></tr>
             </thead>
             <tbody>
-              {tasks.map((t) => {
+              {tasks.map((t, index) => {
                 const finished = t.end_date && t.end_date < today
                 return (
-                  <tr key={t.id} style={{ opacity: t.is_active && !finished ? 1 : 0.5 }}>
+                  <tr
+                    key={t.id}
+                    draggable
+                    onDragStart={() => setDragId(t.id)}
+                    onDragOver={(e) => { e.preventDefault(); setDragOverId(t.id) }}
+                    onDragEnd={() => { setDragId(null); setDragOverId(null) }}
+                    onDrop={() => handleDrop(t.id)}
+                    className={`drag-row ${dragOverId === t.id ? 'drag-over' : ''} ${dragId === t.id ? 'dragging' : ''}`}
+                    style={{ opacity: t.is_active && !finished ? 1 : 0.5 }}
+                  >
+                    <td className="drag-handle" title="ドラッグして並び替え">⠿</td>
                     <td><span className="pill" style={{ background: SUBJECT_COLORS[t.subject]?.soft, color: SUBJECT_COLORS[t.subject]?.main }}>{SUBJECT_EMOJI[t.subject]} {t.subject}</span></td>
                     <td>{t.title}</td>
                     <td>{describeSchedule(t)}</td>
@@ -158,6 +203,8 @@ export default function TasksPanel() {
                     </td>
                     <td>
                       <div className="row-actions">
+                        <button className="btn btn-secondary" style={{ padding: '6px 10px', fontSize: 12 }} disabled={index === 0} onClick={() => moveByOffset(index, -1)} title="上へ">▲</button>
+                        <button className="btn btn-secondary" style={{ padding: '6px 10px', fontSize: 12 }} disabled={index === tasks.length - 1} onClick={() => moveByOffset(index, 1)} title="下へ">▼</button>
                         <button className="btn btn-secondary" style={{ padding: '6px 12px', fontSize: 12 }} onClick={() => startEdit(t)}>編集</button>
                         <button className="btn btn-danger" onClick={() => handleDelete(t)}>削除</button>
                       </div>

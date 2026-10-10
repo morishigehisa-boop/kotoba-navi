@@ -155,6 +155,7 @@ create table if not exists public.tasks (
   weekdays smallint[] not null default '{}' check (weekdays <@ array[0,1,2,3,4,5,6]::smallint[]), -- 0=日..6=土
   end_date date,
   is_active boolean not null default true,
+  sort_order integer not null default 0, -- 管理画面での並び順（1始まり）
   created_at timestamptz not null default now(),
   check (end_date is null or end_date >= due_date)
 );
