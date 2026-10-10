@@ -238,3 +238,4 @@ tr.reviewed-row td { background: #F4FAF6; }
 .area-switch { display: flex; gap: 8px; margin: 4px 0 16px; flex-wrap: wrap; }
 .area-btn { font-family: inherit; font-size: 15px; font-weight: 700; padding: 10px 20px; border-radius: 12px; border: 1px solid #DEDBD0; background: #fff; color: #5A5749; cursor: pointer; }
 .area-btn.active { background: #E36A1E; border-color: #E36A1E; color: #fff; }
+a.area-btn { text-decoration: none; display: inline-block; }

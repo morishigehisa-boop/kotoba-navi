@@ -178,6 +178,8 @@ export default function AdminApp() {
         {AREAS.map(([key, label]) => (
           <button key={key} className={`area-btn ${area === key ? 'active' : ''}`} onClick={() => setArea(key)}>{label}</button>
         ))}
+        {/* さんすうナビの管理は、CSSが衝突しないよう別ページで開く */}
+        <a className="area-btn" href="/admin/sansu">🔢 さんすうナビ</a>
       </div>
 
       {area === 'home' && (

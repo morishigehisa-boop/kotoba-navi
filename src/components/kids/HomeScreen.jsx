@@ -98,7 +98,10 @@ export default function HomeScreen({ onStartKotoba, pendingSession, onResumeSess
         </div>
       )}
 
-      <button className="restart" onClick={onStartKotoba}>📚 ことばナビを やる</button>
+      <div className="app-switch">
+        <button className="app-tile kotoba" onClick={onStartKotoba}><span className="app-emoji">📚</span>ことばナビ</button>
+        <a className="app-tile sansu" href="/sansu"><span className="app-emoji">🔢</span>さんすうナビ</a>
+      </div>
     </div>
   )
 }
