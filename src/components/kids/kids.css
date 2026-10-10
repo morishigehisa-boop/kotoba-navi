@@ -298,31 +298,69 @@ body { margin: 0; background: var(--bg); }
   border-top: 1px dashed #EFE3CB; padding-top: 12px; margin-bottom: 0;
 }
 
-/* ホーム画面（きょうのやること） */
-.home-title { font-size: 20px; font-weight: 800; color: var(--ink); margin: 0 0 12px; }
-.home-empty { text-align: center; font-weight: 700; color: var(--ink-soft); background: var(--card); border-radius: 20px; padding: 22px 12px; margin-bottom: 12px; }
+/* ===== ホーム画面（勉強がんばるアプリ） ===== */
+.home-hero { display: flex; align-items: center; gap: 12px; background: var(--card); border-radius: 22px; padding: 12px 14px; margin-bottom: 14px; box-shadow: 0 4px 0 #EEDFC0, 0 5px 10px rgba(140,110,50,0.08); }
+.mascot-mini { flex: none; width: 64px; height: 64px; }
+.mascot-mini .fox { width: 64px; height: 64px; }
+.home-hero-body { flex: 1; min-width: 0; }
+.home-app-name { font-size: 11px; font-weight: 800; color: var(--ink-soft); letter-spacing: .5px; }
+.home-message { font-size: 16px; font-weight: 800; color: var(--ink); line-height: 1.4; margin: 2px 0 6px; }
+.home-progress { display: flex; align-items: center; gap: 8px; }
+.home-progress .progress-wrap { flex: 1; height: 12px; margin-bottom: 0; }
+.home-progress-num { font-size: 13px; font-weight: 800; color: var(--fox-dark); white-space: nowrap; }
 .home-error { background: #FFE9E9; color: var(--bad-dark); font-weight: 700; font-size: 14px; border-radius: 14px; padding: 10px 14px; margin-bottom: 10px; }
+
 .task-group { margin-bottom: 14px; }
 .task-subject { display: inline-block; font-size: 15px; font-weight: 800; color: var(--c, var(--fox-dark)); background: var(--soft, transparent); border-radius: 12px; padding: 3px 12px; margin: 0 0 6px 4px; }
 .task-subject.soon-label, .task-subject.done-label { color: var(--ink-soft); background: none; padding-left: 0; }
-.task-row { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 60px; padding: 12px 14px; margin-bottom: 8px; background: var(--card); border: none; border-radius: 18px; font-family: inherit; text-align: left; cursor: pointer; border-left: 8px solid var(--c, var(--fox)); box-shadow: 0 4px 0 #EEDFC0, 0 5px 10px rgba(140,110,50,0.08); transition: transform .08s; }
-.task-row:active:not(:disabled) { transform: scale(.98); }
+.task-row { display: flex; align-items: stretch; margin-bottom: 8px; background: var(--card); border-radius: 18px; border-left: 8px solid var(--c, var(--fox)); box-shadow: 0 4px 0 #EEDFC0, 0 5px 10px rgba(140,110,50,0.08); overflow: hidden; }
+.task-main { flex: 1; display: flex; align-items: center; gap: 12px; min-width: 0; min-height: 60px; padding: 12px 14px; background: none; border: none; font-family: inherit; text-align: left; cursor: pointer; }
+.task-main:active:not(:disabled) { background: var(--soft, #FFF3E1); }
 .task-check { flex: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; border: 3px solid var(--c, var(--fox)); background: var(--soft, #fff); color: #fff; font-size: 20px; font-weight: 800; }
 .task-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .task-title { font-size: 17px; font-weight: 800; color: var(--ink); line-height: 1.4; overflow-wrap: anywhere; }
+.task-subject-tag { font-size: 12px; font-weight: 800; color: var(--c, var(--ink-soft)); }
 .task-note { font-size: 12px; font-weight: 700; color: var(--ink-soft); }
-.task-row.overdue .task-note { color: var(--bad-dark); font-size: 13px; } /* 国語の赤と区別するため、期限切れは枠ではなく文言で示す */
-.task-row.soon { opacity: .65; box-shadow: none; cursor: default; min-height: 48px; }
+.task-go { flex: none; align-self: center; min-height: 44px; margin-right: 10px; padding: 0 14px; border: none; border-radius: 14px; background: var(--c, var(--fox)); color: #fff; font-family: inherit; font-size: 14px; font-weight: 800; cursor: pointer; }
+.task-go:active { transform: scale(.95); }
+.task-row.soon { opacity: .65; box-shadow: none; }
+.task-row.soon .task-main { cursor: default; min-height: 48px; }
 .task-row.soon .task-check { opacity: .5; }
 .task-row.done { opacity: .75; }
 .task-row.done .task-check { background: var(--c, var(--ok)); border-color: var(--c, var(--ok)); }
 .task-row.done .task-title { text-decoration: line-through; color: var(--ink-soft); }
-.back-home { background: none; border: none; font-family: inherit; font-size: 14px; font-weight: 800; color: var(--ink-soft); min-height: 44px; padding: 8px 4px; cursor: pointer; }
 
-/* アプリ切り替え（ことばナビ／さんすうナビ） */
-.app-switch { display: flex; gap: 10px; margin-top: 10px; }
-.app-tile { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-height: 88px; border: none; border-radius: 18px; font-family: inherit; font-size: 16px; font-weight: 800; color: #fff; text-decoration: none; cursor: pointer; }
-.app-tile:active { transform: scale(.96); }
-.app-tile .app-emoji { font-size: 30px; line-height: 1.2; }
-.app-tile.kotoba { background: var(--fox); box-shadow: 0 5px 0 var(--fox-dark); }
-.app-tile.sansu { background: var(--sky); box-shadow: 0 5px 0 #3690B8; }
+.late-toggle { display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 48px; padding: 0 16px; margin-bottom: 8px; background: #FFF1E0; border: 2px solid #FFD9A0; border-radius: 16px; color: var(--bad-dark); font-family: inherit; font-size: 15px; font-weight: 800; cursor: pointer; }
+.late-toggle-hint { font-size: 12px; color: var(--ink-soft); }
+.late-date { font-size: 13px; font-weight: 800; color: var(--ink-soft); margin: 8px 0 4px 4px; }
+
+/* ===== 下のメニュー ===== */
+.bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; z-index: 40; display: flex; background: #fff; border-top: 1px solid #EFE3CB; box-shadow: 0 -4px 12px rgba(140,110,50,0.08); padding-bottom: env(safe-area-inset-bottom); }
+.nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-height: 58px; padding: 6px 0; background: none; border: none; font-family: inherit; color: var(--ink-soft); cursor: pointer; }
+.nav-item:active { opacity: .6; }
+.nav-icon { font-size: 22px; line-height: 1.1; }
+.nav-label { font-size: 11px; font-weight: 800; }
+.nav-item.active { color: var(--fox-dark); }
+.nav-item.active .nav-icon { transform: translateY(-1px) scale(1.12); }
+.app.has-nav { padding-bottom: calc(88px + env(safe-area-inset-bottom)); }
+.restart:disabled { opacity: .5; box-shadow: none; cursor: default; }
+
+/* ===== さんすうナビ（ことばナビと同じ見た目） ===== */
+.sansu-title { font-size: 20px; font-weight: 800; color: var(--ink); margin: 0 0 6px; }
+.sansu-section { font-size: 15px; font-weight: 800; color: var(--sky); margin: 16px 0 8px 4px; }
+.chip-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { min-height: 44px; padding: 0 16px; background: var(--card); border: 2px solid #EFE3CB; border-radius: 22px; color: var(--ink-soft); font-family: inherit; font-size: 15px; font-weight: 800; cursor: pointer; }
+.chip.chip-on { background: var(--sky); border-color: var(--sky); color: #fff; box-shadow: 0 3px 0 #3690B8; }
+.sansu-check { display: flex; align-items: center; gap: 10px; min-height: 48px; margin-top: 14px; font-size: 14px; font-weight: 700; color: var(--ink); cursor: pointer; }
+.sansu-check input { width: 22px; height: 22px; flex: none; accent-color: var(--sky); }
+.sansu-count { text-align: center; font-size: 15px; font-weight: 700; color: var(--ink-soft); margin: 14px 0 0; }
+.sansu-count b { font-size: 26px; color: var(--fox-dark); }
+.sansu-empty { text-align: center; font-weight: 800; color: var(--ink-soft); background: var(--card); border-radius: 20px; padding: 28px 12px; margin-bottom: 10px; }
+.sansu-card { align-items: stretch; text-align: left; }
+.sansu-question { font-size: 18px; font-weight: 700; line-height: 1.8; color: var(--ink); margin: 18px 0 8px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.sansu-images { display: flex; flex-direction: column; gap: 10px; margin: 8px 0; }
+.sansu-images img { width: 100%; height: auto; border-radius: 12px; }
+.sansu-answer { text-align: left; }
+.sansu-result { min-height: 0; padding: 28px 20px; margin-bottom: 8px; }
+.sansu-rate { font-size: 64px; font-weight: 800; color: var(--fox-dark); line-height: 1.1; margin: 22px 0 6px; }
+.sansu-rate small { font-size: 28px; }

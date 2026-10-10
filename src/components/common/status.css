@@ -1,0 +1,10 @@
+/* 読み込み・エラー表示（子ども画面・管理画面の共通）。CSS変数に頼らず単体で動くようにしている */
+.status-view { text-align: center; padding: 48px 16px; font-family: 'Zen Maru Gothic', 'M PLUS Rounded 1c', sans-serif; color: #8A7B62; }
+.status-icon { font-size: 40px; line-height: 1.2; }
+.status-bounce { animation: statusBounce 1s ease-in-out infinite; }
+@keyframes statusBounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+.status-text { font-size: 16px; font-weight: 800; margin: 8px 0 4px; }
+.status-hint { font-size: 13px; font-weight: 500; margin: 0 0 14px; line-height: 1.6; }
+.status-retry { min-height: 48px; padding: 0 24px; border: none; border-radius: 16px; background: #FF8A3D; color: #fff; font-family: inherit; font-size: 16px; font-weight: 800; box-shadow: 0 4px 0 #E36A1E; cursor: pointer; }
+.status-retry:active { transform: scale(.96); }
+@media (prefers-reduced-motion: reduce) { .status-bounce { animation: none; } }

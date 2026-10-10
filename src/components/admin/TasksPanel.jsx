@@ -1,14 +1,16 @@
 import { useEffect, useState } from 'react'
 import { SUBJECTS, SUBJECT_EMOJI, SUBJECT_COLORS, FREQUENCIES, WEEKDAY_LABELS, toISODate, describeSchedule, fetchTasks, saveTask, deleteTask, reorderTasks } from '../../lib/tasks'
+import { LoadingView, ErrorView } from '../common/Status'
 import { useConfirm } from './useConfirm'
 import { useToast } from './useToast'
 
-const emptyForm = () => ({ subject: '算数', title: '', due_date: toISODate(), frequency: 'once', weekdays: [], end_date: '' })
+const emptyForm = () => ({ subject: '算数', title: '', due_date: toISODate(), frequency: 'once', weekdays: [], end_date: '', link_to: '' })
 
 // 「やること」の登録・編集・おやすみ（無効化）・削除。子どものホーム画面に表示される。
 export default function TasksPanel() {
   const [tasks, setTasks] = useState([])
   const [loading, setLoading] = useState(true)
+  const [loadFailed, setLoadFailed] = useState(false)
   const [form, setForm] = useState(emptyForm())
   const [editingId, setEditingId] = useState(null)
   const [saving, setSaving] = useState(false)
@@ -19,10 +21,13 @@ export default function TasksPanel() {
 
   const reload = () => fetchTasks().then(setTasks)
 
-  useEffect(() => {
-    reload().catch((e) => notify(`よみこみに失敗しました：${e.message}`)).finally(() => setLoading(false))
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  function firstLoad() {
+    setLoading(true)
+    setLoadFailed(false)
+    reload().catch((e) => { console.error(e); setLoadFailed(true) }).finally(() => setLoading(false))
+  }
+
+  useEffect(firstLoad, [])
 
   const set = (patch) => setForm((f) => ({ ...f, ...patch }))
   const toggleWeekday = (d) =>
@@ -35,7 +40,7 @@ export default function TasksPanel() {
 
   function startEdit(t) {
     setEditingId(t.id)
-    setForm({ subject: t.subject, title: t.title, due_date: t.due_date, frequency: t.frequency, weekdays: t.weekdays || [], end_date: t.end_date || '' })
+    setForm({ subject: t.subject, title: t.title, due_date: t.due_date, frequency: t.frequency, weekdays: t.weekdays || [], end_date: t.end_date || '', link_to: t.link_to || '' })
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
@@ -53,6 +58,7 @@ export default function TasksPanel() {
           frequency: form.frequency,
           weekdays: form.frequency === 'weekly' ? form.weekdays : [],
           end_date: form.frequency === 'once' ? null : form.end_date || null,
+          link_to: form.link_to || null,
           // 新規は一番下に追加する
           ...(editingId ? {} : { sort_order: tasks.reduce((m, t) => Math.max(m, t.sort_order), 0) + 1 })
         },
@@ -145,6 +151,14 @@ export default function TasksPanel() {
               {FREQUENCIES.map((f) => <option key={f.value} value={f.value}>{f.label}</option>)}
             </select>
           </div>
+          <div>
+            <label className="f-label">開く先（ホームの「はじめる」ボタン）</label>
+            <select value={form.link_to} onChange={(e) => set({ link_to: e.target.value })}>
+              <option value="">なし</option>
+              <option value="kotoba">📚 ことばナビ</option>
+              <option value="sansu">🔢 さんすうナビ</option>
+            </select>
+          </div>
           {form.frequency === 'weekly' && (
             <div className="task-form-wide">
               <label className="f-label">曜日（複数えらべます。未選択なら期日の曜日）</label>
@@ -171,7 +185,7 @@ export default function TasksPanel() {
       <div className="card">
         <h2>登録ずみのやること（{tasks.length}件）</h2>
         <p className="lead" style={{ marginBottom: 10 }}>行をドラッグ&ドロップするか、▲▼で順番を変えられます。子どもの画面では、同じ教科の中でこの順に並びます。</p>
-        {loading ? <p className="empty">よみこみちゅう…</p> : tasks.length === 0 ? <p className="empty">まだ登録がありません</p> : (
+        {loading ? <LoadingView /> : loadFailed ? <ErrorView onRetry={firstLoad} /> : tasks.length === 0 ? <p className="empty">まだ登録がありません</p> : (
           <table>
             <thead>
               <tr><th></th><th>教科</th><th>やること</th><th>くり返し</th><th>期日</th><th>終了日</th><th>表示</th><th></th></tr>
@@ -192,7 +206,10 @@ export default function TasksPanel() {
                   >
                     <td className="drag-handle" title="ドラッグして並び替え">⠿</td>
                     <td><span className="pill" style={{ background: SUBJECT_COLORS[t.subject]?.soft, color: SUBJECT_COLORS[t.subject]?.main }}>{SUBJECT_EMOJI[t.subject]} {t.subject}</span></td>
-                    <td>{t.title}</td>
+                    <td>
+                      {t.title}
+                      {t.link_to && <span className="pill pill-ok" style={{ marginLeft: 6 }}>▶ {t.link_to === 'sansu' ? 'さんすうナビ' : 'ことばナビ'}</span>}
+                    </td>
                     <td>{describeSchedule(t)}</td>
                     <td>{t.due_date}</td>
                     <td>{t.end_date || '—'}{finished ? '（終了）' : ''}</td>

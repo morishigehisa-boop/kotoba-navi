@@ -24,6 +24,7 @@ import PreviewPanel from './PreviewPanel'
 import { EditModal } from './EditModal'
 import FuriganaPanel from './FuriganaPanel'
 import TasksPanel from './TasksPanel'
+import { LoadingView, ErrorView } from '../common/Status'
 
 // 未正解・1回・2回・3回・かんぺき の5段階
 const ADMIN_BOX_COLORS = ['#D8D2C0', '#F5D18C', '#F5A742', '#E8863A', '#4CB27A']
@@ -150,6 +151,7 @@ export default function AdminApp() {
   const [toast, setToast] = useState('')
   const [toastType, setToastType] = useState('success')
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState(false)
   const [confirm, confirmModal] = useConfirm()
 
   async function reloadAll() {
@@ -161,11 +163,15 @@ export default function AdminApp() {
     setCustomFurigana(fe)
   }
 
-  useEffect(() => {
+  function load() {
+    setLoading(true)
+    setLoadError(false)
     reloadAll()
-      .catch(console.error)
+      .catch((e) => { console.error(e); setLoadError(true) })
       .finally(() => setLoading(false))
-  }, [])
+  }
+
+  useEffect(load, [])
 
   const books = useMemo(() => [...new Set(questions.map((q) => q.source_book))].filter(Boolean), [questions])
   const categories = useMemo(() => [...new Set(questions.map((q) => q.category))].filter(Boolean), [questions])
@@ -173,7 +179,7 @@ export default function AdminApp() {
 
   return (
     <div className="wrap">
-      <h1>管理画面</h1>
+      <h1>勉強がんばるアプリ 管理画面</h1>
       <div className="area-switch">
         {AREAS.map(([key, label]) => (
           <button key={key} className={`area-btn ${area === key ? 'active' : ''}`} onClick={() => setArea(key)}>{label}</button>
@@ -189,9 +195,10 @@ export default function AdminApp() {
         </>
       )}
 
-      {area === 'kotoba' && loading && <p className="lead">よみこみちゅう…</p>}
+      {area === 'kotoba' && loading && <LoadingView />}
+      {area === 'kotoba' && !loading && loadError && <ErrorView onRetry={load} />}
 
-      {area === 'kotoba' && !loading && (
+      {area === 'kotoba' && !loading && !loadError && (
         <>
       <p className="lead">問題の登録・成績確認・問題集の作成をおこないます</p>
 

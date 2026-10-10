@@ -4,6 +4,6 @@ import './sansu.css'
 
 // /admin/sansu：さんすうナビの問題登録。ことばナビの管理画面とはCSSが衝突するため、別ページとして開く
 export default function SansuAdmin() {
-  useEffect(() => { document.title = 'さんすうナビ 管理' }, [])
+  useEffect(() => { document.title = 'さんすうナビ 管理｜勉強がんばるアプリ' }, [])
   return <AdminPanel />
 }

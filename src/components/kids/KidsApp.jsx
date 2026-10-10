@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Character from './Character'
 import Confetti from './Confetti'
 import { addFurigana, setCustomFurigana } from '../../lib/furigana'
@@ -27,6 +27,10 @@ import RecordScreen from './RecordScreen'
 import ShopScreen from './ShopScreen'
 import SugorokuScreen from './SugorokuScreen'
 import HomeScreen from './HomeScreen'
+import SansuScreen from './SansuScreen'
+import BottomNav from './BottomNav'
+import { LoadingView, ErrorView } from '../common/Status'
+import { toISODate } from '../../lib/tasks'
 import RoomBackground from './RoomBackground'
 import './kids.css'
 
@@ -70,13 +74,30 @@ function formatGoalShort(iso) {
   return `${d.getMonth() + 1}/${d.getDate()}`
 }
 
-export default function KidsApp() {
+// やること（ホーム）の完了ごほうび
+const TASK_POINTS = 5
+const TASK_ALL_DONE_BONUS = 20
+const TASK_BONUS_KEY = 'kotoba_navi_task_bonus_date'
+// 「ぜんぶ終わった」ボーナスは、1日1回だけ（取り消して付けなおしても増えない）
+function claimTaskBonus() {
+  const today = toISODate()
+  try {
+    if (localStorage.getItem(TASK_BONUS_KEY) === today) return false
+    localStorage.setItem(TASK_BONUS_KEY, today)
+  } catch {}
+  return true
+}
+
+export default function KidsApp({ initialScreen = 'home' }) {
   const [loading, setLoading] = useState(true)
   const [questions, setQuestions] = useState([])
   const [allSets, setAllSets] = useState([])
   const [progress, setProgress] = useState(null) // { streak_count, longest_streak, points, freeze_tokens, last_activity_date, owned_items, equipped_item }
 
-  const [screen, setScreen] = useState('home') // 'home' | 'select' | 'quiz' | 'record' | 'shop' | 'sugoroku'
+  const [screen, setScreen] = useState(initialScreen) // 'home' | 'select' | 'quiz' | 'record' | 'shop' | 'sugoroku' | 'sansu'
+  const [sansuStage, setSansuStage] = useState('setup') // さんすうナビの 'setup' | 'study' | 'result'（学習中は下のメニューを隠す）
+  const [backTo, setBackTo] = useState('home') // きろく・ショップ・すごろくの「もどる」先
+  const [loadError, setLoadError] = useState(false)
   const [mode, setMode] = useState('main') // 'main' | 'review'
   const [sessionQuestions, setSessionQuestions] = useState([])
   const [idx, setIdx] = useState(0)
@@ -108,30 +129,33 @@ export default function KidsApp() {
   const [milestone, setMilestone] = useState(null) // マイルストーン達成のお祝いモーダル
   const [newCharacter, setNewCharacter] = useState(null) // 新キャラクター解放のお祝いモーダル
 
-  useEffect(() => {
-    ;(async () => {
-      try {
-        const [qs, sets, prog, furiganaEntries] = await Promise.all([
-          fetchQuestions(), fetchQuestionSetsWithItems(), fetchProgress(), fetchFuriganaEntries()
-        ])
-        setCustomFurigana(furiganaEntries)
-        setQuestions(qs)
-        setAllSets(sets)
-        setProgress(prog)
+  const loadAll = useCallback(async () => {
+    setLoadError(false)
+    setLoading(true)
+    try {
+      const [qs, sets, prog, furiganaEntries] = await Promise.all([
+        fetchQuestions(), fetchQuestionSetsWithItems(), fetchProgress(), fetchFuriganaEntries()
+      ])
+      setCustomFurigana(furiganaEntries)
+      setQuestions(qs)
+      setAllSets(sets)
+      setProgress(prog)
 
-        const snapshot = loadSessionSnapshot()
-        if (snapshot && snapshot.questionIds?.length > 0) {
-          const stillExists = snapshot.questionIds.some((id) => qs.some((q) => q.id === id))
-          if (stillExists) setPendingSession(snapshot)
-          else clearSessionSnapshot()
-        }
-      } catch (e) {
-        console.error(e)
-      } finally {
-        setLoading(false)
+      const snapshot = loadSessionSnapshot()
+      if (snapshot && snapshot.questionIds?.length > 0) {
+        const stillExists = snapshot.questionIds.some((id) => qs.some((q) => q.id === id))
+        if (stillExists) setPendingSession(snapshot)
+        else clearSessionSnapshot()
       }
-    })()
+    } catch (e) {
+      console.error(e)
+      setLoadError(true) // 読み込みに失敗したら、「よみこみちゅう」のまま止まらず、やりなおせるようにする
+    } finally {
+      setLoading(false)
+    }
   }, [])
+
+  useEffect(() => { loadAll() }, [loadAll])
 
   const goalSets = useMemo(() => allSets.filter((s) => s.goal_at), [allSets])
   // 目標日時があってもなくても、一覧では全ての問題集を選べるようにする
@@ -240,12 +264,12 @@ export default function KidsApp() {
   // ポイントを加算し、DBにも永続化する
   function addPoints(n) {
     setProgress((prev) => {
-      const nextPoints = prev.points + n
+      const nextPoints = Math.max(0, prev.points + n) // やることの取り消しでマイナスになる場合があるので、0未満にはしない
       const prevTitle = titleForPoints(prev.points)
       const nextTitle = titleForPoints(nextPoints)
       const next = { ...prev, points: nextPoints }
       updateProgress({ points: nextPoints }).catch(console.error)
-      if (nextTitle !== prevTitle) {
+      if (n > 0 && nextTitle !== prevTitle) {
         setTimeout(() => { playLevelUp(); celebrate(); setMascot({ state: 'happy', text: `称号アップ！「${nextTitle}」に なったよ！` }) }, 200)
       }
       return next
@@ -309,6 +333,59 @@ export default function KidsApp() {
       if (result.newMilestone) setMilestone(result.newMilestone)
       return next
     })
+  }
+
+  // きろく・ショップ・すごろくを開くとき、「もどる」で今いた画面に戻れるようにする
+  function openFrom(next) {
+    setBackTo(screen)
+    setScreen(next)
+  }
+
+  // 下のメニュー（ホーム／ことば／さんすう／きろく／ショップ）
+  function handleNavSelect(key) {
+    if (screen === key || (key === 'kotoba' && screen === 'select')) return
+    if (key === 'home') setScreen('home')
+    else if (key === 'kotoba') setScreen('select')
+    else if (key === 'sansu') {
+      setScreen('sansu')
+      setMascot({ state: 'idle', text: 'さんすうも いっしょに がんばろう！' })
+    } else openFrom(key)
+  }
+
+  // さんすうナビも、ことばナビと同じポイント・連続日数にためる
+  function handleSansuAnswered(isCorrect) {
+    creditTodayActivity()
+    if (isCorrect) {
+      addPoints(10)
+      incrementWeeklyMission()
+      playCorrect()
+      setMascot({ state: 'happy', text: HAPPY_LINES[Math.floor(Math.random() * HAPPY_LINES.length)] })
+    } else {
+      playWrong()
+      setMascot({ state: 'sad', text: 'だいじょうぶ、次で覚えよう' })
+    }
+  }
+
+  function handleSansuFinished() {
+    addPoints(20)
+    playFanfareBig()
+    celebrate()
+    setMascot({ state: 'happy', text: 'さいごまで できたね！すごい！' })
+  }
+
+  // ホームの「やること」を完了／取り消したときのごほうび
+  function handleTaskChange(kind, { allTodayDone }) {
+    if (kind === 'undone') {
+      addPoints(-TASK_POINTS)
+      return
+    }
+    addPoints(TASK_POINTS)
+    playCorrect()
+    if (allTodayDone && claimTaskBonus()) {
+      addPoints(TASK_ALL_DONE_BONUS)
+      playFanfareBig()
+      celebrate()
+    }
   }
 
   function startSet(list, { isToday = false, randomize = true } = {}) {
@@ -521,18 +598,15 @@ export default function KidsApp() {
     await updateProgress({ active_character: characterId, equipped_item: null }).catch(console.error)
   }
 
-  if (loading || !progress) {
-    return (
-      <div className="app">
-        <p className="hint" style={{ textAlign: 'center', marginTop: 40 }}>
-          よみこみちゅう…
-        </p>
-      </div>
-    )
-  }
+  if (loadError) return <div className="app"><ErrorView onRetry={loadAll} /></div>
+  if (loading || !progress) return <div className="app"><LoadingView /></div>
+
+  // 学習中（ことばナビの出題・さんすうナビの出題）は、下のメニューを隠して集中できるようにする
+  const showNav = !(screen === 'quiz' && !finished) && !(screen === 'sansu' && sansuStage === 'study')
+  const navActive = { home: 'home', select: 'kotoba', quiz: 'kotoba', sugoroku: 'kotoba', sansu: 'sansu', record: 'record', shop: 'shop' }[screen]
 
   return (
-    <div className="app">
+    <div className={`app ${showNav ? 'has-nav' : ''}`}>
       <Confetti active={confettiOn} onDone={() => setConfettiOn(false)} />
       {struggleToast && <div className="struggle-toast">🎊 にがて克服！</div>}
       <div className="topbar">
@@ -563,7 +637,7 @@ export default function KidsApp() {
         </div>
       )}
 
-      {screen !== 'sugoroku' && (
+      {screen !== 'sugoroku' && screen !== 'home' && (
         <>
           <div className={`mascot-zone ${progress.active_background ? 'has-room' : ''}`}>
             {progress.active_background && (
@@ -575,7 +649,16 @@ export default function KidsApp() {
         </>
       )}
 
-      {screen === 'home' && <HomeScreen onStartKotoba={() => setScreen('select')} pendingSession={pendingSession} onResumeSession={resumeSession} />}
+      {screen === 'home' && (
+        <HomeScreen
+          character={progress.active_character}
+          accessory={progress.equipped_item}
+          pendingSession={pendingSession}
+          onResumeSession={resumeSession}
+          onOpenApp={(app) => handleNavSelect(app === 'sansu' ? 'sansu' : 'kotoba')}
+          onTaskChange={handleTaskChange}
+        />
+      )}
 
       {screen === 'select' && (
         <SelectScreen
@@ -600,23 +683,22 @@ export default function KidsApp() {
             // 管理画面でランダム出題がオンの問題集は、開くたびに順番を入れ替える
             startSet(list, { isToday: false, randomize: !!set.shuffle })
           }}
-          onShowRecord={() => setScreen('record')}
-          onShowShop={() => setScreen('shop')}
-          onShowSugoroku={() => setScreen('sugoroku')}
-          onShowHome={() => setScreen('home')}
+          onShowRecord={() => openFrom('record')}
+          onShowShop={() => openFrom('shop')}
+          onShowSugoroku={() => openFrom('sugoroku')}
           pendingSession={pendingSession}
           onResumeSession={resumeSession}
           onDismissSession={dismissPendingSession}
         />
       )}
 
-      {screen === 'record' && <RecordScreen questions={questions} onBack={() => setScreen('select')} />}
+      {screen === 'record' && <RecordScreen questions={questions} onBack={() => setScreen(backTo)} />}
 
       {screen === 'sugoroku' && (
         <SugorokuScreen
           masteryEventTotal={progress.mastery_event_total || 0}
           characterEmoji={CHARACTERS.find((c) => c.id === progress.active_character)?.emoji || '🦊'}
-          onBack={() => setScreen('select')}
+          onBack={() => setScreen(backTo)}
         />
       )}
 
@@ -633,7 +715,16 @@ export default function KidsApp() {
           onEquip={handleEquip}
           onSwitchCharacter={handleSwitchCharacter}
           onEquipBackground={handleEquipBackground}
-          onBack={() => setScreen('select')}
+          onBack={() => setScreen(backTo)}
+        />
+      )}
+
+      {screen === 'sansu' && (
+        <SansuScreen
+          onStageChange={setSansuStage}
+          onAnswered={handleSansuAnswered}
+          onFinished={handleSansuFinished}
+          onGoHome={() => setScreen('home')}
         />
       )}
 
@@ -675,6 +766,8 @@ export default function KidsApp() {
           onReviewAgain={reviewAgain}
         />
       )}
+
+      {showNav && <BottomNav active={navActive} onSelect={handleNavSelect} />}
 
       {milestone && <MilestoneModal milestone={milestone} onClose={() => setMilestone(null)} />}
       {newCharacter && <NewCharacterModal character={newCharacter} onClose={() => setNewCharacter(null)} />}
@@ -728,7 +821,7 @@ function QuitConfirmModal({ onCancel, onQuit }) {
   )
 }
 
-function SelectScreen({ today, overdue, staticSets, questionsById, title, freezeTokens, weeklyCorrectCount, weeklyMissionsClaimed, onStartToday, onStartOverdue, onStartSet, onShowRecord, onShowShop, onShowSugoroku, onShowHome, pendingSession, onResumeSession, onDismissSession }) {
+function SelectScreen({ today, overdue, staticSets, questionsById, title, freezeTokens, weeklyCorrectCount, weeklyMissionsClaimed, onStartToday, onStartOverdue, onStartSet, onShowRecord, onShowShop, onShowSugoroku, pendingSession, onResumeSession, onDismissSession }) {
   const todaySub =
     today.picked.length === 0
       ? 'きょうは やることなし！'
@@ -740,7 +833,6 @@ function SelectScreen({ today, overdue, staticSets, questionsById, title, freeze
 
   return (
     <div>
-      <button className="back-home" onClick={onShowHome}>🏠 ホームへ</button>
       <div className="title-banner">
         <span>🎖️ {title}</span>
         <span className="freeze-badge">🧊 フリーズ ×{freezeTokens}</span>

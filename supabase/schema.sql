@@ -156,6 +156,7 @@ create table if not exists public.tasks (
   end_date date,
   is_active boolean not null default true,
   sort_order integer not null default 0, -- 管理画面での並び順（1始まり）
+  link_to text check (link_to in ('kotoba', 'sansu')), -- ホームの「はじめる」ボタンで開くアプリ
   created_at timestamptz not null default now(),
   check (end_date is null or end_date >= due_date)
 );
