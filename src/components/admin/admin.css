@@ -225,3 +225,11 @@ tr.reviewed-row td { background: #F4FAF6; }
 .toggle-row { display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px; color: #3A3833; }
 .toggle-row input { width: auto; cursor: pointer; margin: 0; }
 .pill-shuffle { background: #EEF3FF; color: #4A6FBF; margin-left: 8px; }
+
+/* やること（タスク）登録フォーム */
+.task-form { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 12px; align-items: end; }
+.task-form-wide { grid-column: 1 / -1; }
+.task-form input[type=text], .task-form select, .task-date { width: 100%; font-family: inherit; font-size: 14px; padding: 8px 10px; border-radius: 8px; border: 1px solid #DEDBD0; background: #FAF9F5; }
+.weekday-row { display: flex; gap: 6px; flex-wrap: wrap; }
+.weekday-chip { font-family: inherit; font-size: 14px; font-weight: 700; width: 42px; height: 42px; border-radius: 50%; border: 1px solid #DEDBD0; background: #FAF9F5; color: #5A5749; cursor: pointer; }
+.weekday-chip.on { background: #E36A1E; border-color: #E36A1E; color: #fff; }

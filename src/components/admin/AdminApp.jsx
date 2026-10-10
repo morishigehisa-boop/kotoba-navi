@@ -23,6 +23,7 @@ import './admin.css'
 import PreviewPanel from './PreviewPanel'
 import { EditModal } from './EditModal'
 import FuriganaPanel from './FuriganaPanel'
+import TasksPanel from './TasksPanel'
 
 // 未正解・1回・2回・3回・かんぺき の5段階
 const ADMIN_BOX_COLORS = ['#D8D2C0', '#F5D18C', '#F5A742', '#E8863A', '#4CB27A']
@@ -171,7 +172,8 @@ export default function AdminApp() {
           ['sets', '問題集一覧'],
           ['history', '抽出条件履歴'],
           ['import', 'インポート'],
-          ['furigana', 'ふりがな辞書']
+          ['furigana', 'ふりがな辞書'],
+          ['tasks', 'やること']
         ].map(([key, label]) => (
           <button key={key} className={`tab ${tab === key ? 'active' : ''}`} onClick={() => setTab(key)}>
             {label}
@@ -245,6 +247,7 @@ export default function AdminApp() {
         />
       )}
       {tab === 'history' && <HistoryPanel history={history} />}
+      {tab === 'tasks' && <TasksPanel />}
       {tab === 'import' && (
         <ImportPanel
           onImported={async (count, typeLabel) => {

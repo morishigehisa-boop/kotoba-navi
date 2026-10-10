@@ -26,6 +26,7 @@ import { boxOf } from '../../lib/today'
 import RecordScreen from './RecordScreen'
 import ShopScreen from './ShopScreen'
 import SugorokuScreen from './SugorokuScreen'
+import HomeScreen from './HomeScreen'
 import RoomBackground from './RoomBackground'
 import './kids.css'
 
@@ -75,7 +76,7 @@ export default function KidsApp() {
   const [allSets, setAllSets] = useState([])
   const [progress, setProgress] = useState(null) // { streak_count, longest_streak, points, freeze_tokens, last_activity_date, owned_items, equipped_item }
 
-  const [screen, setScreen] = useState('select') // 'select' | 'quiz' | 'record' | 'shop'
+  const [screen, setScreen] = useState('home') // 'home' | 'select' | 'quiz' | 'record' | 'shop' | 'sugoroku'
   const [mode, setMode] = useState('main') // 'main' | 'review'
   const [sessionQuestions, setSessionQuestions] = useState([])
   const [idx, setIdx] = useState(0)
@@ -574,6 +575,8 @@ export default function KidsApp() {
         </>
       )}
 
+      {screen === 'home' && <HomeScreen onStartKotoba={() => setScreen('select')} pendingSession={pendingSession} onResumeSession={resumeSession} />}
+
       {screen === 'select' && (
         <SelectScreen
           today={today}
@@ -600,6 +603,7 @@ export default function KidsApp() {
           onShowRecord={() => setScreen('record')}
           onShowShop={() => setScreen('shop')}
           onShowSugoroku={() => setScreen('sugoroku')}
+          onShowHome={() => setScreen('home')}
           pendingSession={pendingSession}
           onResumeSession={resumeSession}
           onDismissSession={dismissPendingSession}
@@ -724,7 +728,7 @@ function QuitConfirmModal({ onCancel, onQuit }) {
   )
 }
 
-function SelectScreen({ today, overdue, staticSets, questionsById, title, freezeTokens, weeklyCorrectCount, weeklyMissionsClaimed, onStartToday, onStartOverdue, onStartSet, onShowRecord, onShowShop, onShowSugoroku, pendingSession, onResumeSession, onDismissSession }) {
+function SelectScreen({ today, overdue, staticSets, questionsById, title, freezeTokens, weeklyCorrectCount, weeklyMissionsClaimed, onStartToday, onStartOverdue, onStartSet, onShowRecord, onShowShop, onShowSugoroku, onShowHome, pendingSession, onResumeSession, onDismissSession }) {
   const todaySub =
     today.picked.length === 0
       ? 'きょうは やることなし！'
@@ -736,6 +740,7 @@ function SelectScreen({ today, overdue, staticSets, questionsById, title, freeze
 
   return (
     <div>
+      <button className="back-home" onClick={onShowHome}>🏠 ホームへ</button>
       <div className="title-banner">
         <span>🎖️ {title}</span>
         <span className="freeze-badge">🧊 フリーズ ×{freezeTokens}</span>

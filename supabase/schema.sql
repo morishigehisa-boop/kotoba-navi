@@ -144,3 +144,27 @@ create table filter_history (
 alter table filter_history enable row level security;
 create policy "filter_history_allow_all" on filter_history
   for all using (true) with check (true);
+
+-- ============ やること（タスク管理） ============
+create table if not exists public.tasks (
+  id uuid primary key default gen_random_uuid(),
+  subject text not null check (subject in ('算数','国語','理科','社会')),
+  title text not null check (char_length(btrim(title)) > 0),
+  due_date date not null,
+  frequency text not null default 'once' check (frequency in ('once','daily','weekly','monthly')),
+  weekdays smallint[] not null default '{}' check (weekdays <@ array[0,1,2,3,4,5,6]::smallint[]), -- 0=日..6=土
+  end_date date,
+  is_active boolean not null default true,
+  created_at timestamptz not null default now(),
+  check (end_date is null or end_date >= due_date)
+);
+create table if not exists public.task_completions (
+  id uuid primary key default gen_random_uuid(),
+  task_id uuid not null references public.tasks(id) on delete cascade,
+  occurrence_date date not null,
+  completed_at timestamptz not null default now(),
+  unique (task_id, occurrence_date)
+);
+-- RLS: 管理画面・子ども画面ともログインなし(anon)のため、他テーブルと同じ方針で anon に書き込みを許可
+alter table public.tasks enable row level security;
+alter table public.task_completions enable row level security;

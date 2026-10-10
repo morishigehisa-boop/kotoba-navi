@@ -297,3 +297,26 @@ body { margin: 0; background: var(--bg); }
   font-size: 15px; font-weight: 500; color: var(--ink-soft);
   border-top: 1px dashed #EFE3CB; padding-top: 12px; margin-bottom: 0;
 }
+
+/* ホーム画面（きょうのやること） */
+.home-title { font-size: 20px; font-weight: 800; color: var(--ink); margin: 0 0 12px; }
+.home-empty { text-align: center; font-weight: 700; color: var(--ink-soft); background: var(--card); border-radius: 20px; padding: 22px 12px; margin-bottom: 12px; }
+.home-error { background: #FFE9E9; color: var(--bad-dark); font-weight: 700; font-size: 14px; border-radius: 14px; padding: 10px 14px; margin-bottom: 10px; }
+.task-group { margin-bottom: 14px; }
+.task-subject { font-size: 15px; font-weight: 800; color: var(--fox-dark); margin: 0 0 6px 4px; }
+.task-subject.soon-label, .task-subject.done-label { color: var(--ink-soft); }
+.task-row { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 60px; padding: 12px 14px; margin-bottom: 8px; background: var(--card); border: none; border-radius: 18px; font-family: inherit; text-align: left; cursor: pointer; box-shadow: 0 4px 0 #EEDFC0, 0 5px 10px rgba(140,110,50,0.08); transition: transform .08s; }
+.task-row:active:not(:disabled) { transform: scale(.98); }
+.task-check { flex: none; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; border: 3px solid var(--fox); background: #fff; color: #fff; font-size: 20px; font-weight: 800; }
+.task-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.task-title { font-size: 17px; font-weight: 800; color: var(--ink); line-height: 1.4; overflow-wrap: anywhere; }
+.task-note { font-size: 12px; font-weight: 700; color: var(--ink-soft); }
+.task-row.overdue { box-shadow: 0 4px 0 #F6C3C3, 0 5px 10px rgba(217,72,72,0.12); }
+.task-row.overdue .task-check { border-color: var(--bad); }
+.task-row.overdue .task-note { color: var(--bad-dark); }
+.task-row.soon { opacity: .65; box-shadow: none; cursor: default; min-height: 48px; }
+.task-row.soon .task-check { border-color: var(--ink-soft); opacity: .5; }
+.task-row.done { opacity: .75; }
+.task-row.done .task-check { background: var(--ok); border-color: var(--ok); }
+.task-row.done .task-title { text-decoration: line-through; color: var(--ink-soft); }
+.back-home { background: none; border: none; font-family: inherit; font-size: 14px; font-weight: 800; color: var(--ink-soft); min-height: 44px; padding: 8px 4px; cursor: pointer; }
