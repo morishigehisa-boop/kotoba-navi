@@ -639,12 +639,15 @@ export default function KidsApp({ initialScreen = 'home' }) {
 
       {screen !== 'sugoroku' && screen !== 'home' && (
         <>
-          <div className={`mascot-zone ${progress.active_background ? 'has-room' : ''}`}>
-            {progress.active_background && (
-              <RoomBackground themeId={progress.active_background} height={130} />
-            )}
-            <Character character={progress.active_character} state={mascot.state} accessory={progress.equipped_item} />
-          </div>
+          {/* 問題を解いている間は、問題を広く見せるためキャラを出さない（ひとことだけ残す） */}
+          {screen !== 'quiz' && (
+            <div className={`mascot-zone ${progress.active_background ? 'has-room' : ''}`}>
+              {progress.active_background && (
+                <RoomBackground themeId={progress.active_background} height={130} />
+              )}
+              <Character character={progress.active_character} state={mascot.state} accessory={progress.equipped_item} />
+            </div>
+          )}
           <div className="speech">{mascot.text}</div>
         </>
       )}
