@@ -95,6 +95,7 @@ export default function KidsApp({ initialScreen = 'home' }) {
   const [progress, setProgress] = useState(null) // { streak_count, longest_streak, points, freeze_tokens, last_activity_date, owned_items, equipped_item }
 
   const [screen, setScreen] = useState(initialScreen) // 'home' | 'select' | 'quiz' | 'record' | 'shop' | 'sugoroku' | 'sansu'
+  const answeringRef = useRef(false)
   const [sansuStage, setSansuStage] = useState('setup') // さんすうナビの 'setup' | 'study' | 'result'（学習中は下のメニューを隠す）
   const [backTo, setBackTo] = useState('home') // きろく・ショップ・すごろくの「もどる」先
   const [loadError, setLoadError] = useState(false)
@@ -451,6 +452,7 @@ export default function KidsApp({ initialScreen = 'home' }) {
   }, [screen, mode, sessionQuestions, idx, correctCount, wrongQuestions, isTodayAutoSession])
 
   function goNext() {
+    answeringRef.current = false
     setRevealed(false)
     setChoiceFeedback(null)
     if (mode === 'main') setIdx((v) => v + 1)
@@ -462,53 +464,60 @@ export default function KidsApp({ initialScreen = 'home' }) {
   }
 
   function handleAnswer(isCorrect) {
-    const q = current
-    if (mode === 'main') {
-      creditTodayActivity()
-      if (isCorrect) {
-        const wasStruggling = (q.wrong_count || 0) >= 3 && q.last_correct !== true
-        setCorrectCount((v) => v + 1)
-        addPoints(10)
-        incrementWeeklyMission()
-        if (wasStruggling) {
-          playComeback()
-          celebrate()
-          setStruggleToast(true)
-          setTimeout(() => setStruggleToast(false), 2200)
-          setMascot({ state: 'happy', text: 'にがてだった問題、ついに できたね！！' })
-        } else {
-          playCorrect()
-          setMascot({ state: 'happy', text: HAPPY_LINES[Math.floor(Math.random() * HAPPY_LINES.length)] })
-        }
-      } else {
-        setWrongQuestions((v) => [...v, q])
-        playWrong()
-        setMascot({ state: 'sad', text: 'だいじょうぶ、次で覚えよう' })
-      }
-      recordAnswer({ question: q, isCorrect, sessionType: 'main' })
-        .then((patch) => {
-          if (!patch) return
-          patchQuestionLocal(q.id, patch)
-          if (isCorrect) {
-            const updated = { ...q, ...patch }
-            checkSetCompletion(updated)
-            checkCategoryBadge(updated)
-            checkMasteryProgress(updated)
+    // 次の問題へ進むまでの間（約0.7秒）の連打・二重タップは無視する（問題が飛ばされるのを防ぐ）
+    if (answeringRef.current) return
+    answeringRef.current = true
+    try {
+      const q = current
+      if (mode === 'main') {
+        creditTodayActivity()
+        if (isCorrect) {
+          const wasStruggling = (q.wrong_count || 0) >= 3 && q.last_correct !== true
+          setCorrectCount((v) => v + 1)
+          addPoints(10)
+          incrementWeeklyMission()
+          if (wasStruggling) {
+            playComeback()
+            celebrate()
+            setStruggleToast(true)
+            setTimeout(() => setStruggleToast(false), 2200)
+            setMascot({ state: 'happy', text: 'にがてだった問題、ついに できたね！！' })
+          } else {
+            playCorrect()
+            setMascot({ state: 'happy', text: HAPPY_LINES[Math.floor(Math.random() * HAPPY_LINES.length)] })
           }
-        })
-        .catch(console.error)
-    } else {
-      if (isCorrect) {
-        setReviewCorrect((v) => v + 1)
-        addPoints(5)
-        playCorrect()
-        setMascot({ state: 'happy', text: '今度は できたね！' })
+        } else {
+          setWrongQuestions((v) => [...v, q])
+          playWrong()
+          setMascot({ state: 'sad', text: 'だいじょうぶ、次で覚えよう' })
+        }
+        recordAnswer({ question: q, isCorrect, sessionType: 'main' })
+          .then((patch) => {
+            if (!patch) return
+            patchQuestionLocal(q.id, patch)
+            if (isCorrect) {
+              const updated = { ...q, ...patch }
+              checkSetCompletion(updated)
+              checkCategoryBadge(updated)
+              checkMasteryProgress(updated)
+            }
+          })
+          .catch(console.error)
       } else {
-        setReviewFailed((v) => [...v, q])
-        playWrong()
-        setMascot({ state: 'sad', text: 'もう一回 見直してみよう' })
+        if (isCorrect) {
+          setReviewCorrect((v) => v + 1)
+          addPoints(5)
+          playCorrect()
+          setMascot({ state: 'happy', text: '今度は できたね！' })
+        } else {
+          setReviewFailed((v) => [...v, q])
+          playWrong()
+          setMascot({ state: 'sad', text: 'もう一回 見直してみよう' })
+        }
+        recordAnswer({ question: q, isCorrect, sessionType: 'review' }).catch(console.error)
       }
-      recordAnswer({ question: q, isCorrect, sessionType: 'review' }).catch(console.error)
+    } catch (err) {
+      console.error(err) // 演出などで失敗しても、次の問題へは必ず進める
     }
     setTimeout(goNext, 700)
   }

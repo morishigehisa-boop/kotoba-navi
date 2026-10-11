@@ -15,25 +15,33 @@ export function setMuted(value) {
   try { localStorage.setItem(MUTE_KEY, value ? '1' : '0') } catch {}
 }
 
+// iPhoneは、画面を切りかえたり しばらく放置したりすると AudioContext が止まる／閉じることがある。
+// そのままだと音を鳴らす処理で例外になり、「できた！」の後の処理（次の問題へ）まで止まってしまうので、
+// ここで復帰・作り直しをして、それでも失敗したら音だけあきらめる（アプリの動きは止めない）
 function ac() {
-  if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)()
+  if (!actx || actx.state === 'closed') actx = new (window.AudioContext || window.webkitAudioContext)()
+  if (actx.state !== 'running') actx.resume?.().catch(() => {})
   return actx
 }
 function tone(freq, start, dur, type, gain) {
   if (muted) return
-  const c = ac()
-  const o = c.createOscillator()
-  const g = c.createGain()
-  o.type = type || 'sine'
-  o.frequency.value = freq
-  g.gain.value = 0
-  o.connect(g)
-  g.connect(c.destination)
-  const t0 = c.currentTime + start
-  g.gain.linearRampToValueAtTime(gain || 0.18, t0 + 0.02)
-  g.gain.exponentialRampToValueAtTime(0.001, t0 + dur)
-  o.start(t0)
-  o.stop(t0 + dur + 0.02)
+  try {
+    const c = ac()
+    const o = c.createOscillator()
+    const g = c.createGain()
+    o.type = type || 'sine'
+    o.frequency.value = freq
+    g.gain.value = 0
+    o.connect(g)
+    g.connect(c.destination)
+    const t0 = c.currentTime + start
+    g.gain.linearRampToValueAtTime(gain || 0.18, t0 + 0.02)
+    g.gain.exponentialRampToValueAtTime(0.001, t0 + dur)
+    o.start(t0)
+    o.stop(t0 + dur + 0.02)
+  } catch (e) {
+    console.warn('sound failed', e)
+  }
 }
 export function playCorrect() {
   tone(523, 0, 0.16, 'triangle')
