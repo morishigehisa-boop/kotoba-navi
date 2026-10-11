@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react'
 // ============================================================
 // キャラクター本体（表情はidle/happy/sadの3種、より大げさに）
 // アクセサリーは同じviewBox(0 0 100 100)上の正しい部位に重ねて描画する
@@ -2428,13 +2429,28 @@ const ITEM_FRAGMENTS = {
   )}
 }
 
+const POKES = ['poke-shake', 'poke-hop', 'poke-spin'] // さわったときのリアクション（順番に切りかわる）
+
 export default function Character({ character = 'fox', state, accessory }) {
-  const cls = state === 'happy' ? 'fox happy' : state === 'sad' ? 'fox sad' : 'fox'
-  const body = (BODIES[character] || BODIES.fox)[state] || (BODIES[character] || BODIES.fox).idle
+  const [poke, setPoke] = useState({ n: 0, cls: '' })
+  const timer = useRef(null)
+  useEffect(() => () => clearTimeout(timer.current), [])
+
+  // タップで、ふるえる・はねる・くるっと回る。いっしゅん笑顔になる
+  function handlePoke() {
+    const n = poke.n + 1
+    setPoke({ n, cls: POKES[n % POKES.length] })
+    clearTimeout(timer.current)
+    timer.current = setTimeout(() => setPoke((p) => ({ ...p, cls: '' })), 700)
+  }
+
+  const shown = poke.cls && state !== 'sad' ? 'happy' : state
+  const cls = `${shown === 'happy' ? 'fox happy' : shown === 'sad' ? 'fox sad' : 'fox'} ${poke.cls}`.trim()
+  const body = (BODIES[character] || BODIES.fox)[shown] || (BODIES[character] || BODIES.fox).idle
   const frag = accessory ? ITEM_FRAGMENTS[accessory] : null
 
   return (
-    <div className={cls}>
+    <div className={cls} key={poke.cls ? poke.n : 'base'} onClick={handlePoke} role="button" aria-label="キャラクターをさわる">
       <svg viewBox="0 0 100 100">
         {frag?.back}
         {body}

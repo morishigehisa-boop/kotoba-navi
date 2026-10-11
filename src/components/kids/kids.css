@@ -373,3 +373,13 @@ body { margin: 0; background: var(--bg); }
 .mascot-strip-bubble::before { content: ''; position: absolute; left: -6px; top: 50%; margin-top: -6px; border: 6px solid transparent; border-right-color: var(--card); border-left: 0; }
 @keyframes stripPop { from { transform: scale(.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .mascot-strip-bubble { animation: none; } }
+
+/* キャラをさわったときのリアクション */
+.fox { cursor: pointer; -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none; }
+.fox.poke-shake { animation: pokeShake .5s ease; }
+.fox.poke-hop { animation: pokeHop .55s ease; }
+.fox.poke-spin { animation: pokeSpin .6s ease; }
+@keyframes pokeShake { 0%,100%{transform:translateX(0);} 15%{transform:translateX(-7px) rotate(-6deg);} 35%{transform:translateX(7px) rotate(6deg);} 55%{transform:translateX(-5px) rotate(-4deg);} 75%{transform:translateX(5px) rotate(4deg);} }
+@keyframes pokeHop { 0%{transform:translateY(0) scale(1,1);} 20%{transform:translateY(0) scale(1.1,.88);} 50%{transform:translateY(-20px) scale(.95,1.08);} 80%{transform:translateY(0) scale(1.08,.9);} 100%{transform:translateY(0) scale(1,1);} }
+@keyframes pokeSpin { 0%{transform:rotate(0) scale(1);} 50%{transform:rotate(180deg) scale(1.15);} 100%{transform:rotate(360deg) scale(1);} }
+@media (prefers-reduced-motion: reduce) { .fox.poke-shake, .fox.poke-hop, .fox.poke-spin { animation: none; } }
