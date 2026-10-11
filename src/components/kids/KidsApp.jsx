@@ -637,17 +637,24 @@ export default function KidsApp({ initialScreen = 'home' }) {
         </div>
       )}
 
-      {screen !== 'sugoroku' && screen !== 'home' && (
+      {/* 問題を解いている間は、小さなキャラ＋ふきだしの1行だけ出す（場所をとらずにリアクションできる） */}
+      {(screen === 'quiz' || (screen === 'sansu' && sansuStage === 'study')) && (
+        <div className="mascot-strip">
+          <div className="mascot-strip-fox" key={`${mascot.state}|${mascot.text}`}>
+            <Character character={progress.active_character} state={mascot.state} accessory={progress.equipped_item} />
+          </div>
+          {mascot.text && <div className="mascot-strip-bubble">{mascot.text}</div>}
+        </div>
+      )}
+
+      {screen !== 'sugoroku' && screen !== 'home' && screen !== 'quiz' && !(screen === 'sansu' && sansuStage === 'study') && (
         <>
-          {/* 問題を解いている間は、問題を広く見せるためキャラを出さない（ひとことだけ残す） */}
-          {screen !== 'quiz' && (
-            <div className={`mascot-zone ${progress.active_background ? 'has-room' : ''}`}>
-              {progress.active_background && (
-                <RoomBackground themeId={progress.active_background} height={130} />
-              )}
-              <Character character={progress.active_character} state={mascot.state} accessory={progress.equipped_item} />
-            </div>
-          )}
+          <div className={`mascot-zone ${progress.active_background ? 'has-room' : ''}`}>
+            {progress.active_background && (
+              <RoomBackground themeId={progress.active_background} height={130} />
+            )}
+            <Character character={progress.active_character} state={mascot.state} accessory={progress.equipped_item} />
+          </div>
           <div className="speech">{mascot.text}</div>
         </>
       )}

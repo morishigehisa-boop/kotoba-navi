@@ -364,3 +364,12 @@ body { margin: 0; background: var(--bg); }
 .sansu-result { min-height: 0; padding: 28px 20px; margin-bottom: 8px; }
 .sansu-rate { font-size: 64px; font-weight: 800; color: var(--fox-dark); line-height: 1.1; margin: 22px 0 6px; }
 .sansu-rate small { font-size: 28px; }
+
+/* 学習中の小さなキャラ（1行）。キャラ48px＋ふきだし */
+.mascot-strip { display: flex; align-items: center; gap: 8px; margin: 0 0 12px; min-height: 52px; }
+.mascot-strip-fox { flex: none; width: 52px; height: 52px; }
+.mascot-strip-fox .fox { width: 52px; height: 52px; }
+.mascot-strip-bubble { position: relative; flex: 1; min-width: 0; background: var(--card); border-radius: 14px; padding: 8px 12px; font-size: 13px; font-weight: 700; line-height: 1.4; color: var(--ink-soft); box-shadow: 0 2px 0 #EEDFC0; animation: stripPop .3s ease; }
+.mascot-strip-bubble::before { content: ''; position: absolute; left: -6px; top: 50%; margin-top: -6px; border: 6px solid transparent; border-right-color: var(--card); border-left: 0; }
+@keyframes stripPop { from { transform: scale(.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .mascot-strip-bubble { animation: none; } }
