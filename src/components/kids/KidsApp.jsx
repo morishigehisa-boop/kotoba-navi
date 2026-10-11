@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Character from './Character'
 import Confetti from './Confetti'
 import { addFurigana, setCustomFurigana } from '../../lib/furigana'
-import { playCorrect, playWrong, playFanfareBig, playCharacterUnlock, playItemGet, playLevelUp, playBadgeGet, playComeback, isMuted, setMuted } from '../../lib/sound'
+import { playTaskDone, playTaskAllDone, playCorrect, playWrong, playFanfareBig, playCharacterUnlock, playItemGet, playLevelUp, playBadgeGet, playComeback, isMuted, setMuted } from '../../lib/sound'
 import { fetchQuestions, fetchQuestionSetsWithItems, recordAnswer, fetchProgress, updateProgress, fetchFuriganaEntries } from '../../lib/api'
 import { buildTodaySet, buildOverdueSet } from '../../lib/today'
 import {
@@ -380,10 +380,10 @@ export default function KidsApp({ initialScreen = 'home' }) {
       return
     }
     addPoints(TASK_POINTS)
-    playCorrect()
+    playTaskDone()
     if (allTodayDone && claimTaskBonus()) {
       addPoints(TASK_ALL_DONE_BONUS)
-      playFanfareBig()
+      playTaskAllDone()
       celebrate()
     }
   }

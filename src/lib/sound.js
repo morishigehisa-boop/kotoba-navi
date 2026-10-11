@@ -54,6 +54,20 @@ export function playFanfareBig() {
   tone(392, 0.02, 0.6, 'sine', 0.1) // 低音の支え
 }
 
+// ホームのやること完了用（ことばナビの正解音とは別）：ベルのような「ちりん♪」
+export function playTaskDone() {
+  tone(988, 0, 0.12, 'sine', 0.2) // B5
+  tone(1319, 0.09, 0.3, 'sine', 0.18) // E6
+  tone(2637, 0.09, 0.2, 'sine', 0.05) // きらめき
+}
+// ホームの今日の分をぜんぶ終えたとき用：上がっていく鐘のようなアルペジオ
+export function playTaskAllDone() {
+  const notes = [784, 988, 1175, 1568, 1976] // G5 B5 D6 G6 B6
+  notes.forEach((f, i) => { tone(f, i * 0.11, 0.4, 'sine', 0.2); tone(f * 2, i * 0.11, 0.2, 'sine', 0.04) })
+  tone(2349, 0.6, 0.6, 'sine', 0.12) // D7
+  tone(392, 0, 0.8, 'triangle', 0.08)
+}
+
 // 新しいキャラクター解放
 export function playCharacterUnlock() {
   const notes = [659, 784, 988, 1175] // E5 G5 B5 D6
