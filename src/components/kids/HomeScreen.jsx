@@ -127,13 +127,6 @@ export default function HomeScreen({ character, accessory, pendingSession, onRes
       {loadFailed && <ErrorView message="やることを ひらけなかったよ" onRetry={load} />}
       {!loadFailed && tasks === null && <LoadingView />}
 
-      {groups.map(([subject, list]) => (
-        <section key={subject} className="task-group">
-          <div className="task-subject" style={subjectStyle(subject)}>{SUBJECT_EMOJI[subject]} {subject}</div>
-          {list.map((item) => <TaskRow key={`${item.task.id}|${item.date}`} item={item} {...rowProps} />)}
-        </section>
-      ))}
-
       {lateItems.length > 0 && (
         <section className="task-group late-group">
           <button className="late-toggle" aria-expanded={lateIsOpen} onClick={() => setLateOpen(!lateIsOpen)}>
@@ -148,6 +141,13 @@ export default function HomeScreen({ character, accessory, pendingSession, onRes
           ))}
         </section>
       )}
+
+      {groups.map(([subject, list]) => (
+        <section key={subject} className="task-group">
+          <div className="task-subject" style={subjectStyle(subject)}>{SUBJECT_EMOJI[subject]} {subject}</div>
+          {list.map((item) => <TaskRow key={`${item.task.id}|${item.date}`} item={item} {...rowProps} />)}
+        </section>
+      ))}
 
       {upcoming.length > 0 && (
         <section className="task-group">
