@@ -14,6 +14,7 @@ export default function TasksPanel() {
   const [form, setForm] = useState(emptyForm())
   const [editingId, setEditingId] = useState(null)
   const [saving, setSaving] = useState(false)
+  const [filterSubjects, setFilterSubjects] = useState(SUBJECTS) // 一覧に出す教科（すべてONからスタート）
   const [dragId, setDragId] = useState(null)
   const [dragOverId, setDragOverId] = useState(null)
   const [confirm, confirmModal] = useConfirm()
@@ -28,6 +29,11 @@ export default function TasksPanel() {
   }
 
   useEffect(firstLoad, [])
+
+  const visible = tasks.filter((t) => filterSubjects.includes(t.subject))
+  const allOn = filterSubjects.length === SUBJECTS.length
+  const toggleFilter = (sub) =>
+    setFilterSubjects((p) => (p.includes(sub) ? p.filter((x) => x !== sub) : [...p, sub]))
 
   const set = (patch) => setForm((f) => ({ ...f, ...patch }))
   const toggleWeekday = (d) =>
@@ -96,11 +102,14 @@ export default function TasksPanel() {
     applyOrder(next)
   }
 
-  function moveByOffset(index, offset) {
-    const target = index + offset
-    if (target < 0 || target >= tasks.length) return
+  // 教科で絞っているときは、画面に見えている前後のやることと入れ替える
+  function moveByOffset(visibleIndex, offset) {
+    const targetVisible = visible[visibleIndex + offset]
+    if (!targetVisible) return
+    const from = tasks.findIndex((t) => t.id === visible[visibleIndex].id)
+    const to = tasks.findIndex((t) => t.id === targetVisible.id)
     const next = [...tasks]
-    ;[next[index], next[target]] = [next[target], next[index]]
+    ;[next[from], next[to]] = [next[to], next[from]]
     applyOrder(next)
   }
 
@@ -183,15 +192,25 @@ export default function TasksPanel() {
       </div>
 
       <div className="card">
-        <h2>登録ずみのやること（{tasks.length}件）</h2>
+        <h2>登録ずみのやること（{allOn ? `${tasks.length}件` : `${visible.length}/${tasks.length}件`}）</h2>
+        <div className="cal-filter">
+          <span className="cal-filter-label">教科:</span>
+          {/* 全教科ONのときに押すと全部OFF、それ以外は全部ON */}
+          <button className={`cal-chip ${allOn ? 'on' : ''}`} onClick={() => setFilterSubjects(allOn ? [] : SUBJECTS)}>すべて</button>
+          {SUBJECTS.map((sub) => (
+            <button key={sub} className={`cal-chip ${filterSubjects.includes(sub) ? 'on' : ''}`} style={{ '--c': SUBJECT_COLORS[sub]?.main }} onClick={() => toggleFilter(sub)}>
+              {SUBJECT_EMOJI[sub]} {sub}
+            </button>
+          ))}
+        </div>
         <p className="lead" style={{ marginBottom: 10 }}>行をドラッグ&ドロップするか、▲▼で順番を変えられます。子どもの画面では、同じ教科の中でこの順に並びます。</p>
-        {loading ? <LoadingView /> : loadFailed ? <ErrorView onRetry={firstLoad} /> : tasks.length === 0 ? <p className="empty">まだ登録がありません</p> : (
+        {loading ? <LoadingView /> : loadFailed ? <ErrorView onRetry={firstLoad} /> : tasks.length === 0 ? <p className="empty">まだ登録がありません</p> : visible.length === 0 ? <p className="empty">この教科のやることはありません</p> : (
           <table>
             <thead>
               <tr><th></th><th>教科</th><th>やること</th><th>くり返し</th><th>期日</th><th>終了日</th><th>表示</th><th></th></tr>
             </thead>
             <tbody>
-              {tasks.map((t, index) => {
+              {visible.map((t, index) => {
                 const finished = t.end_date && t.end_date < today
                 return (
                   <tr
@@ -221,7 +240,7 @@ export default function TasksPanel() {
                     <td>
                       <div className="row-actions">
                         <button className="btn btn-secondary" style={{ padding: '6px 10px', fontSize: 12 }} disabled={index === 0} onClick={() => moveByOffset(index, -1)} title="上へ">▲</button>
-                        <button className="btn btn-secondary" style={{ padding: '6px 10px', fontSize: 12 }} disabled={index === tasks.length - 1} onClick={() => moveByOffset(index, 1)} title="下へ">▼</button>
+                        <button className="btn btn-secondary" style={{ padding: '6px 10px', fontSize: 12 }} disabled={index === visible.length - 1} onClick={() => moveByOffset(index, 1)} title="下へ">▼</button>
                         <button className="btn btn-secondary" style={{ padding: '6px 12px', fontSize: 12 }} onClick={() => startEdit(t)}>編集</button>
                         <button className="btn btn-danger" onClick={() => handleDelete(t)}>削除</button>
                       </div>
