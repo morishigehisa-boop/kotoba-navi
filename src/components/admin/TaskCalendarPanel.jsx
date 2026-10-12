@@ -64,7 +64,12 @@ export default function TaskCalendarPanel() {
     milestones.forEach((m) => map.set(m.event_date, [...(map.get(m.event_date) || []), m]))
     return map
   }, [milestones])
-  const rangeEvents = milestones.filter((m) => m.event_date >= days[0].iso && m.event_date <= days[days.length - 1].iso)
+  // 上の黄色い帯は、表示中の期間に関係なく「今日から1ヶ月先まで」のイベントを出す
+  const upcomingEvents = useMemo(() => {
+    const [y, m, d] = todayISO.split('-').map(Number)
+    const limit = toISODate(new Date(y, m, d)) // 1ヶ月後の同じ日
+    return milestones.filter((e) => e.event_date >= todayISO && e.event_date <= limit)
+  }, [milestones, todayISO])
   const daysUntil = (iso) => Math.round((new Date(iso) - new Date(todayISO)) / 86400000)
 
   const allOn = subjects.length === SUBJECTS.length
@@ -75,13 +80,13 @@ export default function TaskCalendarPanel() {
 
   return (
     <div>
-      {/* マイルストーン：表示中の期間にあるイベントを、カレンダーの上に並べる */}
+      {/* マイルストーン：今日から1ヶ月先までのイベントを、カレンダーの上に並べる */}
       <div className="ms-bar">
         <div className="ms-list">
-          {rangeEvents.length === 0 ? (
-            <span className="ms-none">この期間のイベントはありません</span>
+          {upcomingEvents.length === 0 ? (
+            <span className="ms-none">今後1ヶ月のイベントはありません</span>
           ) : (
-            rangeEvents.map((m) => {
+            upcomingEvents.map((m) => {
               const n = daysUntil(m.event_date)
               const [, mo, d] = m.event_date.split('-').map(Number)
               return (
