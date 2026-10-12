@@ -268,3 +268,21 @@ a.area-btn { text-decoration: none; display: inline-block; }
 .cal-range { display: flex; gap: 6px; margin-left: auto; }
 @media (max-width: 900px) { .cal-grid, .cal-grid.r7, .cal-grid.r30 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 480px) { .cal-grid, .cal-grid.r7, .cal-grid.r30 { grid-template-columns: 1fr; } .cal-range { margin-left: 0; } }
+
+/* マイルストーン（イベント） */
+.ms-bar { display: flex; align-items: flex-start; gap: 10px; background: #FFF8E6; border: 1px solid #F2DFA6; border-radius: 12px; padding: 10px 12px; margin-bottom: 12px; }
+.ms-list { flex: 1; min-width: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.ms-none { font-size: 13px; color: #A39565; padding: 4px 0; }
+.ms-chip { font-size: 13px; font-weight: 800; color: #5C4A0B; background: #fff; border: 1px solid #F2DFA6; border-radius: 16px; padding: 5px 12px; }
+.ms-left { margin-left: 8px; color: #E36A1E; font-size: 12px; }
+.ms-manage { flex: none; white-space: nowrap; }
+.ms-panel { margin-bottom: 12px; }
+.ms-form { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 10px; }
+.ms-form input[type=text] { flex: 1; min-width: 160px; }
+.ms-items { list-style: none; margin: 0; padding: 0; }
+.ms-items li { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-top: 1px solid #EFEDE4; font-size: 14px; }
+.ms-items li.past { opacity: .5; }
+.ms-items-date { flex: none; font-weight: 700; color: #5A5749; }
+.ms-items-title { flex: 1; min-width: 0; word-break: break-all; }
+.cal-event { font-size: 12px; font-weight: 800; color: #5C4A0B; background: #FFE9A8; border-radius: 6px; padding: 4px 7px; margin-bottom: 4px; word-break: break-all; }
+@media (max-width: 600px) { .ms-bar { flex-direction: column; } .ms-manage { align-self: flex-end; } }

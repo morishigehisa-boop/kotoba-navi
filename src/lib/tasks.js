@@ -180,3 +180,35 @@ export async function uncompleteTask(taskId, occurrenceDate) {
   const { error } = await supabase.from('task_completions').delete().eq('task_id', taskId).eq('occurrence_date', occurrenceDate)
   if (error) throw error
 }
+
+// ---- マイルストーン（テスト・行事などの目標日）。予定カレンダーの上に表示する ----
+// 件数は少ない想定だが、1,000行上限に当たらないよう .range() でページ分けして取る
+export async function fetchMilestones() {
+  const PAGE = 1000
+  let all = []
+  let from = 0
+  while (true) {
+    const { data, error } = await supabase
+      .from('milestones')
+      .select('id, event_date, title')
+      .order('event_date', { ascending: true })
+      .order('id', { ascending: true })
+      .range(from, from + PAGE - 1)
+    if (error) throw error
+    all = all.concat(data)
+    if (data.length < PAGE) break
+    from += PAGE
+  }
+  return all
+}
+
+export async function saveMilestone({ event_date, title }, id) {
+  const q = id ? supabase.from('milestones').update({ event_date, title }).eq('id', id) : supabase.from('milestones').insert({ event_date, title })
+  const { error } = await q
+  if (error) throw error
+}
+
+export async function deleteMilestone(id) {
+  const { error } = await supabase.from('milestones').delete().eq('id', id)
+  if (error) throw error
+}

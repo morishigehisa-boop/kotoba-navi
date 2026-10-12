@@ -170,3 +170,17 @@ create table if not exists public.task_completions (
 -- RLS: 管理画面・子ども画面ともログインなし(anon)のため、他テーブルと同じ方針で anon に書き込みを許可
 alter table public.tasks enable row level security;
 alter table public.task_completions enable row level security;
+
+-- マイルストーン（テスト・行事などの目標日。管理画面の予定カレンダーに表示）
+create table if not exists milestones (
+  id bigint generated always as identity primary key,
+  event_date date not null,
+  title text not null,
+  created_at timestamptz not null default now()
+);
+create index if not exists milestones_event_date_idx on milestones (event_date);
+alter table milestones enable row level security;
+create policy "milestones anon select" on milestones for select to anon, authenticated using (true);
+create policy "milestones anon insert" on milestones for insert to anon, authenticated with check (true);
+create policy "milestones anon update" on milestones for update to anon, authenticated using (true) with check (true);
+create policy "milestones anon delete" on milestones for delete to anon, authenticated using (true);
