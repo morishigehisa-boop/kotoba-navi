@@ -239,3 +239,23 @@ tr.reviewed-row td { background: #F4FAF6; }
 .area-btn { font-family: inherit; font-size: 15px; font-weight: 700; padding: 10px 20px; border-radius: 12px; border: 1px solid #DEDBD0; background: #fff; color: #5A5749; cursor: pointer; }
 .area-btn.active { background: #E36A1E; border-color: #E36A1E; color: #fff; }
 a.area-btn { text-decoration: none; display: inline-block; }
+
+/* ===== やること予定カレンダー ===== */
+.cal-filter { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 8px; }
+.cal-filter-label { font-size: 13px; font-weight: 700; color: #5A5749; }
+.cal-chip { --c: #5A5749; font-family: inherit; font-size: 14px; font-weight: 700; min-height: 40px; padding: 0 14px; border-radius: 20px; border: 2px solid #DEDBD0; background: #fff; color: #8A8678; cursor: pointer; }
+.cal-chip.on { border-color: var(--c); background: var(--c); color: #fff; }
+.cal-note { margin: 0 0 14px; font-size: 12px; color: #8A8678; line-height: 1.6; }
+.cal-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
+.cal-day { background: #fff; border: 1px solid #E4E2D9; border-radius: 12px; padding: 8px; min-height: 96px; }
+.cal-day.today { border: 2px solid #E36A1E; background: #FFF8F0; }
+.cal-day-head { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 800; color: #3A3A32; margin-bottom: 6px; }
+.cal-day.sat .cal-day-head > span:first-child { color: #3B82D6; }
+.cal-day.sun .cal-day-head > span:first-child { color: #E5484D; }
+.cal-today-badge { font-size: 10px; background: #E36A1E; color: #fff; border-radius: 8px; padding: 1px 6px; }
+.cal-count { margin-left: auto; font-size: 11px; font-weight: 700; color: #8A8678; }
+.cal-empty { font-size: 12px; color: #B5B2A6; text-align: center; padding: 10px 0; }
+.cal-task { --c: #888; --soft: #eee; font-size: 12px; font-weight: 700; line-height: 1.35; color: #3A3A32; background: var(--soft); border-left: 4px solid var(--c); border-radius: 6px; padding: 5px 7px; margin-bottom: 4px; word-break: break-all; }
+.cal-task.done { opacity: .45; text-decoration: line-through; }
+@media (max-width: 900px) { .cal-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 480px) { .cal-grid { grid-template-columns: 1fr; } }
