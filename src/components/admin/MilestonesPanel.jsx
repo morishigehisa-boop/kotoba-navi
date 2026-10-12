@@ -13,6 +13,7 @@ export default function MilestonesPanel() {
   const [form, setForm] = useState(emptyForm())
   const [editingId, setEditingId] = useState(null)
   const [saving, setSaving] = useState(false)
+  const [formOpen, setFormOpen] = useState(false) // 登録・編集のポップアップ
   const [confirm, confirmModal] = useConfirm()
   const [notify, toastEl] = useToast()
   const todayISO = toISODate()
@@ -23,9 +24,23 @@ export default function MilestonesPanel() {
   }
   useEffect(load, [])
 
-  function resetForm() {
+  // ポップアップを閉じて、入力をもとに戻す
+  function closeForm() {
     setEditingId(null)
     setForm(emptyForm())
+    setFormOpen(false)
+  }
+
+  function startNew() {
+    setEditingId(null)
+    setForm(emptyForm())
+    setFormOpen(true)
+  }
+
+  function startEdit(m) {
+    setEditingId(m.id)
+    setForm({ event_date: m.event_date, title: m.title })
+    setFormOpen(true)
   }
 
   async function submit(e) {
@@ -37,8 +52,7 @@ export default function MilestonesPanel() {
       await saveMilestone({ event_date: form.event_date, title }, editingId)
       setMilestones(await fetchMilestones())
       notify(editingId ? 'イベントを更新しました' : 'イベントを登録しました')
-      setEditingId(null)
-      setForm({ event_date: form.event_date, title: '' }) // 続けて同じ日に登録しやすいよう、日付は残す
+      closeForm()
     } catch (err) {
       notify(`保存に失敗しました：${err.message}`)
     } finally {
@@ -51,7 +65,7 @@ export default function MilestonesPanel() {
     try {
       await deleteMilestone(m.id)
       setMilestones((p) => p.filter((x) => x.id !== m.id))
-      if (editingId === m.id) resetForm()
+      if (editingId === m.id) closeForm()
     } catch (err) {
       notify(`削除に失敗しました：${err.message}`)
     }
@@ -63,18 +77,30 @@ export default function MilestonesPanel() {
   return (
     <div>
       <p className="lead">テストや行事など、目標になる日を登録します。「予定カレンダー」の上に表示されます。</p>
-      <div className="card">
-        <h2>{editingId ? 'イベントを編集' : 'イベントを登録'}</h2>
-        <form className="ms-form" onSubmit={submit}>
-          <input type="date" value={form.event_date} onChange={(e) => setForm({ ...form, event_date: e.target.value })} />
-          <input type="text" placeholder="イベント名（例：漢字テスト）" maxLength={40} value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
-          <button className="btn btn-primary" disabled={saving}>{editingId ? '更新する' : '登録する'}</button>
-          {editingId && <button type="button" className="btn btn-secondary" onClick={resetForm}>やめる</button>}
-        </form>
-      </div>
+      {formOpen && (
+        // 入力途中の内容が消えないよう、外側をタップしても閉じない（「キャンセル」で閉じる）
+        <div className="modal-backdrop">
+          <form className="modal" style={{ maxWidth: 480 }} onSubmit={submit}>
+            <h2>{editingId ? 'イベントを編集' : 'イベントを登録'}</h2>
+            <div className="ms-form-fields">
+              <label className="f-label">日付</label>
+              <input type="date" value={form.event_date} onChange={(e) => setForm({ ...form, event_date: e.target.value })} />
+              <label className="f-label">イベント名</label>
+              <input type="text" placeholder="例：漢字テスト" maxLength={40} value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} autoFocus />
+            </div>
+            <div className="modal-actions">
+              <button type="button" className="btn btn-secondary" onClick={closeForm}>キャンセル</button>
+              <button className="btn btn-primary" disabled={saving}>{editingId ? '更新する' : '登録する'}</button>
+            </div>
+          </form>
+        </div>
+      )}
 
       <div className="card">
-        <h2>登録ずみのイベント（{milestones.length}件）</h2>
+        <div className="task-list-head">
+          <h2>登録ずみのイベント（{milestones.length}件）</h2>
+          <button className="btn btn-primary" onClick={startNew}>＋ イベントを登録</button>
+        </div>
         {milestones.length === 0 ? (
           <p className="empty">まだイベントがありません</p>
         ) : (
@@ -83,7 +109,7 @@ export default function MilestonesPanel() {
               <li key={m.id} className={m.event_date < todayISO ? 'past' : ''}>
                 <span className="ms-items-date">{m.event_date}</span>
                 <span className="ms-items-title">{m.title}</span>
-                <button className="btn btn-secondary" style={{ padding: '6px 12px', fontSize: 12 }} onClick={() => { setEditingId(m.id); setForm({ event_date: m.event_date, title: m.title }) }}>編集</button>
+                <button className="btn btn-secondary" style={{ padding: '6px 12px', fontSize: 12 }} onClick={() => startEdit(m)}>編集</button>
                 <button className="btn btn-danger" onClick={() => remove(m)}>削除</button>
               </li>
             ))}

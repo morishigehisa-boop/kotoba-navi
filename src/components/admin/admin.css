@@ -288,3 +288,6 @@ a.area-btn { text-decoration: none; display: inline-block; }
 
 .task-list-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
 .task-list-head h2 { margin: 0; }
+
+.ms-form-fields { display: grid; gap: 6px; }
+.ms-form-fields input { width: 100%; font-family: inherit; font-size: 14px; padding: 8px 10px; border-radius: 8px; border: 1px solid #DEDBD0; background: #FAF9F5; margin-bottom: 8px; }
