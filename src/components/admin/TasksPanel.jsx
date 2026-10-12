@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { SUBJECTS, SUBJECT_EMOJI, SUBJECT_COLORS, FREQUENCIES, WEEKDAY_LABELS, toISODate, describeSchedule, fetchTasks, saveTask, deleteTask, reorderTasks } from '../../lib/tasks'
 import { LoadingView, ErrorView } from '../common/Status'
+import { useSubjectFilter } from './useSubjectFilter'
 import { useConfirm } from './useConfirm'
 import { useToast } from './useToast'
 
@@ -14,7 +15,7 @@ export default function TasksPanel() {
   const [form, setForm] = useState(emptyForm())
   const [editingId, setEditingId] = useState(null)
   const [saving, setSaving] = useState(false)
-  const [filterSubjects, setFilterSubjects] = useState(SUBJECTS) // 一覧に出す教科（すべてONからスタート）
+  const [filterSubjects, setFilterSubjects] = useSubjectFilter('kotoba_navi_admin_tasks_subjects') // 一覧に出す教科（前回の選択を引き継ぐ）
   const [dragId, setDragId] = useState(null)
   const [dragOverId, setDragOverId] = useState(null)
   const [confirm, confirmModal] = useConfirm()

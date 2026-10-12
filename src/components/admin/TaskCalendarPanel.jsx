@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { SUBJECTS, SUBJECT_EMOJI, WEEKDAY_LABELS, subjectStyle, toISODate, occursOn, fetchTasks, fetchTaskCompletions, fetchMilestones } from '../../lib/tasks'
 import { LoadingView, ErrorView } from '../common/Status'
+import { useSubjectFilter } from './useSubjectFilter'
 
 const RANGES = [7, 10, 30] // ひょうじする日数の選びかた
 const RANGE_KEY = 'kotoba_navi_admin_cal_range'
@@ -24,7 +25,7 @@ export default function TaskCalendarPanel() {
   const [completions, setCompletions] = useState([])
   const [milestones, setMilestones] = useState([])
   const [failed, setFailed] = useState(false)
-  const [subjects, setSubjects] = useState(SUBJECTS) // 表示する教科（すべてONからスタート）
+  const [subjects, setSubjects] = useSubjectFilter('kotoba_navi_admin_cal_subjects') // 表示する教科（前回の選択を引き継ぐ）
   const [range, setRangeState] = useState(() => {
     try { const n = Number(localStorage.getItem(RANGE_KEY)); return RANGES.includes(n) ? n : 10 } catch { return 10 }
   })
