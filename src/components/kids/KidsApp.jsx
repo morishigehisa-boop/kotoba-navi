@@ -94,8 +94,9 @@ export default function KidsApp({ initialScreen = 'home' }) {
   const [allSets, setAllSets] = useState([])
   const [progress, setProgress] = useState(null) // { streak_count, longest_streak, points, freeze_tokens, last_activity_date, owned_items, equipped_item }
 
-  const [screen, setScreen] = useState(initialScreen) // 'home' | 'select' | 'quiz' | 'record' | 'shop' | 'sugoroku' | 'sansu'
+  const [screen, setScreen] = useState(initialScreen) // 'home' | 'select' | 'quiz' | 'record' | 'shop' | 'sansu'
   const answeringRef = useRef(false)
+  const [recordTab, setRecordTab] = useState('record') // きろく画面の中の切り替え：'record'（がんばり記録）／'sugoroku'
   const [sansuStage, setSansuStage] = useState('setup') // さんすうナビの 'setup' | 'study' | 'result'（学習中は下のメニューを隠す）
   const [backTo, setBackTo] = useState('home') // きろく・ショップ・すごろくの「もどる」先
   const [loadError, setLoadError] = useState(false)
@@ -612,7 +613,7 @@ export default function KidsApp({ initialScreen = 'home' }) {
 
   // 学習中（ことばナビの出題・さんすうナビの出題）は、下のメニューを隠して集中できるようにする
   const showNav = !(screen === 'quiz' && !finished) && !(screen === 'sansu' && sansuStage === 'study')
-  const navActive = { home: 'home', select: 'kotoba', quiz: 'kotoba', sugoroku: 'kotoba', sansu: 'sansu', record: 'record', shop: 'shop' }[screen]
+  const navActive = { home: 'home', select: 'kotoba', quiz: 'kotoba', sansu: 'sansu', record: 'record', shop: 'shop' }[screen]
 
   return (
     <div className={`app ${showNav ? 'has-nav' : ''}`}>
@@ -656,7 +657,7 @@ export default function KidsApp({ initialScreen = 'home' }) {
         </div>
       )}
 
-      {screen !== 'sugoroku' && screen !== 'home' && screen !== 'quiz' && !(screen === 'sansu' && sansuStage === 'study') && (
+      {!(screen === 'record' && recordTab === 'sugoroku') && screen !== 'home' && screen !== 'quiz' && !(screen === 'sansu' && sansuStage === 'study') && (
         <>
           <div className={`mascot-zone ${progress.active_background ? 'has-room' : ''}`}>
             {progress.active_background && (
@@ -702,21 +703,28 @@ export default function KidsApp({ initialScreen = 'home' }) {
             // 管理画面でランダム出題がオンの問題集は、開くたびに順番を入れ替える
             startSet(list, { isToday: false, randomize: !!set.shuffle })
           }}
-          onShowSugoroku={() => openFrom('sugoroku')}
           pendingSession={pendingSession}
           onResumeSession={resumeSession}
           onDismissSession={dismissPendingSession}
         />
       )}
 
-      {screen === 'record' && <RecordScreen questions={questions} onBack={() => setScreen(backTo)} />}
-
-      {screen === 'sugoroku' && (
-        <SugorokuScreen
-          masteryEventTotal={progress.mastery_event_total || 0}
-          characterEmoji={CHARACTERS.find((c) => c.id === progress.active_character)?.emoji || '🦊'}
-          onBack={() => setScreen(backTo)}
-        />
+      {screen === 'record' && (
+        <>
+          <div className="sub-tabs" role="tablist">
+            <button role="tab" aria-selected={recordTab === 'record'} className={`sub-tab ${recordTab === 'record' ? 'on' : ''}`} onClick={() => setRecordTab('record')}>📊 がんばり記録</button>
+            <button role="tab" aria-selected={recordTab === 'sugoroku'} className={`sub-tab ${recordTab === 'sugoroku' ? 'on' : ''}`} onClick={() => setRecordTab('sugoroku')}>🗺️ すごろく</button>
+          </div>
+          {recordTab === 'record' ? (
+            <RecordScreen questions={questions} onBack={() => setScreen(backTo)} />
+          ) : (
+            <SugorokuScreen
+              masteryEventTotal={progress.mastery_event_total || 0}
+              characterEmoji={CHARACTERS.find((c) => c.id === progress.active_character)?.emoji || '🦊'}
+              onBack={() => setScreen(backTo)}
+            />
+          )}
+        </>
       )}
 
       {screen === 'shop' && (
@@ -838,7 +846,7 @@ function QuitConfirmModal({ onCancel, onQuit }) {
   )
 }
 
-function SelectScreen({ today, overdue, staticSets, questionsById, title, freezeTokens, weeklyCorrectCount, weeklyMissionsClaimed, onStartToday, onStartOverdue, onStartSet, onShowSugoroku, pendingSession, onResumeSession, onDismissSession }) {
+function SelectScreen({ today, overdue, staticSets, questionsById, title, freezeTokens, weeklyCorrectCount, weeklyMissionsClaimed, onStartToday, onStartOverdue, onStartSet, pendingSession, onResumeSession, onDismissSession }) {
   const todaySub =
     today.picked.length === 0
       ? 'きょうは やることなし！'
@@ -907,15 +915,6 @@ function SelectScreen({ today, overdue, staticSets, questionsById, title, freeze
           <div className="mission-title"><span>📅 今週のミッション</span><span className="mission-done">ぜんぶ たっせい！🎉</span></div>
         </div>
       )}
-
-      <div className="two-col" style={{ gridTemplateColumns: '1fr' }}>
-        <button className="set-card sugoroku-card" onClick={onShowSugoroku}>
-          <div className="set-icon sugoroku-icon">🗺️</div>
-          <div className="set-body">
-            <div className="set-name">すごろく</div>
-          </div>
-        </button>
-      </div>
 
       <div className="set-heading" style={{ marginTop: 18 }}>
         問題集をえらんでね

@@ -399,3 +399,8 @@ body { margin: 0; background: var(--bg); }
 .home .resume-text { flex: 1; min-width: 0; margin: 0; font-size: 13px; }
 .resume-go { flex: none; min-height: 44px; padding: 0 16px; border: none; border-radius: 12px; background: #4A6FBF; color: #fff; font-family: inherit; font-size: 14px; font-weight: 800; cursor: pointer; box-shadow: 0 3px 0 #345296; }
 .resume-go:active { transform: translateY(2px); box-shadow: 0 1px 0 #345296; }
+
+/* きろく画面の中の切り替え（がんばり記録／すごろく） */
+.sub-tabs { display: flex; gap: 8px; margin-bottom: 14px; }
+.sub-tab { flex: 1; min-height: 48px; border: 2px solid #E8DCC0; border-radius: 16px; background: #fff; color: var(--ink-soft); font-family: inherit; font-size: 15px; font-weight: 800; cursor: pointer; }
+.sub-tab.on { background: var(--fox); border-color: var(--fox); color: #fff; box-shadow: 0 3px 0 var(--fox-dark); }
