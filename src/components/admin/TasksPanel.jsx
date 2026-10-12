@@ -50,7 +50,7 @@ export default function TasksPanel() {
     setFormOpen(false)
   }
 
-  // 登録ずみのやることをコピーした入力内容で、新規登録のポップアップを開く（内容を変えて登録できる）
+  // 登録済みのやることをコピーした入力内容で、新規登録のポップアップを開く（内容を変えて登録できる）
   function startDuplicate(t) {
     setForm({ subject: t.subject, title: t.title, due_date: t.due_date, frequency: t.frequency, weekdays: t.weekdays || [], end_date: t.end_date || '', link_to: t.link_to || '' })
     setEditingId(null)
@@ -123,17 +123,6 @@ export default function TasksPanel() {
     applyOrder(next)
   }
 
-  // 教科で絞っているときは、画面に見えている前後のやることと入れ替える
-  function moveByOffset(visibleIndex, offset) {
-    const targetVisible = visible[visibleIndex + offset]
-    if (!targetVisible) return
-    const from = tasks.findIndex((t) => t.id === visible[visibleIndex].id)
-    const to = tasks.findIndex((t) => t.id === targetVisible.id)
-    const next = [...tasks]
-    ;[next[from], next[to]] = [next[to], next[from]]
-    applyOrder(next)
-  }
-
   async function toggleActive(t) {
     try {
       await saveTask({ is_active: !t.is_active }, t.id)
@@ -180,13 +169,13 @@ export default function TasksPanel() {
                 <input type="date" className="task-date" value={form.due_date} onChange={(e) => set({ due_date: e.target.value })} />
               </div>
               <div>
-                <label className="f-label">くり返し</label>
+                <label className="f-label">繰り返し</label>
                 <select value={form.frequency} onChange={(e) => set({ frequency: e.target.value })}>
                   {FREQUENCIES.map((f) => <option key={f.value} value={f.value}>{f.label}</option>)}
                 </select>
               </div>
               <div>
-                <label className="f-label">開く先（ホームの「はじめる」ボタン）</label>
+                <label className="f-label">開く先（ホームの「始める」ボタン）</label>
                 <select value={form.link_to} onChange={(e) => set({ link_to: e.target.value })}>
                   <option value="">なし</option>
                   <option value="kotoba">📚 ことばナビ</option>
@@ -195,7 +184,7 @@ export default function TasksPanel() {
               </div>
               {form.frequency === 'weekly' && (
                 <div className="task-form-wide">
-                  <label className="f-label">曜日（複数えらべます。未選択なら期日の曜日）</label>
+                  <label className="f-label">曜日（複数選べます。未選択なら期日の曜日）</label>
                   <div className="weekday-row">
                     {WEEKDAY_LABELS.map((w, d) => (
                       <button key={d} type="button" className={`weekday-chip ${form.weekdays.includes(d) ? 'on' : ''}`} onClick={() => toggleWeekday(d)}>{w}</button>
@@ -205,7 +194,7 @@ export default function TasksPanel() {
               )}
               {form.frequency !== 'once' && (
                 <div>
-                  <label className="f-label">終了日（空なら、ずっと続く）</label>
+                  <label className="f-label">終了日（空なら無期限）</label>
                   <input type="date" className="task-date" value={form.end_date} min={form.due_date} onChange={(e) => set({ end_date: e.target.value })} />
                 </div>
               )}
@@ -220,7 +209,7 @@ export default function TasksPanel() {
 
       <div className="card">
         <div className="task-list-head">
-          <h2>登録ずみのやること（{allOn ? `${tasks.length}件` : `${visible.length}/${tasks.length}件`}）</h2>
+          <h2>登録済みのやること（{allOn ? `${tasks.length}件` : `${visible.length}/${tasks.length}件`}）</h2>
           <button className="btn btn-primary" onClick={startNew}>＋ やることを登録</button>
         </div>
         <div className="cal-filter">
@@ -233,14 +222,14 @@ export default function TasksPanel() {
             </button>
           ))}
         </div>
-        <p className="lead" style={{ marginBottom: 10 }}>行をドラッグ&ドロップするか、▲▼で順番を変えられます。子どもの画面では、同じ教科の中でこの順に並びます。</p>
+        <p className="lead" style={{ marginBottom: 10 }}>行をドラッグ&ドロップして順番を変えられます。子どもの画面では、同じ教科の中でこの順に並びます。</p>
         {loading ? <LoadingView /> : loadFailed ? <ErrorView onRetry={firstLoad} /> : tasks.length === 0 ? <p className="empty">まだ登録がありません</p> : visible.length === 0 ? <p className="empty">この教科のやることはありません</p> : (
           <table>
             <thead>
-              <tr><th></th><th>教科</th><th>やること</th><th>くり返し</th><th>期日</th><th>終了日</th><th>表示</th><th></th></tr>
+              <tr><th></th><th>教科</th><th>やること</th><th>繰り返し</th><th>期日</th><th>終了日</th><th>表示</th><th></th></tr>
             </thead>
             <tbody>
-              {visible.map((t, index) => {
+              {visible.map((t) => {
                 const finished = t.end_date && t.end_date < today
                 return (
                   <tr
@@ -264,13 +253,11 @@ export default function TasksPanel() {
                     <td>{t.end_date || '—'}{finished ? '（終了）' : ''}</td>
                     <td>
                       <button className="btn btn-secondary" style={{ padding: '6px 12px', fontSize: 12 }} onClick={() => toggleActive(t)}>
-                        {t.is_active ? 'ひょうじ中' : 'おやすみ'}
+                        {t.is_active ? '表示中' : '休止中'}
                       </button>
                     </td>
                     <td>
                       <div className="row-actions">
-                        <button className="btn btn-secondary" style={{ padding: '6px 10px', fontSize: 12 }} disabled={index === 0} onClick={() => moveByOffset(index, -1)} title="上へ">▲</button>
-                        <button className="btn btn-secondary" style={{ padding: '6px 10px', fontSize: 12 }} disabled={index === visible.length - 1} onClick={() => moveByOffset(index, 1)} title="下へ">▼</button>
                         <button className="btn btn-secondary" style={{ padding: '6px 12px', fontSize: 12 }} onClick={() => startEdit(t)}>編集</button>
                         <button className="btn btn-secondary" style={{ padding: '6px 12px', fontSize: 12 }} onClick={() => startDuplicate(t)}>複製</button>
                         <button className="btn btn-danger" onClick={() => handleDelete(t)}>削除</button>

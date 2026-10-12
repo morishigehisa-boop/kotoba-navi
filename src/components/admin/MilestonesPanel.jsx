@@ -98,7 +98,7 @@ export default function MilestonesPanel() {
 
       <div className="card">
         <div className="task-list-head">
-          <h2>登録ずみのイベント（{milestones.length}件）</h2>
+          <h2>登録済みのイベント（{milestones.length}件）</h2>
           <button className="btn btn-primary" onClick={startNew}>＋ イベントを登録</button>
         </div>
         {milestones.length === 0 ? (

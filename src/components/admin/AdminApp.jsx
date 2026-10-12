@@ -200,7 +200,7 @@ export default function AdminApp() {
           </div>
           {homeTab === 'calendar' ? <TaskCalendarPanel /> : homeTab === 'events' ? <MilestonesPanel /> : (
             <>
-              <p className="lead">子どもアプリのホームに出る「やること」の登録・並べ替えをおこないます</p>
+              <p className="lead">子どもアプリのホームに出る「やること」の登録・並べ替えを行います</p>
               <TasksPanel />
             </>
           )}
@@ -212,7 +212,7 @@ export default function AdminApp() {
 
       {area === 'kotoba' && !loading && !loadError && (
         <>
-      <p className="lead">問題の登録・成績確認・問題集の作成をおこないます</p>
+      <p className="lead">問題の登録・成績確認・問題集の作成を行います</p>
 
       <div className="tabs">
         {[

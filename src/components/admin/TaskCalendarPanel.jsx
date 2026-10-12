@@ -7,7 +7,7 @@ const RANGES = [7, 10, 30] // ひょうじする日数の選びかた
 const RANGE_KEY = 'kotoba_navi_admin_cal_range'
 
 // 「くりかえし」か「1どだけ」かを示す記号（タスクの右はしに出す）
-const MARK = { repeat: { icon: '🔁', label: 'くりかえし' }, once: { icon: '①', label: '1どだけ' } }
+const MARK = { repeat: { icon: '🔁', label: '繰り返し' }, once: { icon: '①', label: '1度だけ' } }
 
 // startISO から count 日分の日付（'YYYY-MM-DD'）を作る
 function buildDays(startISO, count) {
@@ -19,7 +19,7 @@ function buildDays(startISO, count) {
 }
 
 // 「何日に どのやることが 子どもの画面に出るか」を、日付ごとに並べて見る画面。
-// やることは、期日の日に出る（終わるまで翌日以降も「おくれている分」として残る）
+// やることは、期日の日に出る（終わるまで翌日以降も「遅れている分」として残る）
 export default function TaskCalendarPanel() {
   const [tasks, setTasks] = useState(null)
   const [completions, setCompletions] = useState([])
@@ -114,7 +114,7 @@ export default function TaskCalendarPanel() {
         <button className="cal-nav-btn" onClick={() => setOffset((o) => o - range)} aria-label="前の期間">←</button>
         <div className="cal-nav-label">{days[0].label} 〜 {days[days.length - 1].label}</div>
         <button className="cal-nav-btn" onClick={() => setOffset((o) => o + range)} aria-label="次の期間">→</button>
-        {offset !== 0 && <button className="cal-chip" onClick={() => setOffset(0)}>今日にもどる</button>}
+        {offset !== 0 && <button className="cal-chip" onClick={() => setOffset(0)}>今日に戻る</button>}
         <div className="cal-range">
           {RANGES.map((n) => (
             <button key={n} className={`cal-chip ${range === n ? 'on' : ''}`} onClick={() => { setRange(n); setOffset(0) }}>{n}日間</button>
@@ -122,7 +122,7 @@ export default function TaskCalendarPanel() {
         </div>
       </div>
       <p className="cal-note">
-        {MARK.repeat.icon} ＝{MARK.repeat.label}　{MARK.once.icon} ＝{MARK.once.label}。やることは期日の日に出て、終わらないと翌日以降も「おくれている分」として残ります。おやすみ中のものは出ません。
+        {MARK.repeat.icon} ＝{MARK.repeat.label}　{MARK.once.icon} ＝{MARK.once.label}。やることは期日の日に出て、終わらないと翌日以降も「遅れている分」として残ります。休止中のものは出ません。
       </p>
 
       <div className={`cal-grid r${range}`}>
@@ -131,7 +131,7 @@ export default function TaskCalendarPanel() {
             <div className="cal-day-head">
               <span>{day.label}（{WEEKDAY_LABELS[day.wd]}）</span>
               {day.iso === todayISO && <span className="cal-today-badge">今日</span>}
-              <span className="cal-count">{day.items.length}こ</span>
+              <span className="cal-count">{day.items.length}件</span>
             </div>
             {(eventsByDate.get(day.iso) || []).map((m) => (
               <div key={m.id} className="cal-event">🚩 {m.title}</div>

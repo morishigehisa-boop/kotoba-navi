@@ -15,10 +15,10 @@ export const SUBJECT_COLORS = {
 export const subjectStyle = (s) => ({ '--c': SUBJECT_COLORS[s]?.main, '--soft': SUBJECT_COLORS[s]?.soft })
 
 export const FREQUENCIES = [
-  { value: 'once', label: '1どだけ' },
-  { value: 'daily', label: 'まいにち' },
-  { value: 'weekly', label: 'まいしゅう' },
-  { value: 'monthly', label: 'まいつき' }
+  { value: 'once', label: '1度だけ' },
+  { value: 'daily', label: '毎日' },
+  { value: 'weekly', label: '毎週' },
+  { value: 'monthly', label: '毎月' }
 ]
 export const WEEKDAY_LABELS = ['日', '月', '火', '水', '木', '金', '土']
 export const UPCOMING_DAYS = 3
@@ -132,13 +132,13 @@ export function buildTomorrowItems(tasks, todayISO) {
 
 // 管理画面の一覧に出す、くり返しの説明文
 export function describeSchedule(t) {
-  if (t.frequency === 'once') return '1どだけ'
-  if (t.frequency === 'daily') return 'まいにち'
+  if (t.frequency === 'once') return '1度だけ'
+  if (t.frequency === 'daily') return '毎日'
   if (t.frequency === 'weekly') {
     const days = t.weekdays?.length ? t.weekdays : [parseISO(t.due_date).getDay()]
-    return `まいしゅう（${[...days].sort().map((d) => WEEKDAY_LABELS[d]).join('・')}）`
+    return `毎週（${[...days].sort().map((d) => WEEKDAY_LABELS[d]).join('・')}）`
   }
-  return `まいつき（${parseISO(t.due_date).getDate()}日）`
+  return `毎月（${parseISO(t.due_date).getDate()}日）`
 }
 
 async function fetchAll(table, build) {
