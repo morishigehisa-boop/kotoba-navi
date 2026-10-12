@@ -25,7 +25,7 @@ export default function TaskCalendarPanel() {
   const [completions, setCompletions] = useState([])
   const [milestones, setMilestones] = useState([])
   const [failed, setFailed] = useState(false)
-  const [subjects, setSubjects] = useSubjectFilter('kotoba_navi_admin_cal_subjects') // 表示する教科（前回の選択を引き継ぐ）
+  const [subjects, setSubjects] = useSubjectFilter('kotoba_navi_admin_subjects') // 表示する教科（前回の選択を引き継ぐ）
   const [range, setRangeState] = useState(() => {
     try { const n = Number(localStorage.getItem(RANGE_KEY)); return RANGES.includes(n) ? n : 10 } catch { return 10 }
   })

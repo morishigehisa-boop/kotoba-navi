@@ -15,7 +15,7 @@ export default function TasksPanel() {
   const [form, setForm] = useState(emptyForm())
   const [editingId, setEditingId] = useState(null)
   const [saving, setSaving] = useState(false)
-  const [filterSubjects, setFilterSubjects] = useSubjectFilter('kotoba_navi_admin_tasks_subjects') // 一覧に出す教科（前回の選択を引き継ぐ）
+  const [filterSubjects, setFilterSubjects] = useSubjectFilter('kotoba_navi_admin_subjects') // 一覧に出す教科（前回の選択を引き継ぐ）
   const [dragId, setDragId] = useState(null)
   const [dragOverId, setDragOverId] = useState(null)
   const [confirm, confirmModal] = useConfirm()

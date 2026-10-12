@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { SUBJECTS } from '../../lib/tasks'
 
-// 教科フィルタの選択状態を、画面ごとに localStorage へ保存して次回も引き継ぐ。
+// 教科フィルタの選択状態を（同じキーを使う画面どうしで共通に）localStorage へ保存して次回も引き継ぐ。
 // 保存できない環境（プライベートモードなど）でも、そのまま動く。
 export function useSubjectFilter(storageKey) {
   const [subjects, setSubjectsState] = useState(() => {
