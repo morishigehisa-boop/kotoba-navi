@@ -16,6 +16,7 @@ export default function TasksPanel() {
   const [editingId, setEditingId] = useState(null)
   const [saving, setSaving] = useState(false)
   const [formOpen, setFormOpen] = useState(false) // 登録・編集のポップアップ
+  const [duplicating, setDuplicating] = useState(false) // 複製元から作っているとき
   const [filterSubjects, setFilterSubjects] = useSubjectFilter('kotoba_navi_admin_subjects') // 一覧に出す教科（前回の選択を引き継ぐ）
   const [dragId, setDragId] = useState(null)
   const [dragOverId, setDragOverId] = useState(null)
@@ -45,12 +46,22 @@ export default function TasksPanel() {
   function resetForm() {
     setForm(emptyForm())
     setEditingId(null)
+    setDuplicating(false)
     setFormOpen(false)
+  }
+
+  // 登録ずみのやることをコピーした入力内容で、新規登録のポップアップを開く（内容を変えて登録できる）
+  function startDuplicate(t) {
+    setForm({ subject: t.subject, title: t.title, due_date: t.due_date, frequency: t.frequency, weekdays: t.weekdays || [], end_date: t.end_date || '', link_to: t.link_to || '' })
+    setEditingId(null)
+    setDuplicating(true)
+    setFormOpen(true)
   }
 
   function startNew() {
     setForm(emptyForm())
     setEditingId(null)
+    setDuplicating(false)
     setFormOpen(true)
   }
 
@@ -151,7 +162,8 @@ export default function TasksPanel() {
         // 入力途中の内容が消えないよう、外側をタップしても閉じない（「キャンセル」で閉じる）
         <div className="modal-backdrop">
           <div className="modal" style={{ maxWidth: 560 }}>
-            <h2>{editingId ? 'やることを編集' : 'やることを登録'}</h2>
+            <h2>{editingId ? 'やることを編集' : duplicating ? 'やることを複製して登録' : 'やることを登録'}</h2>
+            {duplicating && <p className="lead" style={{ margin: '0 0 12px' }}>コピーした内容です。変えたいところを直して「登録する」を押してください。</p>}
             <div className="task-form">
               <div>
                 <label className="f-label">教科</label>
@@ -260,6 +272,7 @@ export default function TasksPanel() {
                         <button className="btn btn-secondary" style={{ padding: '6px 10px', fontSize: 12 }} disabled={index === 0} onClick={() => moveByOffset(index, -1)} title="上へ">▲</button>
                         <button className="btn btn-secondary" style={{ padding: '6px 10px', fontSize: 12 }} disabled={index === visible.length - 1} onClick={() => moveByOffset(index, 1)} title="下へ">▼</button>
                         <button className="btn btn-secondary" style={{ padding: '6px 12px', fontSize: 12 }} onClick={() => startEdit(t)}>編集</button>
+                        <button className="btn btn-secondary" style={{ padding: '6px 12px', fontSize: 12 }} onClick={() => startDuplicate(t)}>複製</button>
                         <button className="btn btn-danger" onClick={() => handleDelete(t)}>削除</button>
                       </div>
                     </td>
