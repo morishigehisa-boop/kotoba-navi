@@ -702,8 +702,6 @@ export default function KidsApp({ initialScreen = 'home' }) {
             // 管理画面でランダム出題がオンの問題集は、開くたびに順番を入れ替える
             startSet(list, { isToday: false, randomize: !!set.shuffle })
           }}
-          onShowRecord={() => openFrom('record')}
-          onShowShop={() => openFrom('shop')}
           onShowSugoroku={() => openFrom('sugoroku')}
           pendingSession={pendingSession}
           onResumeSession={resumeSession}
@@ -840,7 +838,7 @@ function QuitConfirmModal({ onCancel, onQuit }) {
   )
 }
 
-function SelectScreen({ today, overdue, staticSets, questionsById, title, freezeTokens, weeklyCorrectCount, weeklyMissionsClaimed, onStartToday, onStartOverdue, onStartSet, onShowRecord, onShowShop, onShowSugoroku, pendingSession, onResumeSession, onDismissSession }) {
+function SelectScreen({ today, overdue, staticSets, questionsById, title, freezeTokens, weeklyCorrectCount, weeklyMissionsClaimed, onStartToday, onStartOverdue, onStartSet, onShowSugoroku, pendingSession, onResumeSession, onDismissSession }) {
   const todaySub =
     today.picked.length === 0
       ? 'きょうは やることなし！'
@@ -910,23 +908,11 @@ function SelectScreen({ today, overdue, staticSets, questionsById, title, freeze
         </div>
       )}
 
-      <div className="two-col three-col">
-        <button className="set-card progress-card" onClick={onShowRecord}>
-          <div className="set-icon progress-icon">📊</div>
-          <div className="set-body">
-            <div className="set-name">がんばり記録</div>
-          </div>
-        </button>
+      <div className="two-col" style={{ gridTemplateColumns: '1fr' }}>
         <button className="set-card sugoroku-card" onClick={onShowSugoroku}>
           <div className="set-icon sugoroku-icon">🗺️</div>
           <div className="set-body">
             <div className="set-name">すごろく</div>
-          </div>
-        </button>
-        <button className="set-card shop-card" onClick={onShowShop}>
-          <div className="set-icon shop-icon">🛍️</div>
-          <div className="set-body">
-            <div className="set-name">ショップ</div>
           </div>
         </button>
       </div>
