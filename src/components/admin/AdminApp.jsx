@@ -25,6 +25,7 @@ import { EditModal } from './EditModal'
 import FuriganaPanel from './FuriganaPanel'
 import TasksPanel from './TasksPanel'
 import TaskCalendarPanel from './TaskCalendarPanel'
+import MilestonesPanel from './MilestonesPanel'
 import { LoadingView, ErrorView } from '../common/Status'
 
 // 未正解・1回・2回・3回・かんぺき の5段階
@@ -145,7 +146,7 @@ export default function AdminApp() {
     setAreaState(a)
     try { localStorage.setItem(AREA_KEY, a) } catch {}
   }
-  const [homeTab, setHomeTab] = useState('calendar') // ホーム側のタブ：'calendar'（予定を見る）／'tasks'（登録・編集）
+  const [homeTab, setHomeTab] = useState('calendar') // ホーム側のタブ：'calendar'（予定を見る）／'tasks'（やること登録）／'events'（イベント登録）
   const [questions, setQuestions] = useState([])
   const [sets, setSets] = useState([])
   const [history, setHistory] = useState([])
@@ -195,8 +196,9 @@ export default function AdminApp() {
           <div className="tabs">
             <button className={`tab ${homeTab === 'calendar' ? 'active' : ''}`} onClick={() => setHomeTab('calendar')}>📅 予定カレンダー</button>
             <button className={`tab ${homeTab === 'tasks' ? 'active' : ''}`} onClick={() => setHomeTab('tasks')}>📝 やること登録</button>
+            <button className={`tab ${homeTab === 'events' ? 'active' : ''}`} onClick={() => setHomeTab('events')}>🚩 イベント登録</button>
           </div>
-          {homeTab === 'calendar' ? <TaskCalendarPanel /> : (
+          {homeTab === 'calendar' ? <TaskCalendarPanel /> : homeTab === 'events' ? <MilestonesPanel /> : (
             <>
               <p className="lead">子どもアプリのホームに出る「やること」の登録・並べ替えをおこないます</p>
               <TasksPanel />

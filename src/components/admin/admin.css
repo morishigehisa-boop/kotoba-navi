@@ -275,7 +275,6 @@ a.area-btn { text-decoration: none; display: inline-block; }
 .ms-none { font-size: 13px; color: #A39565; padding: 4px 0; }
 .ms-chip { font-size: 13px; font-weight: 800; color: #5C4A0B; background: #fff; border: 1px solid #F2DFA6; border-radius: 16px; padding: 5px 12px; }
 .ms-left { margin-left: 8px; color: #E36A1E; font-size: 12px; }
-.ms-manage { flex: none; white-space: nowrap; }
 .ms-panel { margin-bottom: 12px; }
 .ms-form { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 10px; }
 .ms-form input[type=text] { flex: 1; min-width: 160px; }
@@ -285,4 +284,4 @@ a.area-btn { text-decoration: none; display: inline-block; }
 .ms-items-date { flex: none; font-weight: 700; color: #5A5749; }
 .ms-items-title { flex: 1; min-width: 0; word-break: break-all; }
 .cal-event { font-size: 12px; font-weight: 800; color: #5C4A0B; background: #FFE9A8; border-radius: 6px; padding: 4px 7px; margin-bottom: 4px; word-break: break-all; }
-@media (max-width: 600px) { .ms-bar { flex-direction: column; } .ms-manage { align-self: flex-end; } }
+@media (max-width: 600px) { .ms-bar { flex-direction: column; } }
