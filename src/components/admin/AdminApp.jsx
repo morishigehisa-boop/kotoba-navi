@@ -195,8 +195,8 @@ export default function AdminApp() {
         <>
           <div className="tabs">
             <button className={`tab ${homeTab === 'calendar' ? 'active' : ''}`} onClick={() => setHomeTab('calendar')}>📅 予定カレンダー</button>
-            <button className={`tab ${homeTab === 'tasks' ? 'active' : ''}`} onClick={() => setHomeTab('tasks')}>📝 やること登録</button>
-            <button className={`tab ${homeTab === 'events' ? 'active' : ''}`} onClick={() => setHomeTab('events')}>🚩 イベント登録</button>
+            <button className={`tab ${homeTab === 'tasks' ? 'active' : ''}`} onClick={() => setHomeTab('tasks')}>📝 やること一覧</button>
+            <button className={`tab ${homeTab === 'events' ? 'active' : ''}`} onClick={() => setHomeTab('events')}>🚩 イベント一覧</button>
           </div>
           {homeTab === 'calendar' ? <TaskCalendarPanel /> : homeTab === 'events' ? <MilestonesPanel /> : (
             <>
