@@ -15,6 +15,7 @@ export default function TasksPanel() {
   const [form, setForm] = useState(emptyForm())
   const [editingId, setEditingId] = useState(null)
   const [saving, setSaving] = useState(false)
+  const [formOpen, setFormOpen] = useState(false) // 登録・編集のポップアップ
   const [filterSubjects, setFilterSubjects] = useSubjectFilter('kotoba_navi_admin_subjects') // 一覧に出す教科（前回の選択を引き継ぐ）
   const [dragId, setDragId] = useState(null)
   const [dragOverId, setDragOverId] = useState(null)
@@ -40,15 +41,23 @@ export default function TasksPanel() {
   const toggleWeekday = (d) =>
     set({ weekdays: form.weekdays.includes(d) ? form.weekdays.filter((x) => x !== d) : [...form.weekdays, d] })
 
+  // ポップアップを閉じて、入力をもとに戻す
   function resetForm() {
     setForm(emptyForm())
     setEditingId(null)
+    setFormOpen(false)
+  }
+
+  function startNew() {
+    setForm(emptyForm())
+    setEditingId(null)
+    setFormOpen(true)
   }
 
   function startEdit(t) {
     setEditingId(t.id)
     setForm({ subject: t.subject, title: t.title, due_date: t.due_date, frequency: t.frequency, weekdays: t.weekdays || [], end_date: t.end_date || '', link_to: t.link_to || '' })
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+    setFormOpen(true)
   }
 
   async function handleSave() {
@@ -138,62 +147,70 @@ export default function TasksPanel() {
 
   return (
     <div>
-      <div className="card">
-        <h2>{editingId ? 'やることを編集' : 'やることを登録'}</h2>
-        <div className="task-form">
-          <div>
-            <label className="f-label">教科</label>
-            <select value={form.subject} onChange={(e) => set({ subject: e.target.value })}>
-              {SUBJECTS.map((s) => <option key={s} value={s}>{SUBJECT_EMOJI[s]} {s}</option>)}
-            </select>
-          </div>
-          <div className="task-form-wide">
-            <label className="f-label">やること</label>
-            <input type="text" value={form.title} placeholder="例：計算ドリル 3ページ" onChange={(e) => set({ title: e.target.value })} />
-          </div>
-          <div>
-            <label className="f-label">{form.frequency === 'once' ? '完了目標日' : '最初の期日'}</label>
-            <input type="date" className="task-date" value={form.due_date} onChange={(e) => set({ due_date: e.target.value })} />
-          </div>
-          <div>
-            <label className="f-label">くり返し</label>
-            <select value={form.frequency} onChange={(e) => set({ frequency: e.target.value })}>
-              {FREQUENCIES.map((f) => <option key={f.value} value={f.value}>{f.label}</option>)}
-            </select>
-          </div>
-          <div>
-            <label className="f-label">開く先（ホームの「はじめる」ボタン）</label>
-            <select value={form.link_to} onChange={(e) => set({ link_to: e.target.value })}>
-              <option value="">なし</option>
-              <option value="kotoba">📚 ことばナビ</option>
-              <option value="sansu">🔢 さんすうナビ</option>
-            </select>
-          </div>
-          {form.frequency === 'weekly' && (
-            <div className="task-form-wide">
-              <label className="f-label">曜日（複数えらべます。未選択なら期日の曜日）</label>
-              <div className="weekday-row">
-                {WEEKDAY_LABELS.map((w, d) => (
-                  <button key={d} type="button" className={`weekday-chip ${form.weekdays.includes(d) ? 'on' : ''}`} onClick={() => toggleWeekday(d)}>{w}</button>
-                ))}
+      {formOpen && (
+        // 入力途中の内容が消えないよう、外側をタップしても閉じない（「キャンセル」で閉じる）
+        <div className="modal-backdrop">
+          <div className="modal" style={{ maxWidth: 560 }}>
+            <h2>{editingId ? 'やることを編集' : 'やることを登録'}</h2>
+            <div className="task-form">
+              <div>
+                <label className="f-label">教科</label>
+                <select value={form.subject} onChange={(e) => set({ subject: e.target.value })}>
+                  {SUBJECTS.map((s) => <option key={s} value={s}>{SUBJECT_EMOJI[s]} {s}</option>)}
+                </select>
               </div>
+              <div className="task-form-wide">
+                <label className="f-label">やること</label>
+                <input type="text" value={form.title} placeholder="例：計算ドリル 3ページ" onChange={(e) => set({ title: e.target.value })} />
+              </div>
+              <div>
+                <label className="f-label">{form.frequency === 'once' ? '完了目標日' : '最初の期日'}</label>
+                <input type="date" className="task-date" value={form.due_date} onChange={(e) => set({ due_date: e.target.value })} />
+              </div>
+              <div>
+                <label className="f-label">くり返し</label>
+                <select value={form.frequency} onChange={(e) => set({ frequency: e.target.value })}>
+                  {FREQUENCIES.map((f) => <option key={f.value} value={f.value}>{f.label}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="f-label">開く先（ホームの「はじめる」ボタン）</label>
+                <select value={form.link_to} onChange={(e) => set({ link_to: e.target.value })}>
+                  <option value="">なし</option>
+                  <option value="kotoba">📚 ことばナビ</option>
+                  <option value="sansu">🔢 さんすうナビ</option>
+                </select>
+              </div>
+              {form.frequency === 'weekly' && (
+                <div className="task-form-wide">
+                  <label className="f-label">曜日（複数えらべます。未選択なら期日の曜日）</label>
+                  <div className="weekday-row">
+                    {WEEKDAY_LABELS.map((w, d) => (
+                      <button key={d} type="button" className={`weekday-chip ${form.weekdays.includes(d) ? 'on' : ''}`} onClick={() => toggleWeekday(d)}>{w}</button>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {form.frequency !== 'once' && (
+                <div>
+                  <label className="f-label">終了日（空なら、ずっと続く）</label>
+                  <input type="date" className="task-date" value={form.end_date} min={form.due_date} onChange={(e) => set({ end_date: e.target.value })} />
+                </div>
+              )}
             </div>
-          )}
-          {form.frequency !== 'once' && (
-            <div>
-              <label className="f-label">終了日（空なら、ずっと続く）</label>
-              <input type="date" className="task-date" value={form.end_date} min={form.due_date} onChange={(e) => set({ end_date: e.target.value })} />
+            <div className="modal-actions">
+              <button className="btn btn-secondary" onClick={resetForm}>キャンセル</button>
+              <button className="btn btn-primary" onClick={handleSave} disabled={saving}>{editingId ? '更新する' : '登録する'}</button>
             </div>
-          )}
+          </div>
         </div>
-        <div className="modal-actions" style={{ justifyContent: 'flex-start' }}>
-          <button className="btn btn-primary" onClick={handleSave} disabled={saving}>{editingId ? '更新する' : '登録する'}</button>
-          {editingId && <button className="btn btn-secondary" onClick={resetForm}>キャンセル</button>}
-        </div>
-      </div>
+      )}
 
       <div className="card">
-        <h2>登録ずみのやること（{allOn ? `${tasks.length}件` : `${visible.length}/${tasks.length}件`}）</h2>
+        <div className="task-list-head">
+          <h2>登録ずみのやること（{allOn ? `${tasks.length}件` : `${visible.length}/${tasks.length}件`}）</h2>
+          <button className="btn btn-primary" onClick={startNew}>＋ やることを登録</button>
+        </div>
         <div className="cal-filter">
           <span className="cal-filter-label">教科:</span>
           {/* 全教科ONのときに押すと全部OFF、それ以外は全部ON */}

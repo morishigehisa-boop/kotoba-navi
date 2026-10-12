@@ -285,3 +285,6 @@ a.area-btn { text-decoration: none; display: inline-block; }
 .ms-items-title { flex: 1; min-width: 0; word-break: break-all; }
 .cal-event { font-size: 12px; font-weight: 800; color: #5C4A0B; background: #FFE9A8; border-radius: 6px; padding: 4px 7px; margin-bottom: 4px; word-break: break-all; }
 @media (max-width: 600px) { .ms-bar { flex-direction: column; } }
+
+.task-list-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+.task-list-head h2 { margin: 0; }
