@@ -39,11 +39,11 @@ export default function CalendarScreen({ onBack }) {
           <button className="cal-nav" onClick={() => setCursor(new Date(year, month + 1, 1))}>▶</button>
         </div>
         <div className="hint" style={{ marginTop: 0, textAlign: 'center' }}>
-          この月は {monthActiveCount}日 がんばったね！
+          この月は {monthActiveCount}日 頑張ったね！
         </div>
 
         {dates === null ? (
-          <div className="hint" style={{ textAlign: 'center', marginTop: 20 }}>よみこみちゅう…</div>
+          <div className="hint" style={{ textAlign: 'center', marginTop: 20 }}>読み込み中…</div>
         ) : (
           <div className="cal-grid">
             {WEEKDAYS.map((w) => <div className="cal-weekday" key={w}>{w}</div>)}

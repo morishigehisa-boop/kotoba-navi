@@ -41,14 +41,14 @@ export default function ShopScreen({
                     <span className={`char-chip-emoji ${isNextUp ? 'char-chip-silhouette' : ''}`}>
                       {unlocked ? c.emoji : isNextUp ? c.emoji : '🔒'}
                     </span>
-                    <span className="char-chip-name">{unlocked ? c.name : isNextUp ? 'つぎは これ！' : '？？？'}</span>
+                    <span className="char-chip-name">{unlocked ? c.name : isNextUp ? '次はこれ！' : '？？？'}</span>
                   </button>
                 )
               })}
             </div>
             {nextUpId && (
               <div className="hint" style={{ marginTop: 4 }}>
-                「{activeCharName}」のアイテムを あと{items.length - ownedCount}こ 集めると、次のキャラが かいほうされるよ！
+                「{activeCharName}」のアイテムをあと{items.length - ownedCount}個集めると、次のキャラが解放されるよ！
               </div>
             )}
           </>
@@ -57,16 +57,16 @@ export default function ShopScreen({
         {tab === 'item' && (
           <>
             <div className="hint" style={{ marginTop: 20, marginBottom: 0 }}>
-              いま えらんでいるキャラ：{activeCharName}
+              今選んでいるキャラ：{activeCharName}
             </div>
             <div className="hint" style={{ marginTop: 4 }}>
-              「{activeCharName}」のアイテム：{ownedCount}/{items.length}こ 集めた
+              「{activeCharName}」のアイテム：{ownedCount}/{items.length}個集めた
               {ownedCount >= items.length && ' 🎉 コンプリート！'}
             </div>
 
             {equippedItem && (
               <button className="shop-unequip" onClick={() => onEquip(null)}>
-                今の 着せ替えを はずす
+                今の着せ替えを外す
               </button>
             )}
 
@@ -84,7 +84,7 @@ export default function ShopScreen({
                         onClick={() => onEquip(item.id)}
                         disabled={equipped}
                       >
-                        {equipped ? 'そうびちゅう' : 'そうびする'}
+                        {equipped ? '装備中' : '装備する'}
                       </button>
                     ) : (
                       <button
@@ -104,7 +104,7 @@ export default function ShopScreen({
 
         {tab === 'room' && (
           <>
-            <div className="hint" style={{ marginTop: 20 }}>すごろくマップでステージが かわるたびに、新しい背景をゲットできるよ！</div>
+            <div className="hint" style={{ marginTop: 20 }}>すごろくマップでステージが変わるたびに、新しい背景をゲットできるよ！</div>
             <div className="room-grid">
               {STAGE_THEMES.map((theme) => {
                 const unlocked = unlockedBackgrounds.includes(theme.id)

@@ -272,7 +272,7 @@ export default function KidsApp({ initialScreen = 'home' }) {
       const next = { ...prev, points: nextPoints }
       updateProgress({ points: nextPoints }).catch(console.error)
       if (n > 0 && nextTitle !== prevTitle) {
-        setTimeout(() => { playLevelUp(); celebrate(); setMascot({ state: 'happy', text: `称号アップ！「${nextTitle}」に なったよ！` }) }, 200)
+        setTimeout(() => { playLevelUp(); celebrate(); setMascot({ state: 'happy', text: `称号アップ！「${nextTitle}」になったよ！` }) }, 200)
       }
       return next
     })
@@ -350,7 +350,7 @@ export default function KidsApp({ initialScreen = 'home' }) {
     else if (key === 'kotoba') setScreen('select')
     else if (key === 'sansu') {
       setScreen('sansu')
-      setMascot({ state: 'idle', text: 'さんすうも いっしょに がんばろう！' })
+      setMascot({ state: 'idle', text: 'さんすうも一緒に頑張ろう！' })
     } else openFrom(key)
   }
 
@@ -372,7 +372,7 @@ export default function KidsApp({ initialScreen = 'home' }) {
     addPoints(20)
     playFanfareBig()
     celebrate()
-    setMascot({ state: 'happy', text: 'さいごまで できたね！すごい！' })
+    setMascot({ state: 'happy', text: '最後までできたね！すごい！' })
   }
 
   // ホームの「やること」を完了／取り消したときのごほうび
@@ -399,7 +399,7 @@ export default function KidsApp({ initialScreen = 'home' }) {
     setIsTodayAutoSession(isToday)
     setRevealed(false)
     setScreen('quiz')
-    setMascot({ state: 'idle', text: 'きょうも いっしょに がんばろう！' })
+    setMascot({ state: 'idle', text: '今日も一緒に頑張ろう！' })
     setPendingSession(null)
   }
 
@@ -415,7 +415,7 @@ export default function KidsApp({ initialScreen = 'home' }) {
     setIsTodayAutoSession(!!pendingSession.isTodayAutoSession)
     setRevealed(false)
     setScreen('quiz')
-    setMascot({ state: 'idle', text: 'つづきから がんばろう！' })
+    setMascot({ state: 'idle', text: '続きから頑張ろう！' })
     setPendingSession(null)
   }
 
@@ -482,7 +482,7 @@ export default function KidsApp({ initialScreen = 'home' }) {
             celebrate()
             setStruggleToast(true)
             setTimeout(() => setStruggleToast(false), 2200)
-            setMascot({ state: 'happy', text: 'にがてだった問題、ついに できたね！！' })
+            setMascot({ state: 'happy', text: '苦手だった問題、ついにできたね！！' })
           } else {
             playCorrect()
             setMascot({ state: 'happy', text: HAPPY_LINES[Math.floor(Math.random() * HAPPY_LINES.length)] })
@@ -509,11 +509,11 @@ export default function KidsApp({ initialScreen = 'home' }) {
           setReviewCorrect((v) => v + 1)
           addPoints(5)
           playCorrect()
-          setMascot({ state: 'happy', text: '今度は できたね！' })
+          setMascot({ state: 'happy', text: '今度はできたね！' })
         } else {
           setReviewFailed((v) => [...v, q])
           playWrong()
-          setMascot({ state: 'sad', text: 'もう一回 見直してみよう' })
+          setMascot({ state: 'sad', text: 'もう一回見直してみよう' })
         }
         recordAnswer({ question: q, isCorrect, sessionType: 'review' }).catch(console.error)
       }
@@ -618,7 +618,7 @@ export default function KidsApp({ initialScreen = 'home' }) {
   return (
     <div className={`app ${showNav ? 'has-nav' : ''}`}>
       <Confetti active={confettiOn} onDone={() => setConfettiOn(false)} />
-      {struggleToast && <div className="struggle-toast">🎊 にがて克服！</div>}
+      {struggleToast && <div className="struggle-toast">🎊 苦手克服！</div>}
       <div className="topbar">
         <div className="stat streak">
           <span className="flame">🔥</span>
@@ -626,7 +626,7 @@ export default function KidsApp({ initialScreen = 'home' }) {
         </div>
         <button
           className="stat mute-btn"
-          title={soundMuted ? '音を オンにする' : '音を オフにする'}
+          title={soundMuted ? '音をオンにする' : '音をオフにする'}
           onClick={() => { const next = !soundMuted; setMuted(next); setSoundMuted(next) }}
         >
           {soundMuted ? '🔇' : '🔊'}
@@ -692,7 +692,7 @@ export default function KidsApp({ initialScreen = 'home' }) {
           weeklyMissionsClaimed={progress.weekly_missions_claimed || []}
           onStartToday={() => {
             if (today.picked.length === 0) {
-              setMascot({ state: 'happy', text: 'きょうは もうやることないよ！すごい！' })
+              setMascot({ state: 'happy', text: '今日はもうやることないよ！すごい！' })
               return
             }
             startSet(today.picked, { isToday: true })
@@ -812,7 +812,7 @@ function MilestoneModal({ milestone, onClose }) {
       <div className="milestone-card" onClick={(e) => e.stopPropagation()}>
         <div className="milestone-emoji">{milestone.emoji}</div>
         <div className="milestone-label">{milestone.label}</div>
-        <div className="hint">ストリークフリーズを 1こ もらったよ！</div>
+        <div className="hint">ストリークフリーズを1個もらったよ！</div>
         <button className="restart" onClick={onClose}>やったー！</button>
       </div>
     </div>
@@ -824,8 +824,8 @@ function NewCharacterModal({ character, onClose }) {
     <div className="milestone-backdrop" onClick={onClose}>
       <div className="milestone-card" onClick={(e) => e.stopPropagation()}>
         <div className="milestone-emoji">{character.emoji}</div>
-        <div className="milestone-label">新しいキャラクター かいほう！</div>
-        <div className="hint">「{character.name}」が ショップから えらべるようになったよ！</div>
+        <div className="milestone-label">新しいキャラクター解放！</div>
+        <div className="hint">「{character.name}」が ショップから選べるようになったよ！</div>
         <button className="restart" onClick={onClose}>やったー！</button>
       </div>
     </div>
@@ -837,9 +837,9 @@ function QuitConfirmModal({ onCancel, onQuit }) {
     <div className="milestone-backdrop" onClick={onCancel}>
       <div className="milestone-card" onClick={(e) => e.stopPropagation()}>
         <div className="milestone-emoji">🤔</div>
-        <div className="milestone-label">とちゅうで やめますか？</div>
-        <div className="hint">ここまでの きろくは のこりません。</div>
-        <button className="restart" onClick={onCancel}>つづける</button>
+        <div className="milestone-label">途中でやめますか？</div>
+        <div className="hint">ここまでの記録は残りません。</div>
+        <button className="restart" onClick={onCancel}>続ける</button>
         <button className="restart pick-another" onClick={onQuit}>やめる</button>
       </div>
     </div>
@@ -849,7 +849,7 @@ function QuitConfirmModal({ onCancel, onQuit }) {
 function SelectScreen({ today, overdue, staticSets, questionsById, title, freezeTokens, weeklyCorrectCount, weeklyMissionsClaimed, onStartToday, onStartOverdue, onStartSet, pendingSession, onResumeSession, onDismissSession }) {
   const todaySub =
     today.picked.length === 0
-      ? 'きょうは やることなし！'
+      ? '今日はやることなし！'
       : today.totalEligible > today.picked.length
       ? `候補${today.totalEligible}問から${today.picked.length}問を抽出`
       : `${today.picked.length}問を自動で作成`
@@ -866,11 +866,11 @@ function SelectScreen({ today, overdue, staticSets, questionsById, title, freeze
       {pendingSession && (
         <div className="resume-card">
           <div className="resume-text">
-            📖 前回の続きが あります（{pendingSession.idx || 0}/{pendingSession.questionIds.length}問目）
+            📖 前回の続きがあります（{pendingSession.idx || 0}/{pendingSession.questionIds.length}問目）
           </div>
           <div className="resume-buttons">
-            <button className="restart" style={{ marginTop: 0 }} onClick={onResumeSession}>つづきから やる</button>
-            <button className="btn-dismiss-resume" onClick={onDismissSession}>けす</button>
+            <button className="restart" style={{ marginTop: 0 }} onClick={onResumeSession}>続きからやる</button>
+            <button className="btn-dismiss-resume" onClick={onDismissSession}>消す</button>
           </div>
         </div>
       )}
@@ -888,11 +888,11 @@ function SelectScreen({ today, overdue, staticSets, questionsById, title, freeze
         <button className="set-card overdue-card" onClick={onStartOverdue}>
           <div className="set-icon overdue-icon">⏰</div>
           <div className="set-body">
-            <div className="set-name">締切をすぎた問題</div>
+            <div className="set-name">締切を過ぎた問題</div>
             <div className="set-sub">
               {overdue.totalOverdue > overdue.picked.length
                 ? `候補${overdue.totalOverdue}問から${overdue.picked.length}問`
-                : 'まだ できていないよ'}
+                : 'まだできていないよ'}
             </div>
           </div>
           <div className="set-count">{overdue.picked.length}問</div>
@@ -912,12 +912,12 @@ function SelectScreen({ today, overdue, staticSets, questionsById, title, freeze
         </div>
       ) : (
         <div className="mission-card">
-          <div className="mission-title"><span>📅 今週のミッション</span><span className="mission-done">ぜんぶ たっせい！🎉</span></div>
+          <div className="mission-title"><span>📅 今週のミッション</span><span className="mission-done">全部達成！！🎉</span></div>
         </div>
       )}
 
       <div className="set-heading" style={{ marginTop: 18 }}>
-        問題集をえらんでね
+        問題集を選んでね
       </div>
       {staticSets.map((set) => {
         const members = set.questionIds.map((id) => questionsById.get(id)).filter(Boolean)
@@ -941,7 +941,7 @@ function SelectScreen({ today, overdue, staticSets, questionsById, title, freeze
               </div>
               <div className={`set-count ${tier}`}>{rate}%</div>
             </div>
-            <div className="set-progress-wrap" title={`未正解${boxCounts[0]}・1回${boxCounts[1]}・2回${boxCounts[2]}・3回${boxCounts[3]}・かんぺき${boxCounts[4]}`}>
+            <div className="set-progress-wrap" title={`未正解${boxCounts[0]}・1回${boxCounts[1]}・2回${boxCounts[2]}・3回${boxCounts[3]}・完璧${boxCounts[4]}`}>
               {BOX_BAR_COLORS.map((color, i) => (
                 total > 0 && boxCounts[i] > 0 ? (
                   <div key={i} className="set-progress-seg" style={{ width: `${(boxCounts[i] / total) * 100}%`, background: color }} />
@@ -964,7 +964,7 @@ function QuizCard({ item, revealed, reviewMode, choiceFeedback, onReveal, onAnsw
       <div>
         {reviewMode && <div className="hint" style={{ marginBottom: 8 }}>📖 復習タイム（正解数にはカウントされません）</div>}
         <div className="card" style={{ alignItems: 'flex-start' }}>
-          <div className="label">{item.category === '同訓異字' ? 'どうくん' : 'どうおん'}</div>
+          <div className="label">{item.category === '同訓異字' ? '同訓' : '同音'}</div>
           <div className="reading-tag" style={{ marginTop: 20 }}>
             {c.reading}
           </div>
@@ -973,7 +973,7 @@ function QuizCard({ item, revealed, reviewMode, choiceFeedback, onReveal, onAnsw
           </div>
           {c.q && (
             <>
-              <div className="label label-2">いみ</div>
+              <div className="label label-2">意味</div>
               <div className="meaning with-sentence"><Ruby text={c.q} /></div>
             </>
           )}
@@ -999,15 +999,15 @@ function QuizCard({ item, revealed, reviewMode, choiceFeedback, onReveal, onAnsw
   if (c.sentenceA) {
     let labelText = '対になる表現'
     let labelClass = 'label'
-    let hintText = '2つとも なんという ことわざ？'
+    let hintText = '2つとも何ということわざ？'
     if (item.category === '類義語') {
       labelText = '類義語'
       labelClass = 'label label-ruigigo'
-      hintText = 'この二つの文章の意味になる類義語はなに？'
+      hintText = 'この二つの文章の意味になる類義語は何？'
     } else if (item.category === '対義語') {
       labelText = '対義語'
       labelClass = 'label label-taigigo'
-      hintText = 'この二つの文章の意味になる対義語はなに？'
+      hintText = 'この二つの文章の意味になる対義語は何？'
     }
     return (
       <div>
@@ -1032,7 +1032,7 @@ function QuizCard({ item, revealed, reviewMode, choiceFeedback, onReveal, onAnsw
         </div>
         {!revealed ? (
           <button className="btn btn-reveal" onClick={onReveal}>
-            タップして こたえを見る
+            タップして答えを見る
           </button>
         ) : (
           <div className="btn-row">
@@ -1051,21 +1051,21 @@ function QuizCard({ item, revealed, reviewMode, choiceFeedback, onReveal, onAnsw
       <div className="card">
         {item.answer_type === 'meaning_first_fill' ? (
           <>
-            <div className="label">いみ</div>
+            <div className="label">意味</div>
             <div className="meaning"><Ruby text={c.q} /></div>
-            <div className="label label-2">れいぶん</div>
+            <div className="label label-2">例文</div>
             <div className="sentence with-meaning"><Ruby text={c.sentence} /></div>
           </>
         ) : (
           <>
             {c.sentence ? (
               <>
-                <div className="label">れいぶん</div>
+                <div className="label">例文</div>
                 <div className="sentence"><Ruby text={c.sentence} /></div>
-                <div className="label label-2">いみ</div>
+                <div className="label label-2">意味</div>
               </>
             ) : (
-              <div className="label">いみ</div>
+              <div className="label">意味</div>
             )}
             <div className={`meaning${c.sentence ? ' with-sentence' : ''}`}>
               <Ruby text={c.q} />
@@ -1076,18 +1076,18 @@ function QuizCard({ item, revealed, reviewMode, choiceFeedback, onReveal, onAnsw
         {!revealed ? (
           <div className="hint">
             {c.shown
-              ? 'にた いみの ことわざは？'
+              ? '似た意味のことわざは？'
               : item.answer_type === 'meaning_first_fill'
-              ? `あてはまる ${item.category}は？`
+              ? `当てはまる${item.category}は？`
               : item.answer_type === 'wago_fill'
-              ? 'あてはまる 和語は？'
+              ? '当てはまる和語は？'
               : c.sentence
-              ? 'あてはまる 慣用句は？'
-              : 'こたえを かんがえてみよう'}
+              ? '当てはまる慣用句は？'
+              : '答えを考えてみよう'}
           </div>
         ) : isArrayAnswer ? (
           <>
-            {c.a.length > 1 && <div className="multi-badge">こたえは {c.a.length}つ あります</div>}
+            {c.a.length > 1 && <div className="multi-badge">答えは {c.a.length}つあります</div>}
             {c.a.map((x) => (
               <div className="answer" key={x}><Ruby text={x} /></div>
             ))}
@@ -1098,7 +1098,7 @@ function QuizCard({ item, revealed, reviewMode, choiceFeedback, onReveal, onAnsw
       </div>
       {!revealed ? (
         <button className="btn btn-reveal" onClick={onReveal}>
-          タップして こたえを見る
+          タップして答えを見る
         </button>
       ) : (
         <div className="btn-row">
@@ -1130,9 +1130,9 @@ function Summary({
 
   return (
     <div className="card summary">
-      <h2>きょうの けっか</h2>
+      <h2>今日の結果</h2>
       <div className="big">{correctCount} / {total}</div>
-      <div className="hint">せいかいりつ {rate}%</div>
+      <div className="hint">正解率 {rate}%</div>
       <div className="badges">
         <div className="badge">⭐ +{correctCount * 10 + 20} ポイント</div>
         <div className="badge">🔥 {streak}日連続</div>
@@ -1140,20 +1140,20 @@ function Summary({
       {leftover > 0 && (
         <>
           <div className="hint" style={{ margin: '14px 0 4px', color: 'var(--fox-dark)', fontWeight: 700 }}>
-            まだ きょう やるべき問題が {leftover}問 のこっています
+            まだ今日やるべき問題が{leftover}問残っています
           </div>
           <button className="restart today-continue" onClick={onContinueToday}>
-            つづけて 今日のぶんをやる（あと{leftover}問）
+            続けて今日の分をやる（あと{leftover}問）
           </button>
         </>
       )}
-      <button className="restart" onClick={onRestart}>もう一度 さいしょから</button>
+      <button className="restart" onClick={onRestart}>もう一度最初から</button>
       {wrongCount > 0 && (
         <button className="restart review-btn" onClick={onReview}>
-          まちがえた問題を復習する（{wrongCount}問）
+          間違えた問題を復習する（{wrongCount}問）
         </button>
       )}
-      <button className="restart pick-another" onClick={onPickAnother}>べつの問題集をえらぶ</button>
+      <button className="restart pick-another" onClick={onPickAnother}>別の問題集を選ぶ</button>
     </div>
   )
 }
@@ -1161,16 +1161,16 @@ function Summary({
 function ReviewSummary({ reviewCorrect, total, stillWrongCount, onBack, onReviewAgain }) {
   return (
     <div className="card summary">
-      <h2>復習けっか</h2>
+      <h2>復習結果</h2>
       <div className="big">{reviewCorrect} / {total}</div>
       <div className="hint">※この結果は最初の正解数には反映されません</div>
       <div className="badges">
         <div className="badge">⭐ +{reviewCorrect * 5} ポイント</div>
       </div>
-      <button className="restart" onClick={onBack}>けっか画面にもどる</button>
+      <button className="restart" onClick={onBack}>結果画面にもどる</button>
       {stillWrongCount > 0 && (
         <button className="restart today-continue" onClick={onReviewAgain}>
-          まだまちがえた問題を もう一度（{stillWrongCount}問）
+          まだ間違えた問題をもう一度（{stillWrongCount}問）
         </button>
       )}
     </div>

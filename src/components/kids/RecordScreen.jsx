@@ -4,11 +4,11 @@ import { categoryProgress } from '../../lib/gamification'
 import { fetchActivityDates } from '../../lib/api'
 
 const BOX_META = [
-  { box: 0, label: 'まだ これから', color: '#EFE3CB', textColor: '#8A7B62' },
-  { box: 1, label: '1かい せいかい', color: '#FFD9A0', textColor: '#B5670E' },
-  { box: 2, label: '2れんぞく せいかい', color: '#FFB86B', textColor: '#A85200' },
-  { box: 3, label: '3れんぞく せいかい', color: '#FF9A45', textColor: '#8C3E00' },
-  { box: 4, label: '🌟 かんぺき！', color: '#FF8A3D', textColor: '#7A3300' }
+  { box: 0, label: 'まだこれから', color: '#EFE3CB', textColor: '#8A7B62' },
+  { box: 1, label: '1回 正解', color: '#FFD9A0', textColor: '#B5670E' },
+  { box: 2, label: '2回連続 正解', color: '#FFB86B', textColor: '#A85200' },
+  { box: 3, label: '3回連続 正解', color: '#FF9A45', textColor: '#8C3E00' },
+  { box: 4, label: '🌟 完璧！', color: '#FF8A3D', textColor: '#7A3300' }
 ]
 const WEEKDAYS = ['日', '月', '火', '水', '木', '金', '土']
 
@@ -45,10 +45,10 @@ export default function RecordScreen({ questions, onBack }) {
   return (
     <div>
       <div className="card" style={{ alignItems: 'stretch' }}>
-        <div className="label">がんばりグラフ</div>
+        <div className="label">頑張りグラフ</div>
         <div style={{ textAlign: 'center', marginTop: 20, marginBottom: 6 }}>
           <div style={{ fontSize: 40, fontWeight: 800, color: 'var(--fox-dark)' }}>{masteredRate}%</div>
-          <div className="hint" style={{ marginTop: 0 }}>ぜんぶで {total}問中 {masteredCount}問が かんぺき！</div>
+          <div className="hint" style={{ marginTop: 0 }}>全部で {total}問中 {masteredCount}問が完璧！</div>
         </div>
 
         <div style={{ marginTop: 18 }}>
@@ -80,7 +80,7 @@ export default function RecordScreen({ questions, onBack }) {
 
       <div className="card" style={{ alignItems: 'stretch' }}>
         <div className="label">バッジ</div>
-        <div className="hint" style={{ marginTop: 20 }}>カテゴリーごとに 30%でどう、60%でぎん、100%できん！</div>
+        <div className="hint" style={{ marginTop: 20 }}>カテゴリーごとに 30%で銅、60%で銀、100%で金！</div>
         <div className="badge-row">
           {categories.map((c) => (
             <div className="category-badge" key={c.category}>
@@ -100,10 +100,10 @@ export default function RecordScreen({ questions, onBack }) {
           <button className="cal-nav" onClick={() => setCursor(new Date(year, month + 1, 1))}>▶</button>
         </div>
         <div className="hint" style={{ marginTop: 0, textAlign: 'center' }}>
-          この月は {monthActiveCount}日 がんばったね！
+          この月は {monthActiveCount}日 頑張ったね！
         </div>
         {dates === null ? (
-          <div className="hint" style={{ textAlign: 'center', marginTop: 20 }}>よみこみちゅう…</div>
+          <div className="hint" style={{ textAlign: 'center', marginTop: 20 }}>読み込み中…</div>
         ) : (
           <div className="cal-grid">
             {WEEKDAYS.map((w) => <div className="cal-weekday" key={w}>{w}</div>)}

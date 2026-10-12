@@ -19,7 +19,7 @@ function TaskRow({ item, done, soon, noNote, showSubject, onToggle, onOpenApp })
         </span>
       </button>
       {!done && !soon && task.link_to && (
-        <button className="task-go" onClick={() => onOpenApp(task.link_to)}>▶ はじめる</button>
+        <button className="task-go" onClick={() => onOpenApp(task.link_to)}>▶ 始める</button>
       )}
     </div>
   )
@@ -87,7 +87,7 @@ export default function HomeScreen({ character, accessory, pendingSession, onRes
     } catch (e) {
       console.error(e)
       setCompletions(prev)
-      setError('うまくいかなかったよ。もういちど おしてね')
+      setError('うまくいかなかったよ。もう一度押してね')
       return
     }
     const after = buildHomeTasks(tasks, next, todayISO)
@@ -96,12 +96,12 @@ export default function HomeScreen({ character, accessory, pendingSession, onRes
   }
 
   const message = tasks === null
-    ? 'きょうの やること、みてみよう'
+    ? '今日のやること、見てみよう'
     : todayTotal === 0
-      ? lateItems.length > 0 ? 'おくれている分を やってみよう' : 'きょうの やることは ないよ'
+      ? lateItems.length > 0 ? '遅れている分をやってみよう' : '今日のやることはないよ'
       : todayLeft.length === 0
-        ? '🎉 きょうの分は ぜんぶ おわったよ！'
-        : `あと ${todayLeft.length}こ！ がんばろう`
+        ? '🎉 今日の分は全部終わったよ！'
+        : `あと${todayLeft.length}個！頑張ろう`
 
   const groups = SUBJECTS.map((s) => [s, todayLeft.filter((i) => i.task.subject === s)]).filter(([, list]) => list.length > 0)
   const lateDates = [...new Set(lateItems.map((i) => i.date))].sort()
@@ -117,7 +117,7 @@ export default function HomeScreen({ character, accessory, pendingSession, onRes
           <div className="home-app-name">勉強がんばるアプリ</div>
           <div className="home-message">{message}</div>
           {todayTotal > 0 && (
-            <div className="home-progress" aria-label={`きょうの分 ${todayDoneCount}/${todayTotal}`}>
+            <div className="home-progress" aria-label={`今日の分 ${todayDoneCount}/${todayTotal}`}>
               <div className="progress-wrap"><div className="progress-bar" style={{ width: `${Math.round((todayDoneCount / todayTotal) * 100)}%` }} /></div>
               <span className="home-progress-num">{todayDoneCount}/{todayTotal}</span>
             </div>
@@ -135,7 +135,7 @@ export default function HomeScreen({ character, accessory, pendingSession, onRes
                 <span className="home-event-flag">🚩</span>
                 <span className="home-event-title">{e.title}</span>
                 <span className="home-event-date">{mo}/{d}</span>
-                <span className={`home-event-left ${n <= 3 ? 'near' : ''}`}>{n === 0 ? 'きょう！' : `あと${n}日`}</span>
+                <span className={`home-event-left ${n <= 3 ? 'near' : ''}`}>{n === 0 ? '今日！' : `あと${n}日`}</span>
               </div>
             )
           })}
@@ -144,20 +144,20 @@ export default function HomeScreen({ character, accessory, pendingSession, onRes
 
       {pendingSession && (
         <div className="resume-card">
-          <div className="resume-text">📖 ことばナビの つづき（{pendingSession.idx || 0}/{pendingSession.questionIds.length}問）</div>
-          <button className="resume-go" onClick={onResumeSession}>つづきから</button>
+          <div className="resume-text">📖 ことばナビの続き（{pendingSession.idx || 0}/{pendingSession.questionIds.length}問）</div>
+          <button className="resume-go" onClick={onResumeSession}>続きから</button>
         </div>
       )}
 
       {error && <div className="home-error">{error}</div>}
-      {loadFailed && <ErrorView message="やることを ひらけなかったよ" onRetry={load} />}
+      {loadFailed && <ErrorView message="やることを開けなかったよ" onRetry={load} />}
       {!loadFailed && tasks === null && <LoadingView />}
 
       {lateItems.length > 0 && (
         <section className="task-group late-group">
           <button className="late-toggle" aria-expanded={lateIsOpen} onClick={() => setLateOpen(!lateIsOpen)}>
-            <span>⚠️ おくれている分 {lateItems.length}こ</span>
-            <span className="late-toggle-hint">{lateIsOpen ? '▲ とじる' : '▼ ひらく'}</span>
+            <span>⚠️ 遅れている分 {lateItems.length}個</span>
+            <span className="late-toggle-hint">{lateIsOpen ? '▲ 閉じる' : '▼ 開く'}</span>
           </button>
           {lateIsOpen && lateDates.map((date) => (
             <div key={date}>
@@ -185,8 +185,8 @@ export default function HomeScreen({ character, accessory, pendingSession, onRes
       {tomorrowItems.length > 0 && (
         <section className="task-group late-group tomorrow-group">
           <button className="late-toggle" aria-expanded={tomorrowOpen} onClick={() => setTomorrowOpen(!tomorrowOpen)}>
-            <span>🌙 あしたの分 {tomorrowItems.length}こ</span>
-            <span className="late-toggle-hint">{tomorrowOpen ? '▲ とじる' : '▼ ひらく'}</span>
+            <span>🌙 明日の分 {tomorrowItems.length}個</span>
+            <span className="late-toggle-hint">{tomorrowOpen ? '▲ 閉じる' : '▼ 開く'}</span>
           </button>
           {tomorrowOpen && tomorrowItems.map((item) => <TaskRow key={`${item.task.id}|${item.date}`} item={item} soon noNote showSubject {...rowProps} />)}
         </section>
@@ -194,7 +194,7 @@ export default function HomeScreen({ character, accessory, pendingSession, onRes
 
       {doneToday.length > 0 && (
         <section className="task-group">
-          <div className="task-subject done-label">✅ きょうおわったこと（おすと もどせるよ）</div>
+          <div className="task-subject done-label">✅ 今日終わったこと（押すと戻せるよ）</div>
           {doneToday.map((item) => <TaskRow key={`${item.task.id}|${item.date}`} item={item} done showSubject {...rowProps} />)}
         </section>
       )}

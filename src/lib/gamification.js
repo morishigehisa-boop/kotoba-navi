@@ -1,12 +1,12 @@
 // 連続記録の達成でもらえるバッジ（マイルストーン）
 // 3日・7日は特別扱い、それ以降は7日ごと（14, 21, 28...）に発生する
 export function milestoneForStreak(days) {
-  if (days === 3) return { days, label: '3日 れんぞく！', emoji: '🔥' }
-  if (days === 7) return { days, label: '1週間 れんぞく！', emoji: '🎉' }
+  if (days === 3) return { days, label: '3日連続！', emoji: '🔥' }
+  if (days === 7) return { days, label: '1週間連続！', emoji: '🎉' }
   if (days > 7 && days % 7 === 0) {
     const weeks = days / 7
     const emoji = weeks >= 10 ? '👑' : weeks >= 4 ? '🏆' : '🏅'
-    return { days, label: `${days}日 れんぞく！`, emoji }
+    return { days, label: `${days}日連続！`, emoji }
   }
   return null
 }
@@ -29,9 +29,9 @@ export function titleForPoints(points) {
 
 // ---- 6. カテゴリー別マスターバッジ ----
 export const BADGE_TIERS = [
-  { id: 'gold', min: 100, label: 'きん', emoji: '🥇' },
-  { id: 'silver', min: 60, label: 'ぎん', emoji: '🥈' },
-  { id: 'bronze', min: 30, label: 'どう', emoji: '🥉' }
+  { id: 'gold', min: 100, label: '金', emoji: '🥇' },
+  { id: 'silver', min: 60, label: '銀', emoji: '🥈' },
+  { id: 'bronze', min: 30, label: '銅', emoji: '🥉' }
 ]
 export function tierForRate(rate) {
   return BADGE_TIERS.find((t) => rate >= t.min) || null
