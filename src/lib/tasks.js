@@ -121,6 +121,15 @@ export function buildHomeTasks(tasks, completions, todayISO) {
   return { todayItems, upcoming, doneToday }
 }
 
+// あしたの分（くり返しも含む）。まだ終わらせられないので、完了の記録は見ない
+export function buildTomorrowItems(tasks, todayISO) {
+  const date = addDays(todayISO, 1)
+  return tasks
+    .filter((t) => t.is_active && occursOn(t, date))
+    .map((task) => ({ task, date }))
+    .sort((a, b) => SUBJECTS.indexOf(a.task.subject) - SUBJECTS.indexOf(b.task.subject) || a.task.sort_order - b.task.sort_order)
+}
+
 // 管理画面の一覧に出す、くり返しの説明文
 export function describeSchedule(t) {
   if (t.frequency === 'once') return '1どだけ'
