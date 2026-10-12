@@ -393,3 +393,9 @@ body { margin: 0; background: var(--bg); }
 .home-event-left { flex: none; font-size: 13px; background: #fff; border-radius: 12px; padding: 4px 10px; color: #E36A1E; }
 .home-event-left.near { background: #E36A1E; color: #fff; }
 .tomorrow-group .late-toggle { background: #EEF0FB; border-color: #D3D8F2; color: #4A55A8; }
+
+/* つづきがあるときの案内：1行のコンパクト表示（場所をとらない） */
+.home .resume-card { display: flex; align-items: center; gap: 10px; padding: 8px 8px 8px 14px; margin-bottom: 10px; border-radius: 14px; border-width: 1.5px; }
+.home .resume-text { flex: 1; min-width: 0; margin: 0; font-size: 13px; }
+.resume-go { flex: none; min-height: 44px; padding: 0 16px; border: none; border-radius: 12px; background: #4A6FBF; color: #fff; font-family: inherit; font-size: 14px; font-weight: 800; cursor: pointer; box-shadow: 0 3px 0 #345296; }
+.resume-go:active { transform: translateY(2px); box-shadow: 0 1px 0 #345296; }

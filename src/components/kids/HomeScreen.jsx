@@ -144,10 +144,8 @@ export default function HomeScreen({ character, accessory, pendingSession, onRes
 
       {pendingSession && (
         <div className="resume-card">
-          <div className="resume-text">📖 ことばナビの つづきが あるよ（{pendingSession.idx || 0}/{pendingSession.questionIds.length}問目）</div>
-          <div className="resume-buttons">
-            <button className="restart" style={{ marginTop: 0 }} onClick={onResumeSession}>つづきから やる</button>
-          </div>
+          <div className="resume-text">📖 ことばナビの つづき（{pendingSession.idx || 0}/{pendingSession.questionIds.length}問）</div>
+          <button className="resume-go" onClick={onResumeSession}>つづきから</button>
         </div>
       )}
 
