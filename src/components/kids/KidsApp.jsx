@@ -462,7 +462,7 @@ export default function KidsApp({ initialScreen = 'home' }) {
       )}
       {showQuitConfirm && (
         <QuitConfirm
-          hint="ここまでの記録は残りません。"
+          hint="ここまでの記録は残るよ。あとで「続きから」できるよ。"
           onCancel={() => setShowQuitConfirm(false)}
           onQuit={() => { setShowQuitConfirm(false); session.quit(); setScreen('select') }}
         />

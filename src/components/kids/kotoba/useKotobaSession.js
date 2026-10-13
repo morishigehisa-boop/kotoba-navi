@@ -85,9 +85,11 @@ export function useKotobaSession({ questionsById, onAnswer }) {
     clearSnapshot()
   }
 
+  // 途中でやめる：途中経過は残して、あとで「続きから」できるようにする（答えた分の記録はもう保存ずみ）
   function quit() {
     setActive(false)
-    clearSnapshot()
+    const snap = loadSnapshot()
+    if (snap?.questionIds?.length && (snap.idx || 0) < snap.questionIds.length) setPendingSession(snap)
   }
 
   function goNext() {
