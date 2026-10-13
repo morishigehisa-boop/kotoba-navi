@@ -404,3 +404,26 @@ body { margin: 0; background: var(--bg); }
 .sub-tabs { display: flex; gap: 8px; margin-bottom: 14px; }
 .sub-tab { flex: 1; min-height: 48px; border: 2px solid #E8DCC0; border-radius: 16px; background: #fff; color: var(--ink-soft); font-family: inherit; font-size: 15px; font-weight: 800; cursor: pointer; }
 .sub-tab.on { background: var(--fox); border-color: var(--fox); color: #fff; box-shadow: 0 3px 0 var(--fox-dark); }
+
+/* やることを完了したときの「+Npt」表示 */
+.point-toast {
+  position: fixed; left: 50%; top: 18%; transform: translateX(-50%);
+  background: #fff7d6; color: #8a5a00; border: 2px solid #f5c542;
+  border-radius: 999px; padding: 10px 22px; font-size: 22px; font-weight: 800;
+  box-shadow: 0 6px 18px rgba(0,0,0,.18); z-index: 60; pointer-events: none;
+  animation: point-toast-up 1.8s ease-out forwards;
+}
+@keyframes point-toast-up {
+  0% { opacity: 0; transform: translate(-50%, 10px) scale(.8); }
+  15% { opacity: 1; transform: translate(-50%, 0) scale(1.05); }
+  80% { opacity: 1; }
+  100% { opacity: 0; transform: translate(-50%, -24px); }
+}
+
+/* きろく：さんすう・やることの記録 */
+.overall-record { display: flex; gap: 10px; padding: 12px 12px 0; }
+.overall-card { flex: 1; background: #fff; border-radius: 14px; padding: 10px 12px; box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+.overall-title { font-size: 13px; font-weight: 700; color: #555; }
+.overall-num { font-size: 26px; font-weight: 800; color: #333; }
+.overall-num span { font-size: 12px; font-weight: 600; color: #777; }
+.overall-sub { font-size: 11px; color: #888; }

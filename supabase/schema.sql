@@ -184,3 +184,27 @@ create policy "milestones anon select" on milestones for select to anon, authent
 create policy "milestones anon insert" on milestones for insert to anon, authenticated with check (true);
 create policy "milestones anon update" on milestones for update to anon, authenticated using (true) with check (true);
 create policy "milestones anon delete" on milestones for delete to anon, authenticated using (true);
+
+-- ===== やることのポイント / 自動完了 / ポイント履歴 =====
+alter table public.tasks add column if not exists points integer not null default 100 check (points in (10,50,100,150,200));
+alter table public.tasks add column if not exists auto_complete boolean not null default false;
+alter table public.task_completions add column if not exists points_awarded integer not null default 5;
+
+create table if not exists public.point_logs (
+  id bigint generated always as identity primary key,
+  source text not null check (source in ('kotoba','sansu','task','bonus','mission','other')),
+  delta integer not null,
+  label text,
+  created_at timestamptz not null default now()
+);
+alter table public.point_logs enable row level security;
+create policy "anon select point_logs" on public.point_logs for select to anon using (true);
+create policy "anon insert point_logs" on public.point_logs for insert to anon with check (true);
+
+-- 勉強した日（ことばナビ・さんすう・やること完了）の一覧。きろくのカレンダー用
+create or replace function public.get_activity_dates() returns table(activity_date date)
+language sql stable set search_path = public as $$
+  select (answered_at at time zone 'Asia/Tokyo')::date from answer_logs
+  union select (answered_at at time zone 'Asia/Tokyo')::date from sansu_answer_logs
+  union select (completed_at at time zone 'Asia/Tokyo')::date from task_completions
+$$;

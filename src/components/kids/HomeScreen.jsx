@@ -74,16 +74,23 @@ export default function HomeScreen({ character, accessory, pendingSession, onRes
   const lateIsOpen = lateOpen ?? lateItems.length <= LATE_OPEN_LIMIT
 
   async function handleToggle(item, toDone) {
-    const { id } = item.task
+    const { id, title } = item.task
     const prev = completions
+    const taskPoints = item.task.points ?? 100
     const next = toDone
-      ? [...prev, { task_id: id, occurrence_date: item.date, completed_at: new Date().toISOString() }]
+      ? [...prev, { task_id: id, occurrence_date: item.date, completed_at: new Date().toISOString(), points_awarded: taskPoints }]
       : prev.filter((c) => !(c.task_id === id && c.occurrence_date === item.date))
     // 先に画面へ反映して、通信が失敗したら元にもどす
     setCompletions(next)
     setError('')
+    let points = taskPoints
     try {
-      await (toDone ? completeTask(id, item.date) : uncompleteTask(id, item.date))
+      if (toDone) {
+        const inserted = await completeTask(id, item.date, taskPoints)
+        if (!inserted) return // 連打などで、すでに完了ずみ。ポイントは二重に付けない
+      } else {
+        points = await uncompleteTask(id, item.date) // 完了したときに付いたポイントを取り消す
+      }
     } catch (e) {
       console.error(e)
       setCompletions(prev)
@@ -92,7 +99,7 @@ export default function HomeScreen({ character, accessory, pendingSession, onRes
     }
     const after = buildHomeTasks(tasks, next, todayISO)
     const allTodayDone = after.todayItems.every((i) => i.late) && after.doneToday.some((i) => !i.late)
-    onTaskChange(toDone ? 'done' : 'undone', { allTodayDone })
+    onTaskChange(toDone ? 'done' : 'undone', { allTodayDone, points, title })
   }
 
   const message = tasks === null

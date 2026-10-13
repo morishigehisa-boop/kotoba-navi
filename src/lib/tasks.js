@@ -158,7 +158,7 @@ export const fetchTasks = () =>
   fetchAll('tasks', (q) => q.select('*').order('sort_order', { ascending: true }).order('created_at', { ascending: true }).order('id', { ascending: true }))
 
 export const fetchTaskCompletions = () =>
-  fetchAll('task_completions', (q) => q.select('task_id, occurrence_date, completed_at').order('id', { ascending: true }))
+  fetchAll('task_completions', (q) => q.select('task_id, occurrence_date, completed_at, points_awarded').order('id', { ascending: true }))
 
 export async function saveTask(values, id) {
   const q = id ? supabase.from('tasks').update(values).eq('id', id) : supabase.from('tasks').insert(values)
@@ -179,15 +179,43 @@ export async function deleteTask(id) {
   if (error) throw error
 }
 
-export async function completeTask(taskId, occurrenceDate) {
-  const { error } = await supabase.from('task_completions').insert({ task_id: taskId, occurrence_date: occurrenceDate })
-  // 23505 = すでに完了ずみ（二重タップ）。成功と同じ扱いにする
-  if (error && error.code !== '23505') throw error
+// 完了を記録する。そのときのポイントも一緒に残す（あとでポイント設定を変えても、取り消しがずれないように）
+// 戻り値：新しく記録できたら true、すでに完了ずみ（二重タップ）なら false → ポイントの二重加算を防ぐ
+export async function completeTask(taskId, occurrenceDate, points) {
+  const { error } = await supabase.from('task_completions').insert({ task_id: taskId, occurrence_date: occurrenceDate, points_awarded: points })
+  if (error) {
+    if (error.code === '23505') return false
+    throw error
+  }
+  return true
 }
 
+// 完了を取り消す。戻り値：取り消した完了で付いていたポイント（なければ0）
 export async function uncompleteTask(taskId, occurrenceDate) {
-  const { error } = await supabase.from('task_completions').delete().eq('task_id', taskId).eq('occurrence_date', occurrenceDate)
+  const { data, error } = await supabase
+    .from('task_completions')
+    .delete()
+    .eq('task_id', taskId)
+    .eq('occurrence_date', occurrenceDate)
+    .select('points_awarded')
   if (error) throw error
+  return (data || []).reduce((sum, r) => sum + (r.points_awarded || 0), 0)
+}
+
+// ポイントの選択肢（登録画面）と初期値
+export const TASK_POINT_OPTIONS = [200, 150, 100, 50, 10]
+export const DEFAULT_TASK_POINTS = 100
+
+// 「アプリの学習を終えたら自動で完了にする」やるべきものを1件探す。
+// 対象は link_to が同じで auto_complete のやること。遅れている分があれば古い順に1件ずつ（まとめて消さない）
+export function findAutoCompleteTarget(tasks, completions, todayISO, app) {
+  const done = new Set(completions.map((c) => `${c.task_id}|${c.occurrence_date}`))
+  const { todayItems } = buildHomeTasks(
+    tasks.filter((t) => t.auto_complete && t.link_to === app),
+    completions,
+    todayISO
+  )
+  return todayItems.find((i) => !done.has(`${i.task.id}|${i.date}`)) || null
 }
 
 // ---- マイルストーン（テスト・行事などの目標日）。予定カレンダーの上に表示する ----

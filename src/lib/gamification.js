@@ -13,10 +13,10 @@ export function milestoneForStreak(days) {
 
 // ポイント累計でもらえる称号
 export const TITLE_THRESHOLDS = [
-  { min: 0, title: 'ことわざ見習い' },
-  { min: 100, title: 'ことわざ名人' },
-  { min: 300, title: 'ことわざ博士' },
-  { min: 600, title: 'ことわざ仙人' }
+  { min: 0, title: '勉強見習い' },
+  { min: 100, title: '勉強名人' },
+  { min: 300, title: '勉強博士' },
+  { min: 600, title: '勉強仙人' }
 ]
 
 export function titleForPoints(points) {

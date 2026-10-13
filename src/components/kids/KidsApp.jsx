@@ -3,7 +3,7 @@ import Character from './Character'
 import Confetti from './Confetti'
 import { addFurigana, setCustomFurigana } from '../../lib/furigana'
 import { playTaskDone, playTaskAllDone, playCorrect, playWrong, playFanfareBig, playCharacterUnlock, playItemGet, playLevelUp, playBadgeGet, playComeback, isMuted, setMuted } from '../../lib/sound'
-import { fetchQuestions, fetchQuestionSetsWithItems, recordAnswer, fetchProgress, updateProgress, fetchFuriganaEntries } from '../../lib/api'
+import { fetchQuestions, fetchQuestionSetsWithItems, recordAnswer, fetchProgress, updateProgress, fetchFuriganaEntries, logPoints } from '../../lib/api'
 import { buildTodaySet, buildOverdueSet } from '../../lib/today'
 import {
   computeStreakUpdate,
@@ -24,13 +24,14 @@ import {
 } from '../../lib/gamification'
 import { boxOf } from '../../lib/today'
 import RecordScreen from './RecordScreen'
+import OverallRecord from './OverallRecord'
 import ShopScreen from './ShopScreen'
 import SugorokuScreen from './SugorokuScreen'
 import HomeScreen from './HomeScreen'
 import SansuScreen from './SansuScreen'
 import BottomNav from './BottomNav'
 import { LoadingView, ErrorView } from '../common/Status'
-import { toISODate } from '../../lib/tasks'
+import { toISODate, fetchTasks, fetchTaskCompletions, completeTask, findAutoCompleteTarget } from '../../lib/tasks'
 import RoomBackground from './RoomBackground'
 import './kids.css'
 
@@ -75,7 +76,6 @@ function formatGoalShort(iso) {
 }
 
 // やること（ホーム）の完了ごほうび
-const TASK_POINTS = 5
 const TASK_ALL_DONE_BONUS = 20
 const TASK_BONUS_KEY = 'kotoba_navi_task_bonus_date'
 // 「ぜんぶ終わった」ボーナスは、1日1回だけ（取り消して付けなおしても増えない）
@@ -122,6 +122,9 @@ export default function KidsApp({ initialScreen = 'home' }) {
   const categoryTierRef = useRef(new Map())
   const seededCategoryTierRef = useRef(false)
   const masteredQuestionsRef = useRef(new Set())
+  const masteredSansuRef = useRef(new Set()) // さんすうで、習得を数えた問題
+  const [pointToast, setPointToast] = useState(null) // { n, key }：もらったポイントの表示
+  const pointToastTimer = useRef(null)
   const seededMasteredRef = useRef(false)
 
   function celebrate() {
@@ -200,7 +203,11 @@ export default function KidsApp({ initialScreen = 'home' }) {
     if (boxOf(updatedQuestion) < 4) return
     if (masteredQuestionsRef.current.has(updatedQuestion.id)) return
     masteredQuestionsRef.current.add(updatedQuestion.id)
+    addMasteryEvent()
+  }
 
+  // 「習得」が1つ増えたことをすごろくに反映する（ことばナビの「完璧」・さんすうの「3回連続正解」の共通処理）
+  function addMasteryEvent() {
     setProgress((prev) => {
       const prevTotal = prev.mastery_event_total || 0
       const nextTotal = prevTotal + 1
@@ -264,7 +271,9 @@ export default function KidsApp({ initialScreen = 'home' }) {
   }
 
   // ポイントを加算し、DBにも永続化する
-  function addPoints(n) {
+  // source / label は、ポイント履歴（point_logs）に残すための情報
+  function addPoints(n, source = 'other', label) {
+    logPoints(source, n, label)
     setProgress((prev) => {
       const nextPoints = Math.max(0, prev.points + n) // やることの取り消しでマイナスになる場合があるので、0未満にはしない
       const prevTitle = titleForPoints(prev.points)
@@ -279,16 +288,17 @@ export default function KidsApp({ initialScreen = 'home' }) {
   }
 
   // 1. 週替わりミッション：正解のたびに呼ぶ。週が変わっていれば自動リセットしてから加算する。
-  function incrementWeeklyMission() {
+  // delta：進める数（正解1問＝1。やることは、ポイント÷10＝正解何問ぶんか）。取り消しのときはマイナス
+  function incrementWeeklyMission(delta = 1) {
     setProgress((prev) => {
       const reset = weeklyResetIfNeeded(prev)
       const base = reset ? { ...prev, ...reset } : prev
-      const nextCount = (base.weekly_correct_count || 0) + 1
+      const nextCount = Math.max(0, (base.weekly_correct_count || 0) + delta)
       const claimed = [...(base.weekly_missions_claimed || [])]
       let bonus = 0
       let newlyClaimed = null
       WEEKLY_MISSIONS.forEach((m) => {
-        if (nextCount >= m.count && !claimed.includes(m.id)) {
+        if (delta > 0 && nextCount >= m.count && !claimed.includes(m.id)) {
           claimed.push(m.id)
           bonus += m.reward
           newlyClaimed = m
@@ -308,6 +318,7 @@ export default function KidsApp({ initialScreen = 'home' }) {
         week_start_date: next.week_start_date
       }).catch(console.error)
       if (newlyClaimed) {
+        logPoints('mission', bonus, '今週のミッション')
         setTimeout(() => { playBadgeGet(); celebrate() }, 260)
       }
       return next
@@ -358,7 +369,7 @@ export default function KidsApp({ initialScreen = 'home' }) {
   function handleSansuAnswered(isCorrect) {
     creditTodayActivity()
     if (isCorrect) {
-      addPoints(10)
+      addPoints(10, 'sansu', 'さんすう 正解')
       incrementWeeklyMission()
       playCorrect()
       setMascot({ state: 'happy', text: HAPPY_LINES[Math.floor(Math.random() * HAPPY_LINES.length)] })
@@ -368,25 +379,61 @@ export default function KidsApp({ initialScreen = 'home' }) {
     }
   }
 
+  // さんすうの問題が3回連続正解（習得）になったら、ことばナビの「完璧」と同じようにすごろくを進める
+  function handleSansuMastered(question) {
+    if (masteredSansuRef.current.has(question.id)) return
+    masteredSansuRef.current.add(question.id)
+    addMasteryEvent()
+  }
+
   function handleSansuFinished() {
-    addPoints(20)
+    addPoints(20, 'bonus', 'さんすう 最後までできた')
+    autoCompleteLinkedTask('sansu')
     playFanfareBig()
     celebrate()
     setMascot({ state: 'happy', text: '最後までできたね！すごい！' })
   }
 
   // ホームの「やること」を完了／取り消したときのごほうび
-  function handleTaskChange(kind, { allTodayDone }) {
+  function showPointToast(n) {
+    clearTimeout(pointToastTimer.current)
+    setPointToast({ n, key: Date.now() })
+    pointToastTimer.current = setTimeout(() => setPointToast(null), 1800)
+  }
+
+  // ホームの「やること」を完了／取り消したときの処理。ポイント・連続日数・今週のミッション・履歴をまとめて反映する
+  // points: そのやることのポイント（取り消しのときは、完了したときに付いたポイント）
+  function handleTaskChange(kind, { allTodayDone, points, title }) {
     if (kind === 'undone') {
-      addPoints(-TASK_POINTS)
+      addPoints(-points, 'task', `取り消し：${title}`)
+      incrementWeeklyMission(-Math.round(points / 10))
       return
     }
-    addPoints(TASK_POINTS)
+    creditTodayActivity() // やることだけをやった日も「連続」に数える
+    addPoints(points, 'task', title)
+    incrementWeeklyMission(Math.round(points / 10)) // 正解1問＝10ptとして、正解何問ぶんかで数える
+    showPointToast(points)
     playTaskDone()
     if (allTodayDone && claimTaskBonus()) {
-      addPoints(TASK_ALL_DONE_BONUS)
+      addPoints(TASK_ALL_DONE_BONUS, 'bonus', '今日のやることを全部達成')
       playTaskAllDone()
       celebrate()
+    }
+  }
+
+  // アプリの学習を終えたとき、「自動で完了にする」設定のやること（1件）を完了にする
+  async function autoCompleteLinkedTask(app) {
+    try {
+      const [tasks, completions] = await Promise.all([fetchTasks(), fetchTaskCompletions()])
+      const target = findAutoCompleteTarget(tasks, completions, toISODate(), app)
+      if (!target) return
+      const { task, date } = target
+      const inserted = await completeTask(task.id, date, task.points)
+      if (!inserted) return // すでに完了ずみ
+      handleTaskChange('done', { allTodayDone: false, points: task.points, title: task.title })
+      setMascot({ state: 'happy', text: `「${task.title}」を完了にしたよ！` })
+    } catch (e) {
+      console.error(e) // 失敗しても学習結果には影響させない（ホームから手動で完了にできる）
     }
   }
 
@@ -475,7 +522,7 @@ export default function KidsApp({ initialScreen = 'home' }) {
         if (isCorrect) {
           const wasStruggling = (q.wrong_count || 0) >= 3 && q.last_correct !== true
           setCorrectCount((v) => v + 1)
-          addPoints(10)
+          addPoints(10, 'kotoba', 'ことばナビ 正解')
           incrementWeeklyMission()
           if (wasStruggling) {
             playComeback()
@@ -507,7 +554,7 @@ export default function KidsApp({ initialScreen = 'home' }) {
       } else {
         if (isCorrect) {
           setReviewCorrect((v) => v + 1)
-          addPoints(5)
+          addPoints(5, 'kotoba', 'ことばナビ 復習')
           playCorrect()
           setMascot({ state: 'happy', text: '今度はできたね！' })
         } else {
@@ -618,6 +665,7 @@ export default function KidsApp({ initialScreen = 'home' }) {
   return (
     <div className={`app ${showNav ? 'has-nav' : ''}`}>
       <Confetti active={confettiOn} onDone={() => setConfettiOn(false)} />
+      {pointToast && <div className="point-toast" key={pointToast.key}>⭐ +{pointToast.n}pt</div>}
       {struggleToast && <div className="struggle-toast">🎊 苦手克服！</div>}
       <div className="topbar">
         <div className="stat streak">
@@ -716,7 +764,10 @@ export default function KidsApp({ initialScreen = 'home' }) {
             <button role="tab" aria-selected={recordTab === 'sugoroku'} className={`sub-tab ${recordTab === 'sugoroku' ? 'on' : ''}`} onClick={() => setRecordTab('sugoroku')}>🗺️ すごろく</button>
           </div>
           {recordTab === 'record' ? (
-            <RecordScreen questions={questions} onBack={() => setScreen(backTo)} />
+            <>
+              <OverallRecord />
+              <RecordScreen questions={questions} onBack={() => setScreen(backTo)} />
+            </>
           ) : (
             <SugorokuScreen
               masteryEventTotal={progress.mastery_event_total || 0}
@@ -748,6 +799,7 @@ export default function KidsApp({ initialScreen = 'home' }) {
         <SansuScreen
           onStageChange={setSansuStage}
           onAnswered={handleSansuAnswered}
+          onMastered={handleSansuMastered}
           onFinished={handleSansuFinished}
           onGoHome={() => setScreen('home')}
         />
@@ -778,7 +830,10 @@ export default function KidsApp({ initialScreen = 'home' }) {
           onReview={startReview}
           onPickAnother={() => setScreen('select')}
           onContinueToday={continueToday}
-          onFinishBonus={() => addPoints(20)}
+          onFinishBonus={() => {
+            addPoints(20, 'bonus', 'ことばナビ 最後までできた')
+            if (isTodayAutoSession) autoCompleteLinkedTask('kotoba') // 「今日やる問題」を終えたら、連動するやることを完了にする
+          }}
         />
       )}
 

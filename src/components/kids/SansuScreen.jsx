@@ -27,7 +27,7 @@ const toggle = (list, value) => (list.includes(value) ? list.filter((v) => v !==
  * @param onFinished     最後まで終えたときに呼ぶ（おわりのボーナス用）
  * @param onGoHome       結果画面の「ホームへ」
  */
-export default function SansuScreen({ onStageChange, onAnswered, onFinished, onGoHome }) {
+export default function SansuScreen({ onStageChange, onAnswered, onMastered, onFinished, onGoHome }) {
   const [stage, setStage] = useState('setup')
   const [filters, setFilters] = useState(null)
   const [result, setResult] = useState(null)
@@ -49,6 +49,7 @@ export default function SansuScreen({ onStageChange, onAnswered, onFinished, onG
       <Study
         filters={filters}
         onAnswered={onAnswered}
+        onMastered={onMastered}
         onFinish={(r) => finish(r, false)}
         onQuit={(r) => (r.total > 0 ? finish(r, true) : setStage('setup'))}
       />
@@ -141,7 +142,7 @@ function Setup({ onStart }) {
   )
 }
 
-function Study({ filters, onAnswered, onFinish, onQuit }) {
+function Study({ filters, onAnswered, onMastered, onFinish, onQuit }) {
   const [questions, setQuestions] = useState([])
   const [state, setState] = useState('loading') // loading | error | ready
   const [index, setIndex] = useState(0)
@@ -170,7 +171,9 @@ function Study({ filters, onAnswered, onFinish, onQuit }) {
     const next = { correct: results.correct + (isCorrect ? 1 : 0), incorrect: results.incorrect + (isCorrect ? 0 : 1) }
     setResults(next)
     onAnswered(isCorrect)
-    recordSansuAnswer(current, isCorrect).catch(console.error)
+    recordSansuAnswer(current, isCorrect)
+      .then((r) => { if (r?.newlyMastered) onMastered?.(current) })
+      .catch(console.error)
     setTimeout(() => {
       if (index + 1 >= questions.length) {
         onFinish({ ...next, total: questions.length })

@@ -135,6 +135,14 @@ export async function updateProgress(patch) {
   return data
 }
 // がんばりカレンダー用：学習した日の一覧（YYYY-MM-DD、重複なし）を取得
+// ポイントの履歴を残す（何でいくら増減したか）。失敗しても学習は止めない
+export function logPoints(source, delta, label) {
+  if (!delta) return
+  supabase.from('point_logs').insert({ source, delta, label: label || null }).then(({ error }) => {
+    if (error) console.error(error)
+  })
+}
+
 export async function fetchActivityDates() {
   // answer_logsは件数が多くなるため、DB側で日付を集計して返す関数を使う
   const { data, error } = await supabase.rpc('get_activity_dates')

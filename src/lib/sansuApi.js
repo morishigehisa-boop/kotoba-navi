@@ -45,13 +45,16 @@ export async function recordSansuAnswer(question, isCorrect) {
   if (logError) throw logError
 
   const consecutive = isCorrect ? (question.consecutive_correct || 0) + 1 : 0
+  const nowMastered = consecutive >= MASTERED_STREAK
   const { error } = await supabase
     .from('sansu_questions')
     .update({
       consecutive_correct: consecutive,
-      is_mastered: consecutive >= MASTERED_STREAK,
+      is_mastered: nowMastered,
       last_answered_at: new Date().toISOString()
     })
     .eq('id', question.id)
   if (error) throw error
+  // 今回の正解で、はじめて「習得」になったか（すごろくを進める判定に使う）
+  return { newlyMastered: nowMastered && !question.is_mastered }
 }

@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react'
-import { SUBJECTS, SUBJECT_EMOJI, SUBJECT_COLORS, FREQUENCIES, WEEKDAY_LABELS, toISODate, describeSchedule, fetchTasks, saveTask, deleteTask, reorderTasks } from '../../lib/tasks'
+import { TASK_POINT_OPTIONS, DEFAULT_TASK_POINTS, SUBJECTS, SUBJECT_EMOJI, SUBJECT_COLORS, FREQUENCIES, WEEKDAY_LABELS, toISODate, describeSchedule, fetchTasks, saveTask, deleteTask, reorderTasks } from '../../lib/tasks'
 import { LoadingView, ErrorView } from '../common/Status'
 import { useSubjectFilter } from './useSubjectFilter'
 import { useConfirm } from './useConfirm'
 import { useToast } from './useToast'
 
-const emptyForm = () => ({ subject: '算数', title: '', due_date: toISODate(), frequency: 'once', weekdays: [], end_date: '', link_to: '' })
+const emptyForm = () => ({ subject: '算数', title: '', due_date: toISODate(), frequency: 'once', weekdays: [], end_date: '', link_to: '', points: DEFAULT_TASK_POINTS, auto_complete: false })
 
 // 「やること」の登録・編集・おやすみ（無効化）・削除。子どものホーム画面に表示される。
 export default function TasksPanel() {
@@ -52,7 +52,7 @@ export default function TasksPanel() {
 
   // 登録済みのやることをコピーした入力内容で、新規登録のポップアップを開く（内容を変えて登録できる）
   function startDuplicate(t) {
-    setForm({ subject: t.subject, title: t.title, due_date: t.due_date, frequency: t.frequency, weekdays: t.weekdays || [], end_date: t.end_date || '', link_to: t.link_to || '' })
+    setForm({ subject: t.subject, title: t.title, due_date: t.due_date, frequency: t.frequency, weekdays: t.weekdays || [], end_date: t.end_date || '', link_to: t.link_to || '', points: t.points ?? DEFAULT_TASK_POINTS, auto_complete: !!t.auto_complete })
     setEditingId(null)
     setDuplicating(true)
     setFormOpen(true)
@@ -67,7 +67,7 @@ export default function TasksPanel() {
 
   function startEdit(t) {
     setEditingId(t.id)
-    setForm({ subject: t.subject, title: t.title, due_date: t.due_date, frequency: t.frequency, weekdays: t.weekdays || [], end_date: t.end_date || '', link_to: t.link_to || '' })
+    setForm({ subject: t.subject, title: t.title, due_date: t.due_date, frequency: t.frequency, weekdays: t.weekdays || [], end_date: t.end_date || '', link_to: t.link_to || '', points: t.points ?? DEFAULT_TASK_POINTS, auto_complete: !!t.auto_complete })
     setFormOpen(true)
   }
 
@@ -86,6 +86,8 @@ export default function TasksPanel() {
           weekdays: form.frequency === 'weekly' ? form.weekdays : [],
           end_date: form.frequency === 'once' ? null : form.end_date || null,
           link_to: form.link_to || null,
+          points: form.points,
+          auto_complete: !!form.link_to && form.auto_complete, // 開く先がないと自動で完了にできない
           // 新規は一番下に追加する
           ...(editingId ? {} : { sort_order: tasks.reduce((m, t) => Math.max(m, t.sort_order), 0) + 1 })
         },
@@ -175,6 +177,12 @@ export default function TasksPanel() {
                 </select>
               </div>
               <div>
+                <label className="f-label">ポイント（完了したときにもらえる）</label>
+                <select value={form.points} onChange={(e) => set({ points: Number(e.target.value) })}>
+                  {TASK_POINT_OPTIONS.map((p) => <option key={p} value={p}>{p} pt</option>)}
+                </select>
+              </div>
+              <div>
                 <label className="f-label">開く先（ホームの「始める」ボタン）</label>
                 <select value={form.link_to} onChange={(e) => set({ link_to: e.target.value })}>
                   <option value="">なし</option>
@@ -182,6 +190,14 @@ export default function TasksPanel() {
                   <option value="sansu">🔢 さんすうナビ</option>
                 </select>
               </div>
+              {form.link_to && (
+                <div className="task-form-wide">
+                  <label className="auto-complete-check">
+                    <input type="checkbox" checked={form.auto_complete} onChange={(e) => set({ auto_complete: e.target.checked })} />
+                    <span>アプリの学習を終えたら、自動で完了にする（{form.link_to === 'sansu' ? 'さんすうナビを最後までやったとき' : 'ことばナビの「今日やる問題」を終えたとき'}）</span>
+                  </label>
+                </div>
+              )}
               {form.frequency === 'weekly' && (
                 <div className="task-form-wide">
                   <label className="f-label">曜日（複数選べます。未選択なら期日の曜日）</label>
@@ -226,7 +242,7 @@ export default function TasksPanel() {
         {loading ? <LoadingView /> : loadFailed ? <ErrorView onRetry={firstLoad} /> : tasks.length === 0 ? <p className="empty">まだ登録がありません</p> : visible.length === 0 ? <p className="empty">この教科のやることはありません</p> : (
           <table>
             <thead>
-              <tr><th></th><th>教科</th><th>やること</th><th>繰り返し</th><th>期日</th><th>終了日</th><th>表示</th><th></th></tr>
+              <tr><th></th><th>教科</th><th>やること</th><th>繰り返し</th><th>ポイント</th><th>期日</th><th>終了日</th><th>表示</th><th></th></tr>
             </thead>
             <tbody>
               {visible.map((t) => {
@@ -246,9 +262,10 @@ export default function TasksPanel() {
                     <td><span className="pill" style={{ background: SUBJECT_COLORS[t.subject]?.soft, color: SUBJECT_COLORS[t.subject]?.main }}>{SUBJECT_EMOJI[t.subject]} {t.subject}</span></td>
                     <td>
                       {t.title}
-                      {t.link_to && <span className="pill pill-ok" style={{ marginLeft: 6 }}>▶ {t.link_to === 'sansu' ? 'さんすうナビ' : 'ことばナビ'}</span>}
+                      {t.link_to && <span className="pill pill-ok" style={{ marginLeft: 6 }}>▶ {t.link_to === 'sansu' ? 'さんすうナビ' : 'ことばナビ'}{t.auto_complete ? '（自動完了）' : ''}</span>}
                     </td>
                     <td>{describeSchedule(t)}</td>
+                    <td>{t.points ?? DEFAULT_TASK_POINTS} pt</td>
                     <td>{t.due_date}</td>
                     <td>{t.end_date || '—'}{finished ? '（終了）' : ''}</td>
                     <td>

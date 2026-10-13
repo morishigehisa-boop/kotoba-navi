@@ -291,3 +291,6 @@ a.area-btn { text-decoration: none; display: inline-block; }
 
 .ms-form-fields { display: grid; gap: 6px; }
 .ms-form-fields input { width: 100%; font-family: inherit; font-size: 14px; padding: 8px 10px; border-radius: 8px; border: 1px solid #DEDBD0; background: #FAF9F5; margin-bottom: 8px; }
+
+.auto-complete-check { display: flex; align-items: flex-start; gap: 8px; font-size: 13px; color: #5A5749; cursor: pointer; line-height: 1.5; }
+.auto-complete-check input { margin-top: 3px; }
