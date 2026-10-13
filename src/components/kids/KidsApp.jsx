@@ -25,6 +25,7 @@ import {
 import { boxOf } from '../../lib/today'
 import RecordScreen from './RecordScreen'
 import OverallRecord from './OverallRecord'
+import PointHistory from './PointHistory'
 import ShopScreen from './ShopScreen'
 import SugorokuScreen from './SugorokuScreen'
 import HomeScreen from './HomeScreen'
@@ -88,6 +89,15 @@ function claimTaskBonus() {
   return true
 }
 
+// さんすうで「習得」を数えた問題のID。開き直しても二重にすごろくを進めないよう端末に保存する
+const SANSU_COUNTED_KEY = 'kotoba_navi_sansu_counted'
+function loadSansuCounted() {
+  try { return new Set(JSON.parse(localStorage.getItem(SANSU_COUNTED_KEY) || '[]')) } catch { return new Set() }
+}
+function saveSansuCounted(set) {
+  try { localStorage.setItem(SANSU_COUNTED_KEY, JSON.stringify([...set])) } catch {}
+}
+
 export default function KidsApp({ initialScreen = 'home' }) {
   const [loading, setLoading] = useState(true)
   const [questions, setQuestions] = useState([])
@@ -122,7 +132,7 @@ export default function KidsApp({ initialScreen = 'home' }) {
   const categoryTierRef = useRef(new Map())
   const seededCategoryTierRef = useRef(false)
   const masteredQuestionsRef = useRef(new Set())
-  const masteredSansuRef = useRef(new Set()) // さんすうで、習得を数えた問題
+  const masteredSansuRef = useRef(loadSansuCounted()) // さんすうで、習得を数えた問題
   const [pointToast, setPointToast] = useState(null) // { n, key }：もらったポイントの表示
   const pointToastTimer = useRef(null)
   const seededMasteredRef = useRef(false)
@@ -383,6 +393,7 @@ export default function KidsApp({ initialScreen = 'home' }) {
   function handleSansuMastered(question) {
     if (masteredSansuRef.current.has(question.id)) return
     masteredSansuRef.current.add(question.id)
+    saveSansuCounted(masteredSansuRef.current)
     addMasteryEvent()
   }
 
@@ -766,6 +777,7 @@ export default function KidsApp({ initialScreen = 'home' }) {
           {recordTab === 'record' ? (
             <>
               <OverallRecord />
+              <PointHistory />
               <RecordScreen questions={questions} onBack={() => setScreen(backTo)} />
             </>
           ) : (

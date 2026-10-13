@@ -18,6 +18,17 @@ function shuffle(arr) {
   return a
 }
 
+// 途中でやめても、あとで「つづきから」できるように、残りの問題の順番を端末に保存する
+const RESUME_KEY = 'kotoba_navi_sansu_resume'
+function loadResume() {
+  try {
+    const r = JSON.parse(localStorage.getItem(RESUME_KEY) || 'null')
+    return r && Array.isArray(r.ids) && r.ids.length > 0 ? r : null
+  } catch { return null }
+}
+function saveResume(data) { try { localStorage.setItem(RESUME_KEY, JSON.stringify(data)) } catch {} }
+function clearResume() { try { localStorage.removeItem(RESUME_KEY) } catch {} }
+
 const toggle = (list, value) => (list.includes(value) ? list.filter((v) => v !== value) : [...list, value])
 
 /**
@@ -31,6 +42,7 @@ export default function SansuScreen({ onStageChange, onAnswered, onMastered, onF
   const [stage, setStage] = useState('setup')
   const [filters, setFilters] = useState(null)
   const [result, setResult] = useState(null)
+  const [resume, setResume] = useState(null) // つづきから始めるときだけ入る
 
   useEffect(() => {
     onStageChange(stage)
@@ -42,12 +54,14 @@ export default function SansuScreen({ onStageChange, onAnswered, onMastered, onF
     setResult({ ...r, interrupted })
     setStage('result')
     if (!interrupted && r.total > 0) onFinished(r)
+    if (!interrupted) clearResume()
   }
 
   if (stage === 'study') {
     return (
       <Study
         filters={filters}
+        resume={resume}
         onAnswered={onAnswered}
         onMastered={onMastered}
         onFinish={(r) => finish(r, false)}
@@ -58,10 +72,16 @@ export default function SansuScreen({ onStageChange, onAnswered, onMastered, onF
   if (stage === 'result') {
     return <Result result={result} onRestart={() => setStage('setup')} onGoHome={onGoHome} />
   }
-  return <Setup onStart={(f) => { setFilters(f); setStage('study') }} />
+  return (
+    <Setup
+      onStart={(f) => { clearResume(); setResume(null); setFilters(f); setStage('study') }}
+      onResume={(saved) => { setResume(saved); setFilters(saved.filters); setStage('study') }}
+    />
+  )
 }
 
-function Setup({ onStart }) {
+function Setup({ onStart, onResume }) {
+  const [saved] = useState(loadResume)
   const [units, setUnits] = useState([])
   const [selectedUnits, setSelectedUnits] = useState([])
   const [difficulties, setDifficulties] = useState(['easy', 'normal', 'hard'])
@@ -135,26 +155,42 @@ function Setup({ onStart }) {
 
       <p className="sansu-count">問題は <b>{count}</b> 問</p>
 
-      <button className="restart" disabled={count === 0} onClick={() => onStart({ units: selectedUnits, difficulties, excludeMastered })}>
+      {saved && (
+        <button className="restart" onClick={() => onResume(saved)}>
+          ▶ つづきから（あと{saved.ids.length}問）
+        </button>
+      )}
+      <button className={`restart ${saved ? 'pick-another' : ''}`} disabled={count === 0} onClick={() => onStart({ units: selectedUnits, difficulties, excludeMastered })}>
         始める
       </button>
     </div>
   )
 }
 
-function Study({ filters, onAnswered, onMastered, onFinish, onQuit }) {
+function Study({ filters, resume, onAnswered, onMastered, onFinish, onQuit }) {
   const [questions, setQuestions] = useState([])
   const [state, setState] = useState('loading') // loading | error | ready
   const [index, setIndex] = useState(0)
   const [revealed, setRevealed] = useState(false)
   const [busy, setBusy] = useState(false)
-  const [results, setResults] = useState({ correct: 0, incorrect: 0 })
+  const [results, setResults] = useState(resume?.results || { correct: 0, incorrect: 0 })
   const [showQuit, setShowQuit] = useState(false)
+
+  const offset = resume?.answered || 0 // つづきから始めたとき、すでに答えた数
 
   async function load() {
     setState('loading')
     try {
-      setQuestions(shuffle(await fetchSansuQuestions(filters)))
+      const rows = await fetchSansuQuestions(filters)
+      if (resume) {
+        // 保存した順番どおりに、残りの問題だけを最新の内容で並べなおす
+        const byId = new Map(rows.map((r) => [r.id, r]))
+        const rest = resume.ids.map((id) => byId.get(id)).filter(Boolean)
+        if (rest.length === 0) clearResume()
+        setQuestions(rest)
+      } else {
+        setQuestions(shuffle(rows))
+      }
       setState('ready')
     } catch (e) {
       console.error(e)
@@ -171,12 +207,13 @@ function Study({ filters, onAnswered, onMastered, onFinish, onQuit }) {
     const next = { correct: results.correct + (isCorrect ? 1 : 0), incorrect: results.incorrect + (isCorrect ? 0 : 1) }
     setResults(next)
     onAnswered(isCorrect)
+    saveResume({ filters, ids: questions.slice(index + 1).map((q) => q.id), answered: offset + index + 1, results: next })
     recordSansuAnswer(current, isCorrect)
       .then((r) => { if (r?.newlyMastered) onMastered?.(current) })
       .catch(console.error)
     setTimeout(() => {
       if (index + 1 >= questions.length) {
-        onFinish({ ...next, total: questions.length })
+        onFinish({ ...next, total: offset + questions.length })
       } else {
         setIndex(index + 1)
         setRevealed(false)
@@ -203,7 +240,7 @@ function Study({ filters, onAnswered, onMastered, onFinish, onQuit }) {
         <button className="quit-btn" onClick={() => setShowQuit(true)}>✕ やめる</button>
       </div>
       <div className="progress-wrap">
-        <div className="progress-bar" style={{ width: `${Math.round((index / questions.length) * 100)}%` }} />
+        <div className="progress-bar" style={{ width: `${Math.round(((offset + index) / (offset + questions.length)) * 100)}%` }} />
       </div>
 
       <div className="card sansu-card" key={current.id}>

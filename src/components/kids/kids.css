@@ -427,3 +427,16 @@ body { margin: 0; background: var(--bg); }
 .overall-num { font-size: 26px; font-weight: 800; color: #333; }
 .overall-num span { font-size: 12px; font-weight: 600; color: #777; }
 .overall-sub { font-size: 11px; color: #888; }
+
+/* ポイントのきろく（きろくタブ） */
+.point-history { margin: 12px 12px 0; background: #fff; border-radius: 14px; box-shadow: 0 1px 4px rgba(0,0,0,.08); overflow: hidden; }
+.point-history-toggle { display: flex; justify-content: space-between; align-items: center; width: 100%; min-height: 48px; padding: 0 14px; background: none; border: none; font-size: 15px; font-weight: 700; color: #555; cursor: pointer; }
+.point-history-body { padding: 0 14px 12px; max-height: 360px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.point-history-day { display: flex; justify-content: space-between; padding: 8px 0 4px; font-size: 12px; font-weight: 700; color: #888; border-bottom: 1px solid #eee; }
+.point-history-row { display: flex; gap: 8px; align-items: center; padding: 7px 0; font-size: 14px; color: #333; }
+.point-history-time { font-size: 11px; color: #aaa; flex: none; }
+.point-history-label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.point-history-delta { flex: none; font-weight: 800; color: #E8A317; }
+.point-history-delta.minus { color: #D9534F; }
+.point-history-empty { padding: 14px 0; text-align: center; font-size: 13px; color: #888; }
+.point-history-more { width: 100%; min-height: 44px; margin-top: 8px; background: #f3f0fa; border: none; border-radius: 10px; font-size: 14px; font-weight: 700; color: #6a54b0; cursor: pointer; }
