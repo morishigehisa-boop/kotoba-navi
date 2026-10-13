@@ -76,7 +76,7 @@ function formatGoalShort(iso) {
 }
 
 // やること（ホーム）の完了ごほうび
-const TASK_ALL_DONE_BONUS = 20
+const TASK_ALL_DONE_BONUS = 200
 const TASK_BONUS_KEY = 'kotoba_navi_task_bonus_date'
 // 「ぜんぶ終わった」ボーナスは、1日1回だけ（取り消して付けなおしても増えない）
 function claimTaskBonus() {
