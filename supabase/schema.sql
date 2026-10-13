@@ -1,103 +1,77 @@
--- ことばナビ Supabaseテーブル設計
--- 作成日: 2026-07-25
+-- 勉強がんばるアプリ（ことばナビ・さんすうナビ・やること）Supabaseテーブル定義
+-- 本番DB（project: ydxgwijjpmpfaqkhmuov）の現在の状態に合わせた一覧。2026-10-13 更新。
+-- ログインなし（anon）で使うアプリのため、RLSは有効にしたうえで anon に読み書きを許可している。
+-- 新しく作るときは上から順に実行する。既存DBの変更は apply_migration で行い、このファイルも合わせて直す。
 
 -- =========================================
--- 1. questions（問題本体）
+-- ことばナビ
 -- =========================================
+
+-- 問題本体
 create table questions (
   id bigint generated always as identity primary key,
-  category text not null,               -- ことわざ / 慣用句 / 類義語 / 対義語 / 四字熟語 / 同音異義語
+  category text not null,               -- ことわざ / 慣用句 / 類義語 / 対義語 / 四字熟語 / 同音異義語 など
   answer_type text not null check (answer_type in (
-    'self_recall',       -- ことわざ（自己採点）
-    'synonym_forward',   -- ことわざ（似た意味・上段→下段）
-    'synonym_reverse',   -- ことわざ（似た意味・下段→上段）
-    'fill_blank',        -- 慣用句（穴埋め）/ 四字熟語（部分ヒント）共通
-    'pair_fill',         -- 類義語・対義語（二文穴埋め）
-    'choice'             -- 同音異義語（選択式）
+    'self_recall',         -- 意味 → 答え（自己採点）
+    'synonym_forward',     -- 似た意味のことわざ（上段→下段）
+    'synonym_reverse',     -- 似た意味のことわざ（下段→上段）
+    'fill_blank',          -- 穴埋め例文＋意味 → 答え（慣用句・四字熟語）
+    'pair_fill',           -- 二文穴埋め（類義語・対義語）
+    'antonym_pair',        -- 対になる表現（二文）
+    'synonym_pair',        -- 類義語（二文穴埋め）
+    'wago_fill',           -- 和語（穴埋め）
+    'meaning_first_fill',  -- 意味 → 穴埋め例文
+    'choice'               -- 同音異義語・同訓異字（選択式・自動採点）
   )),
-  content jsonb not null,               -- パターン別の表示・正解データ（下記参照）
+  content jsonb not null,               -- 出題形式ごとの表示・正解データ（下記）
   source_book text,                     -- インプット問題集の名前
   source_page text,                     -- ページ（例: "12-13"）
   last_correct boolean,                 -- 最後の正解/不正解（null=未回答）
   last_answered_at timestamptz,
   correct_count integer not null default 0,   -- 累計正解回数（記録用。減らない）
-  streak_count integer not null default 0,    -- 連続正解数（定着判定用。不正解で0にリセット）
+  streak_count integer not null default 0,    -- 連続正解数（定着判定用。不正解で0にリセット。4で「完璧」）
+  wrong_count integer not null default 0,     -- 不正解回数（3回以上で「苦手」→克服の演出）
   created_at timestamptz not null default now()
 );
-
-alter table questions enable row level security;
-create policy "questions_allow_all" on questions
-  for all using (true) with check (true);
-
 create index idx_questions_category on questions(category);
 create index idx_questions_source_book on questions(source_book);
 create index idx_questions_correct_count on questions(correct_count);
 
--- content jsonb の形（answer_typeごと。フロント側のカードデータとほぼ同じ形）
---
--- self_recall:
---   { "q": "意味", "a": "答え", "shown": null }
---
--- synonym_forward / synonym_reverse:
---   { "q": "意味", "shown": "表示することわざ", "a": ["答え1", "答え2"] }
---
--- fill_blank:
---   { "sentence": "穴埋め例文（部分ヒントはHTML/記号を含めてよい）", "q": "意味", "a": "答え" }
---
--- pair_fill:
---   { "sentenceA": "例文1", "answerA": "答え1", "sentenceB": "例文2", "answerB": "答え2" }
---
--- choice:
---   { "reading": "カタカナ読み", "sentence": "穴埋め例文", "choices": ["選択肢1","選択肢2","選択肢3"], "answer": "正解" }
+-- content jsonb の形（src/lib/questionTypes.js の TYPE_GROUPS と対応）
+--   self_recall / fill_blank / wago_fill / meaning_first_fill:
+--     { "sentence": "穴埋め例文（self_recallはなし。HTMLの部分ヒントを含めてよい）", "q": "意味", "a": "答え" }
+--   synonym_forward / synonym_reverse:
+--     { "q": "意味", "shown": "表示することわざ", "a": ["答え1", "答え2"] }
+--   pair_fill / antonym_pair / synonym_pair:
+--     { "sentenceA": "例文1", "answerA": "答え1", "sentenceB": "例文2", "answerB": "答え2" }
+--   choice:
+--     { "reading": "カタカナ読み", "sentence": "穴埋め例文", "choices": ["選択肢1","選択肢2"], "answer": "正解" }
 
-
--- =========================================
--- 2. question_sets（問題集）
--- =========================================
+-- 問題集
 create table question_sets (
   id bigint generated always as identity primary key,
-  name text not null,                   -- 例:「言葉ナビ上巻 ことわざ P.12〜20 累計正解2回以下」
-  filter_condition jsonb,               -- 抽出条件のスナップショット（下記参照）
-  goal_at timestamptz,                  -- 全問記憶の目標日時（任意）
+  name text not null,
+  filter_condition jsonb,               -- 抽出条件のスナップショット
+  goal_at timestamptz,                  -- 全問記憶の目標日（任意。「今日やる問題」の抽出に使う）
+  sort_order integer not null default 0,     -- 子どもアプリでの表示順
+  reviewed boolean not null default false,   -- 管理画面のプレビューで確認ずみ
+  shuffle boolean not null default true,     -- 開くたびに順番を入れかえる
   created_at timestamptz not null default now()
 );
+-- filter_condition の形: { source_book, category, answer_type, page_from, page_to, max_correct_count, max_streak_count }（指定なしは null）
 
-alter table question_sets enable row level security;
-create policy "question_sets_allow_all" on question_sets
-  for all using (true) with check (true);
-
--- filter_condition jsonb の形
---   {
---     "source_book": "言葉ナビ上巻",
---     "category": "ことわざ",
---     "page_from": 12,
---     "page_to": 20,
---     "max_correct_count": 2
---   }
--- （指定なしの項目は null または省略）
-
-
--- =========================================
--- 3. question_set_items（問題集と問題の紐付け）
--- =========================================
+-- 問題集と問題の紐付け（多対多）
 create table question_set_items (
   question_set_id bigint not null references question_sets(id) on delete cascade,
   question_id bigint not null references questions(id) on delete cascade,
   position integer not null default 0,
   primary key (question_set_id, question_id)
 );
-
-alter table question_set_items enable row level security;
-create policy "question_set_items_allow_all" on question_set_items
-  for all using (true) with check (true);
-
 create index idx_qsi_set on question_set_items(question_set_id);
 create index idx_qsi_question on question_set_items(question_id);
 
-
--- =========================================
--- 4. answer_logs（回答履歴）
--- =========================================
+-- 回答履歴。集計値（questions の correct_count など）はアプリ側（src/lib/api.js recordAnswer）で更新する。
+-- session_type='review'（間違えた問題の復習）は集計値に反映しない。
 create table answer_logs (
   id bigint generated always as identity primary key,
   question_id bigint not null references questions(id) on delete cascade,
@@ -106,47 +80,63 @@ create table answer_logs (
   is_correct boolean not null,
   answered_at timestamptz not null default now()
 );
-
-alter table answer_logs enable row level security;
-create policy "answer_logs_allow_all" on answer_logs
-  for all using (true) with check (true);
-
 create index idx_answer_logs_question_id on answer_logs(question_id);
 create index idx_answer_logs_answered_at on answer_logs(answered_at);
 
--- 集計値（questions.correct_count / streak_count / last_correct / last_answered_at）は
--- answer_logsへのINSERT後にアプリ側 or トリガーで更新する想定。
--- session_type='review' の回答は questions.correct_count / streak_count に反映しない
--- （復習の正解は正解数にカウントしない、という既存仕様どおり）。
---
--- 更新ルール（session_type='main'の場合）:
---   正解時: correct_count += 1, streak_count += 1
---   不正解時: correct_count は変えない（累計記録として残す）, streak_count = 0 にリセット
---
--- 「今日やる問題集」の抽出（ライトナー式の箱・復習間隔）は、
--- correct_count ではなく streak_count を基準にする。
--- 理由: correct_count は不正解を挟んでも増え続けるため、
--- 「正解・不正解・正解・不正解・正解」のような履歴でも累計3回になってしまい、
--- 定着が進んでいるように誤判定してしまうため。
-
-
--- =========================================
--- 5. filter_history（抽出条件の履歴）
--- =========================================
+-- 問題集作成時の抽出条件の履歴
 create table filter_history (
   id bigint generated always as identity primary key,
   name text not null,
-  filter_condition jsonb not null,      -- question_sets.filter_conditionと同じ形
+  filter_condition jsonb not null,
   result_count integer not null,
   created_at timestamptz not null default now()
 );
 
-alter table filter_history enable row level security;
-create policy "filter_history_allow_all" on filter_history
-  for all using (true) with check (true);
+-- ふりがな辞書（管理画面から追加する分。src/lib/furigana.js の組み込み辞書に上書きでマージ）
+create table furigana_entries (
+  id bigint generated always as identity primary key,
+  word text not null unique,
+  reading text not null,
+  created_at timestamptz not null default now()
+);
 
--- ============ やること（タスク管理） ============
-create table if not exists public.tasks (
+-- =========================================
+-- ごほうび（子ども1人ぶん。1行だけ）
+-- =========================================
+create table user_progress (
+  id bigint primary key default 1 constraint single_row check (id = 1),
+  points integer not null default 0,
+  streak_count integer not null default 0,          -- 連続日数
+  longest_streak integer not null default 0,
+  freeze_tokens integer not null default 1,         -- 1日休んでも連続が切れない「フリーズ」
+  last_activity_date date,                          -- 最後に勉強した日（端末のローカル日付）
+  weekly_correct_count integer not null default 0,  -- 今週のミッションの進み（正解1問=1）
+  week_start_date date,                             -- 今週の月曜日
+  weekly_missions_claimed text[] not null default '{}',
+  mastery_event_total integer not null default 0,   -- すごろく：習得した数の合計
+  owned_items text[] not null default '{}',         -- 'キャラID:アイテムID'
+  equipped_item text,
+  active_character text not null default 'fox',
+  unlocked_characters text[] not null default '{fox}',
+  unlocked_backgrounds text[] not null default '{coast}',
+  active_background text,
+  updated_at timestamptz not null default now()
+);
+
+-- ポイントの増減の履歴（きろく画面の「ポイントのきろく」）
+create table point_logs (
+  id bigint generated always as identity primary key,
+  source text not null check (source in ('kotoba','sansu','task','bonus','mission','other')),
+  delta integer not null,
+  label text,
+  created_at timestamptz not null default now()
+);
+create index point_logs_created_at_idx on point_logs (created_at desc);
+
+-- =========================================
+-- やること（ホーム）
+-- =========================================
+create table tasks (
   id uuid primary key default gen_random_uuid(),
   subject text not null check (subject in ('算数','国語','理科','社会')),
   title text not null check (char_length(btrim(title)) > 0),
@@ -155,56 +145,134 @@ create table if not exists public.tasks (
   weekdays smallint[] not null default '{}' check (weekdays <@ array[0,1,2,3,4,5,6]::smallint[]), -- 0=日..6=土
   end_date date,
   is_active boolean not null default true,
-  sort_order integer not null default 0, -- 管理画面での並び順（1始まり）
-  link_to text check (link_to in ('kotoba', 'sansu')), -- ホームの「はじめる」ボタンで開くアプリ
+  sort_order integer not null default 0,             -- 管理画面での並び順（1始まり）
+  link_to text check (link_to in ('kotoba', 'sansu')), -- ホームの「始める」ボタンで開くアプリ
+  points integer not null default 100 check (points in (10,50,100,150,200)),
+  auto_complete boolean not null default false,      -- 連動するアプリの学習を終えたら自動で完了にする
   created_at timestamptz not null default now(),
   check (end_date is null or end_date >= due_date)
 );
-create table if not exists public.task_completions (
+create index tasks_sort_order_idx on tasks (sort_order);
+
+create table task_completions (
   id uuid primary key default gen_random_uuid(),
-  task_id uuid not null references public.tasks(id) on delete cascade,
-  occurrence_date date not null,
+  task_id uuid not null references tasks(id) on delete cascade,
+  occurrence_date date not null,                     -- どの日の分を終えたか
   completed_at timestamptz not null default now(),
+  points_awarded integer not null default 5,         -- 完了したときに付けたポイント（取り消しで正確に戻すため）
   unique (task_id, occurrence_date)
 );
--- RLS: 管理画面・子ども画面ともログインなし(anon)のため、他テーブルと同じ方針で anon に書き込みを許可
-alter table public.tasks enable row level security;
-alter table public.task_completions enable row level security;
+create index task_completions_occurrence_idx on task_completions (occurrence_date);
 
--- マイルストーン（テスト・行事などの目標日。管理画面の予定カレンダーに表示）
-create table if not exists milestones (
+-- イベント（テスト・行事などの目標日。ホームと管理画面の予定カレンダーに表示）
+create table milestones (
   id bigint generated always as identity primary key,
   event_date date not null,
   title text not null,
   created_at timestamptz not null default now()
 );
-create index if not exists milestones_event_date_idx on milestones (event_date);
+create index milestones_event_date_idx on milestones (event_date);
+
+-- =========================================
+-- さんすうナビ
+-- =========================================
+create table sansu_questions (
+  id bigint generated always as identity primary key,
+  unit text not null,                                -- 単元
+  difficulty text not null default 'normal',         -- 'easy' | 'normal' | 'hard'
+  question_text text not null,
+  answer text,
+  image_url text,                                    -- 旧形式（未使用。image_urls に移行ずみ）
+  image_urls text[] not null default '{}',
+  answer_image_urls text[] not null default '{}',
+  source_name text,                                  -- テスト／教材名
+  page_number text,
+  consecutive_correct integer not null default 0,
+  is_mastered boolean not null default false,        -- 3回連続正解で習得
+  last_answered_at timestamptz,
+  created_at timestamptz not null default now()
+);
+create index idx_sansu_questions_unit on sansu_questions(unit);
+create index idx_sansu_questions_difficulty on sansu_questions(difficulty);
+
+create table sansu_answer_logs (
+  id bigint generated always as identity primary key,
+  question_id bigint not null references sansu_questions(id) on delete cascade,
+  is_correct boolean not null,
+  answered_at timestamptz not null default now()
+);
+create index idx_sansu_answer_logs_question_id on sansu_answer_logs(question_id);
+
+-- 管理画面の「単元」「教材名」の選択肢
+create table sansu_meta_options (
+  id bigint generated always as identity primary key,
+  option_type text not null check (option_type in ('unit', 'source')),
+  name text not null,
+  created_at timestamptz not null default now(),
+  unique (option_type, name)
+);
+-- 画像は Storage のバケット 'sansu-images'（公開）に保存する
+
+-- =========================================
+-- RLS（すべてのテーブルで有効。ログインなしのため anon に許可）
+-- =========================================
+alter table questions enable row level security;
+alter table question_sets enable row level security;
+alter table question_set_items enable row level security;
+alter table answer_logs enable row level security;
+alter table filter_history enable row level security;
+alter table furigana_entries enable row level security;
+alter table user_progress enable row level security;
+alter table point_logs enable row level security;
+alter table tasks enable row level security;
+alter table task_completions enable row level security;
 alter table milestones enable row level security;
+alter table sansu_questions enable row level security;
+alter table sansu_answer_logs enable row level security;
+alter table sansu_meta_options enable row level security;
+
+create policy "questions_allow_all" on questions for all using (true) with check (true);
+create policy "question_sets_allow_all" on question_sets for all using (true) with check (true);
+create policy "question_set_items_allow_all" on question_set_items for all using (true) with check (true);
+create policy "answer_logs_allow_all" on answer_logs for all using (true) with check (true);
+create policy "filter_history_allow_all" on filter_history for all using (true) with check (true);
+create policy "furigana_entries_allow_all" on furigana_entries for all using (true) with check (true);
+create policy "user_progress_allow_all" on user_progress for all using (true) with check (true);
+create policy "sansu_questions_allow_all" on sansu_questions for all using (true) with check (true);
+create policy "sansu_answer_logs_allow_all" on sansu_answer_logs for all using (true) with check (true);
+create policy "sansu_meta_options_allow_all" on sansu_meta_options for all using (true) with check (true);
+
+create policy "point_logs anon select" on point_logs for select to anon, authenticated using (true);
+create policy "point_logs anon insert" on point_logs for insert to anon, authenticated with check (true);
+
+create policy "tasks_all_authenticated" on tasks for all to authenticated using (true) with check (true);
+create policy "tasks_select_anon" on tasks for select to anon using (true);
+create policy "tasks_insert_anon" on tasks for insert to anon with check (true);
+create policy "tasks_update_anon" on tasks for update to anon using (true) with check (true);
+create policy "tasks_delete_anon" on tasks for delete to anon using (true);
+
+create policy "completions_all_authenticated" on task_completions for all to authenticated using (true) with check (true);
+create policy "completions_select_anon" on task_completions for select to anon using (true);
+create policy "completions_insert_anon" on task_completions for insert to anon with check (true);
+create policy "completions_delete_anon" on task_completions for delete to anon using (true);
+
 create policy "milestones anon select" on milestones for select to anon, authenticated using (true);
 create policy "milestones anon insert" on milestones for insert to anon, authenticated with check (true);
 create policy "milestones anon update" on milestones for update to anon, authenticated using (true) with check (true);
 create policy "milestones anon delete" on milestones for delete to anon, authenticated using (true);
 
--- ===== やることのポイント / 自動完了 / ポイント履歴 =====
-alter table public.tasks add column if not exists points integer not null default 100 check (points in (10,50,100,150,200));
-alter table public.tasks add column if not exists auto_complete boolean not null default false;
-alter table public.task_completions add column if not exists points_awarded integer not null default 5;
-
-create table if not exists public.point_logs (
-  id bigint generated always as identity primary key,
-  source text not null check (source in ('kotoba','sansu','task','bonus','mission','other')),
-  delta integer not null,
-  label text,
-  created_at timestamptz not null default now()
-);
-alter table public.point_logs enable row level security;
-create policy "anon select point_logs" on public.point_logs for select to anon using (true);
-create policy "anon insert point_logs" on public.point_logs for insert to anon with check (true);
-
--- 勉強した日（ことばナビ・さんすう・やること完了）の一覧。きろくのカレンダー用
+-- =========================================
+-- 関数
+-- =========================================
+-- 勉強した日（ことばナビ・さんすう・やること完了）の一覧。きろくのカレンダー用（日本時間の日付）
 create or replace function public.get_activity_dates() returns table(activity_date date)
-language sql stable set search_path = public as $$
-  select (answered_at at time zone 'Asia/Tokyo')::date from answer_logs
-  union select (answered_at at time zone 'Asia/Tokyo')::date from sansu_answer_logs
-  union select (completed_at at time zone 'Asia/Tokyo')::date from task_completions
+language sql stable set search_path to 'public' as $$
+  select d as activity_date from (
+    select (answered_at at time zone 'Asia/Tokyo')::date as d from answer_logs
+    union
+    select (answered_at at time zone 'Asia/Tokyo')::date as d from sansu_answer_logs
+    union
+    select (completed_at at time zone 'Asia/Tokyo')::date as d from task_completions
+  ) t
+  order by d;
 $$;

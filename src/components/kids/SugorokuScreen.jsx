@@ -1,4 +1,5 @@
-import { SQUARES_PER_STAGE, MASTERY_PER_SQUARE, stageInfo } from '../../lib/gamification'
+import { SQUARES_PER_STAGE, MASTERY_PER_SQUARE, STAGE_THEMES, stageInfo } from '../../lib/gamification'
+import { MASTERED_STREAK } from '../../lib/sansuApi'
 import RoomBackground from './RoomBackground'
 
 // 下から上へジグザグに進む10マス分の座標（viewBox 0 0 100 220、余裕を持たせた配置）
@@ -25,7 +26,7 @@ export default function SugorokuScreen({ masteryEventTotal, characterEmoji, onBa
         <div className="label">すごろくマップ</div>
         <div className="sugoroku-stage-name" style={{ marginTop: 20 }}>第{info.stageIndex + 1}ステージ：{info.theme.name}</div>
         <div className="sugoroku-progress">
-          {info.squareInStage + 1} / {SQUARES_PER_STAGE} マス目　・　あと{MASTERY_PER_SQUARE - info.towardNextSquare}問 完璧で次のマスへ
+          {info.squareInStage + 1} / {SQUARES_PER_STAGE} マス目 ・ あと{MASTERY_PER_SQUARE - info.towardNextSquare}問 完璧で次のマスへ
         </div>
 
         <RoomBackground themeId={info.theme.id} height={440}>
@@ -55,7 +56,7 @@ export default function SugorokuScreen({ masteryEventTotal, characterEmoji, onBa
         </RoomBackground>
 
         <div className="sugoroku-mastery-hint">
-          問題を「完璧」にするたびに、すごろくが進みます。10ステージ（全100マス）をまわると、また第1ステージから旅が続きます。
+          問題を「完璧」にするたびに、すごろくが進みます（さんすうは{MASTERED_STREAK}回連続でできたら）。{MASTERY_PER_SQUARE}問で1マス進み、{STAGE_THEMES.length}ステージ（全{STAGE_THEMES.length * SQUARES_PER_STAGE}マス）をまわると、また第1ステージから旅が続きます。
         </div>
       </div>
       <button className="restart pick-another" onClick={onBack}>もどる</button>

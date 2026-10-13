@@ -1,25 +1,16 @@
 import { useEffect, useState } from 'react'
-import { boxOf } from '../../lib/today'
-import { categoryProgress } from '../../lib/gamification'
+import { BOX_LEVELS, MASTERED_BOX, countByBox } from '../../lib/today'
+import { categoryProgress, BADGE_TIERS } from '../../lib/gamification'
 import { fetchActivityDates } from '../../lib/api'
+import { WEEKDAY_LABELS, toISODate, isoOf, monthCells } from '../../lib/dates'
 
-const BOX_META = [
-  { box: 0, label: 'まだこれから', color: '#EFE3CB', textColor: '#8A7B62' },
-  { box: 1, label: '1回 正解', color: '#FFD9A0', textColor: '#B5670E' },
-  { box: 2, label: '2回連続 正解', color: '#FFB86B', textColor: '#A85200' },
-  { box: 3, label: '3回連続 正解', color: '#FF9A45', textColor: '#8C3E00' },
-  { box: 4, label: '🌟 完璧！', color: '#FF8A3D', textColor: '#7A3300' }
-]
-const WEEKDAYS = ['日', '月', '火', '水', '木', '金', '土']
-
-function toDateStr(y, m, d) {
-  return `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`
-}
+// バッジの説明文（例：30%で銅、60%で銀、100%で金）
+const BADGE_RULE = [...BADGE_TIERS].reverse().map((t) => `${t.min}%で${t.label}`).join('、')
 
 export default function RecordScreen({ questions, onBack }) {
   const total = questions.length
-  const counts = BOX_META.map((m) => questions.filter((q) => boxOf(q) === m.box).length)
-  const masteredCount = counts[4]
+  const counts = countByBox(questions)
+  const masteredCount = counts[MASTERED_BOX]
   const masteredRate = total > 0 ? Math.round((masteredCount / total) * 100) : 0
   const categories = categoryProgress(questions)
 
@@ -32,15 +23,11 @@ export default function RecordScreen({ questions, onBack }) {
 
   const year = cursor.getFullYear()
   const month = cursor.getMonth()
-  const firstWeekday = new Date(year, month, 1).getDay()
-  const daysInMonth = new Date(year, month + 1, 0).getDate()
-  const now = new Date()
-  const todayStr = toDateStr(now.getFullYear(), now.getMonth(), now.getDate())
-  const cells = []
-  for (let i = 0; i < firstWeekday; i++) cells.push(null)
-  for (let d = 1; d <= daysInMonth; d++) cells.push(d)
+  const todayStr = toISODate()
+  const cells = monthCells(year, month)
   const activeSet = new Set(dates || [])
-  const monthActiveCount = (dates || []).filter((d) => d.startsWith(`${year}-${String(month + 1).padStart(2, '0')}`)).length
+  const monthPrefix = isoOf(year, month, 1).slice(0, 8) // 'YYYY-MM-'
+  const monthActiveCount = (dates || []).filter((d) => d.startsWith(monthPrefix)).length
 
   return (
     <div>
@@ -52,11 +39,11 @@ export default function RecordScreen({ questions, onBack }) {
         </div>
 
         <div style={{ marginTop: 18 }}>
-          {BOX_META.map((m, i) => {
+          {BOX_LEVELS.map((m, i) => {
             const count = counts[i]
             const pct = total > 0 ? Math.round((count / total) * 100) : 0
             return (
-              <div key={m.box} style={{ marginBottom: 14 }}>
+              <div key={i} style={{ marginBottom: 14 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, fontWeight: 700, color: 'var(--ink-soft)', marginBottom: 4 }}>
                   <span>{m.label}</span>
                   <span>{count}問</span>
@@ -80,7 +67,7 @@ export default function RecordScreen({ questions, onBack }) {
 
       <div className="card" style={{ alignItems: 'stretch' }}>
         <div className="label">バッジ</div>
-        <div className="hint" style={{ marginTop: 20 }}>カテゴリーごとに 30%で銅、60%で銀、100%で金！</div>
+        <div className="hint" style={{ marginTop: 20 }}>カテゴリーごとに {BADGE_RULE}！</div>
         <div className="badge-row">
           {categories.map((c) => (
             <div className="category-badge" key={c.category}>
@@ -106,10 +93,10 @@ export default function RecordScreen({ questions, onBack }) {
           <div className="hint" style={{ textAlign: 'center', marginTop: 20 }}>読み込み中…</div>
         ) : (
           <div className="cal-grid">
-            {WEEKDAYS.map((w) => <div className="cal-weekday" key={w}>{w}</div>)}
+            {WEEKDAY_LABELS.map((w) => <div className="cal-weekday" key={w}>{w}</div>)}
             {cells.map((d, i) => {
               if (d === null) return <div key={i} className="cal-cell cal-empty" />
-              const dateStr = toDateStr(year, month, d)
+              const dateStr = isoOf(year, month, d)
               const active = activeSet.has(dateStr)
               const isToday = dateStr === todayStr
               return (

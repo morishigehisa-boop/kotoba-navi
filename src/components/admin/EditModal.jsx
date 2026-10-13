@@ -1,19 +1,8 @@
 import { useState } from 'react'
 import { updateQuestion } from '../../lib/api'
+import { typeLabel, groupOf, splitSlash, joinSlash, formatQid } from '../../lib/questionTypes'
 
-export const ANSWER_TYPE_LABELS = {
-  self_recall: '自己採点',
-  synonym_forward: '似た意味(順)',
-  synonym_reverse: '似た意味(逆)',
-  fill_blank: '穴埋め',
-  pair_fill: '二文穴埋め',
-  antonym_pair: '対になる表現',
-  synonym_pair: '類義語(二文穴埋め)',
-  wago_fill: '和語(穴埋め)',
-  meaning_first_fill: '意味→穴埋め',
-  choice: '選択式'
-}
-
+// 問題1問の編集（出題形式ごとに入力欄が変わる）
 export function EditModal({ question, onClose, onSaved }) {
   const [category, setCategory] = useState(question.category)
   const [sourceBook, setSourceBook] = useState(question.source_book || '')
@@ -21,8 +10,8 @@ export function EditModal({ question, onClose, onSaved }) {
   const [content, setContent] = useState(() => {
     const c = { ...question.content }
     // 編集フォームでは配列項目をテキストで扱う
-    if (Array.isArray(c.a)) c.aText = c.a.join('／')
-    if (Array.isArray(c.choices)) c.choicesText = c.choices.join('／')
+    if (Array.isArray(c.a)) c.aText = joinSlash(c.a)
+    if (Array.isArray(c.choices)) c.choicesText = joinSlash(c.choices)
     return c
   })
   const [saving, setSaving] = useState(false)
@@ -35,8 +24,8 @@ export function EditModal({ question, onClose, onSaved }) {
     setSaving(true)
     try {
       const c = { ...content }
-      if ('aText' in c) { c.a = c.aText.split('／').map((s) => s.trim()).filter(Boolean); delete c.aText }
-      if ('choicesText' in c) { c.choices = c.choicesText.split('／').map((s) => s.trim()).filter(Boolean); delete c.choicesText }
+      if ('aText' in c) { c.a = splitSlash(c.aText); delete c.aText }
+      if ('choicesText' in c) { c.choices = splitSlash(c.choicesText); delete c.choicesText }
       await updateQuestion(question.id, {
         category, source_book: sourceBook, source_page: sourcePage, content: c
       })
@@ -47,11 +36,12 @@ export function EditModal({ question, onClose, onSaved }) {
   }
 
   const t = question.answer_type
+  const group = groupOf(t)
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <div className="modal" onClick={(e) => e.stopPropagation()}>
-        <h2>問題を編集（Q{String(question.id).padStart(4, '0')} ／ {ANSWER_TYPE_LABELS[t] || t}）</h2>
+        <h2>問題を編集（{formatQid(question.id)} ／ {typeLabel(t)}）</h2>
 
         <div className="form-grid" style={{ gridTemplateColumns: '1fr 1fr' }}>
           <div><label className="f-label">カテゴリー</label>
@@ -68,9 +58,9 @@ export function EditModal({ question, onClose, onSaved }) {
 
         <hr />
 
-        {(t === 'self_recall' || t === 'fill_blank' || t === 'wago_fill' || t === 'meaning_first_fill') && (
+        {group === 'recall' && (
           <>
-            {(t === 'fill_blank' || t === 'wago_fill' || t === 'meaning_first_fill') && (
+            {t !== 'self_recall' && (
               <div className="form-row" style={{ maxWidth: 'none' }}>
                 <label className="f-label">穴埋め例文</label>
                 <textarea value={content.sentence || ''} onChange={(e) => setField('sentence', e.target.value)} />
@@ -87,7 +77,7 @@ export function EditModal({ question, onClose, onSaved }) {
           </>
         )}
 
-        {(t === 'synonym_forward' || t === 'synonym_reverse') && (
+        {group === 'synonym' && (
           <>
             <div className="form-row" style={{ maxWidth: 'none' }}>
               <label className="f-label">意味</label>
@@ -104,10 +94,10 @@ export function EditModal({ question, onClose, onSaved }) {
           </>
         )}
 
-        {(t === 'pair_fill' || t === 'antonym_pair' || t === 'synonym_pair') && (
+        {group === 'pair' && (
           <>
             <div className="form-row" style={{ maxWidth: 'none' }}>
-              <label className="f-label">{t === 'antonym_pair' ? '意味①' : t === 'synonym_pair' ? '例文①' : '例文①'}</label>
+              <label className="f-label">{t === 'antonym_pair' ? '意味①' : '例文①'}</label>
               <input type="text" value={content.sentenceA || ''} onChange={(e) => setField('sentenceA', e.target.value)} />
             </div>
             <div className="form-row">
@@ -115,7 +105,7 @@ export function EditModal({ question, onClose, onSaved }) {
               <input type="text" value={content.answerA || ''} onChange={(e) => setField('answerA', e.target.value)} />
             </div>
             <div className="form-row" style={{ maxWidth: 'none' }}>
-              <label className="f-label">{t === 'antonym_pair' ? '意味②' : t === 'synonym_pair' ? '例文②' : '例文②'}</label>
+              <label className="f-label">{t === 'antonym_pair' ? '意味②' : '例文②'}</label>
               <input type="text" value={content.sentenceB || ''} onChange={(e) => setField('sentenceB', e.target.value)} />
             </div>
             <div className="form-row">
@@ -125,7 +115,7 @@ export function EditModal({ question, onClose, onSaved }) {
           </>
         )}
 
-        {t === 'choice' && (
+        {group === 'choice' && (
           <>
             <div className="form-row">
               <label className="f-label">読み（カタカナ）</label>

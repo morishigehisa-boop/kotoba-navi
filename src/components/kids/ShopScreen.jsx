@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { itemsForCharacter, CHARACTERS, isItemOwned, ownedCountForCharacter, STAGE_THEMES } from '../../lib/gamification'
+import { itemsForCharacter, CHARACTERS, isItemOwned, ownedCountForCharacter, nextLockedCharacter, characterById, STAGE_THEMES } from '../../lib/gamification'
 import RoomBackground from './RoomBackground'
 
 export default function ShopScreen({
@@ -10,8 +10,8 @@ export default function ShopScreen({
   const [tab, setTab] = useState('char')
   const items = itemsForCharacter(activeCharacter)
   const ownedCount = ownedCountForCharacter(ownedItems, activeCharacter)
-  const nextUpId = CHARACTERS.find((c) => !unlockedCharacters.includes(c.id))?.id
-  const activeCharName = CHARACTERS.find((c) => c.id === activeCharacter)?.name
+  const nextUpId = nextLockedCharacter(unlockedCharacters)?.id
+  const activeCharName = characterById(activeCharacter).name
 
   return (
     <div>

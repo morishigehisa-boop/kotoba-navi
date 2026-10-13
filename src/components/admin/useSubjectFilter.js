@@ -1,21 +1,16 @@
 import { useState } from 'react'
 import { SUBJECTS } from '../../lib/tasks'
+import { loadJSON, saveJSON, STORAGE_KEYS } from '../../lib/storage'
 
-// 教科フィルタの選択状態を（同じキーを使う画面どうしで共通に）localStorage へ保存して次回も引き継ぐ。
-// 保存できない環境（プライベートモードなど）でも、そのまま動く。
-export function useSubjectFilter(storageKey) {
+// 教科フィルタの選択状態を端末に保存して、次回も（やること一覧・予定カレンダーで共通に）引き継ぐ
+export function useSubjectFilter() {
   const [subjects, setSubjectsState] = useState(() => {
-    try {
-      const saved = JSON.parse(localStorage.getItem(storageKey))
-      if (Array.isArray(saved)) return SUBJECTS.filter((s) => saved.includes(s)) // 教科の増減があっても安全に復元
-    } catch {}
-    return SUBJECTS
+    const saved = loadJSON(STORAGE_KEYS.adminSubjects)
+    return Array.isArray(saved) ? SUBJECTS.filter((s) => saved.includes(s)) : SUBJECTS // 教科の増減があっても安全に復元
   })
-
-  const setSubjects = (next) => {
-    const value = typeof next === 'function' ? next(subjects) : next
+  const setSubjects = (value) => {
     setSubjectsState(value)
-    try { localStorage.setItem(storageKey, JSON.stringify(value)) } catch {}
+    saveJSON(STORAGE_KEYS.adminSubjects, value)
   }
   return [subjects, setSubjects]
 }

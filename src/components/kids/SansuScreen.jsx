@@ -1,35 +1,20 @@
 import { useEffect, useState } from 'react'
-import { fetchSansuUnits, countSansuQuestions, fetchSansuQuestions, recordSansuAnswer } from '../../lib/sansuApi'
+import { fetchSansuUnits, countSansuQuestions, fetchSansuQuestions, recordSansuAnswer, SANSU_DIFFICULTIES, MASTERED_STREAK } from '../../lib/sansuApi'
+import { shuffle, toggleItem } from '../../lib/utils'
+import { loadJSON, saveJSON, removeItem, STORAGE_KEYS } from '../../lib/storage'
 import { LoadingView, ErrorView } from '../common/Status'
-
-const DIFFICULTIES = [
-  { value: 'easy', label: '易しい' },
-  { value: 'normal', label: 'ふつう' },
-  { value: 'hard', label: '難しい' }
-]
-const NEXT_DELAY_MS = 600 // 「できた／もう少し」を押してから次の問題に進むまでの間
-
-function shuffle(arr) {
-  const a = [...arr]
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1))
-    ;[a[i], a[j]] = [a[j], a[i]]
-  }
-  return a
-}
+import AnswerButtons, { StudyHeader } from './AnswerButtons'
+import { QuitConfirm } from './ModalCard'
+import { NEXT_QUESTION_DELAY_MS } from './feedback'
 
 // 途中でやめても、あとで「つづきから」できるように、残りの問題の順番を端末に保存する
-const RESUME_KEY = 'kotoba_navi_sansu_resume'
+// { filters, ids: 残りの問題ID, answered: 答えた数, results: { correct, incorrect } }
 function loadResume() {
-  try {
-    const r = JSON.parse(localStorage.getItem(RESUME_KEY) || 'null')
-    return r && Array.isArray(r.ids) && r.ids.length > 0 ? r : null
-  } catch { return null }
+  const r = loadJSON(STORAGE_KEYS.sansuResume)
+  return Array.isArray(r?.ids) && r.ids.length > 0 ? r : null
 }
-function saveResume(data) { try { localStorage.setItem(RESUME_KEY, JSON.stringify(data)) } catch {} }
-function clearResume() { try { localStorage.removeItem(RESUME_KEY) } catch {} }
-
-const toggle = (list, value) => (list.includes(value) ? list.filter((v) => v !== value) : [...list, value])
+const saveResume = (data) => saveJSON(STORAGE_KEYS.sansuResume, data)
+const clearResume = () => removeItem(STORAGE_KEYS.sansuResume)
 
 /**
  * さんすうナビ（算数の復習）。ことばナビと同じ画面の中で動く。
@@ -133,7 +118,7 @@ function Setup({ onStart, onResume }) {
       <div className="sansu-section">単元を選ぶ</div>
       <div className="chip-row">
         {units.map((unit) => (
-          <button key={unit} className={`chip ${selectedUnits.includes(unit) ? 'chip-on' : ''}`} onClick={() => setSelectedUnits((p) => toggle(p, unit))}>
+          <button key={unit} className={`chip ${selectedUnits.includes(unit) ? 'chip-on' : ''}`} onClick={() => setSelectedUnits((p) => toggleItem(p, unit))}>
             {unit}
           </button>
         ))}
@@ -141,8 +126,8 @@ function Setup({ onStart, onResume }) {
 
       <div className="sansu-section">難しさを選ぶ</div>
       <div className="chip-row">
-        {DIFFICULTIES.map((d) => (
-          <button key={d.value} className={`chip ${difficulties.includes(d.value) ? 'chip-on' : ''}`} onClick={() => setDifficulties((p) => toggle(p, d.value))}>
+        {SANSU_DIFFICULTIES.map((d) => (
+          <button key={d.value} className={`chip ${difficulties.includes(d.value) ? 'chip-on' : ''}`} onClick={() => setDifficulties((p) => toggleItem(p, d.value))}>
             {d.label}
           </button>
         ))}
@@ -150,7 +135,7 @@ function Setup({ onStart, onResume }) {
 
       <label className="sansu-check">
         <input type="checkbox" checked={excludeMastered} onChange={(e) => setExcludeMastered(e.target.checked)} />
-        <span>3回連続でできた問題は除く</span>
+        <span>{MASTERED_STREAK}回連続でできた問題は除く</span>
       </label>
 
       <p className="sansu-count">問題は <b>{count}</b> 問</p>
@@ -219,7 +204,7 @@ function Study({ filters, resume, onAnswered, onMastered, onFinish, onQuit }) {
         setRevealed(false)
         setBusy(false)
       }
-    }, NEXT_DELAY_MS)
+    }, NEXT_QUESTION_DELAY_MS)
   }
 
   if (state === 'loading') return <LoadingView />
@@ -236,12 +221,7 @@ function Study({ filters, resume, onAnswered, onMastered, onFinish, onQuit }) {
   const current = questions[index]
   return (
     <div>
-      <div className="quit-row">
-        <button className="quit-btn" onClick={() => setShowQuit(true)}>✕ やめる</button>
-      </div>
-      <div className="progress-wrap">
-        <div className="progress-bar" style={{ width: `${Math.round(((offset + index) / (offset + questions.length)) * 100)}%` }} />
-      </div>
+      <StudyHeader done={offset + index} total={offset + questions.length} onQuit={() => setShowQuit(true)} />
 
       <div className="card sansu-card" key={current.id}>
         <div className="label">{current.unit}</div>
@@ -265,25 +245,14 @@ function Study({ filters, resume, onAnswered, onMastered, onFinish, onQuit }) {
         )}
       </div>
 
-      {revealed ? (
-        <div className="btn-row">
-          <button className="btn btn-bad" disabled={busy} onClick={() => answer(false)}>もう少し</button>
-          <button className="btn btn-ok" disabled={busy} onClick={() => answer(true)}>できた！</button>
-        </div>
-      ) : (
-        <button className="btn btn-reveal" onClick={() => setRevealed(true)}>タップして答えを見る</button>
-      )}
+      <AnswerButtons revealed={revealed} disabled={busy} onReveal={() => setRevealed(true)} onAnswer={answer} />
 
       {showQuit && (
-        <div className="milestone-backdrop" onClick={() => setShowQuit(false)}>
-          <div className="milestone-card" onClick={(e) => e.stopPropagation()}>
-            <div className="milestone-emoji">🤔</div>
-            <div className="milestone-label">途中でやめますか？</div>
-            <div className="hint">ここまでの記録は残るよ。</div>
-            <button className="restart" onClick={() => setShowQuit(false)}>続ける</button>
-            <button className="restart pick-another" onClick={() => onQuit({ ...results, total: results.correct + results.incorrect })}>やめる</button>
-          </div>
-        </div>
+        <QuitConfirm
+          hint="ここまでの記録は残るよ。あとで「つづきから」できるよ。"
+          onCancel={() => setShowQuit(false)}
+          onQuit={() => onQuit({ ...results, total: results.correct + results.incorrect })}
+        />
       )}
     </div>
   )

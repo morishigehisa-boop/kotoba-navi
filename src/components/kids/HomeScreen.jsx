@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import Character from './Character'
 import { LoadingView, ErrorView } from '../common/Status'
-import { SUBJECTS, SUBJECT_EMOJI, subjectStyle, formatMD, toISODate, buildHomeTasks, buildTomorrowItems, fetchMilestones, fetchTasks, fetchTaskCompletions, completeTask, uncompleteTask } from '../../lib/tasks'
+import { SUBJECTS, SUBJECT_EMOJI, subjectStyle, taskPoints, completionKey, buildHomeTasks, buildTomorrowItems, fetchMilestones, fetchTasks, fetchTaskCompletions, completeTask, uncompleteTask } from '../../lib/tasks'
+import { toISODate, formatMD, daysBetweenISO } from '../../lib/dates'
 
 const LATE_OPEN_LIMIT = 5 // おくれている分が これ以下なら、はじめから ひらいておく
 
@@ -76,17 +77,17 @@ export default function HomeScreen({ character, accessory, pendingSession, onRes
   async function handleToggle(item, toDone) {
     const { id, title } = item.task
     const prev = completions
-    const taskPoints = item.task.points ?? 100
+    const pts = taskPoints(item.task)
     const next = toDone
-      ? [...prev, { task_id: id, occurrence_date: item.date, completed_at: new Date().toISOString(), points_awarded: taskPoints }]
+      ? [...prev, { task_id: id, occurrence_date: item.date, completed_at: new Date().toISOString(), points_awarded: pts }]
       : prev.filter((c) => !(c.task_id === id && c.occurrence_date === item.date))
     // 先に画面へ反映して、通信が失敗したら元にもどす
     setCompletions(next)
     setError('')
-    let points = taskPoints
+    let points = pts
     try {
       if (toDone) {
-        const inserted = await completeTask(id, item.date, taskPoints)
+        const inserted = await completeTask(id, item.date, pts)
         if (!inserted) return // 連打などで、すでに完了ずみ。ポイントは二重に付けない
       } else {
         points = await uncompleteTask(id, item.date) // 完了したときに付いたポイントを取り消す
@@ -135,13 +136,12 @@ export default function HomeScreen({ character, accessory, pendingSession, onRes
       {nextEvents.length > 0 && (
         <div className="home-events">
           {nextEvents.map((e) => {
-            const n = Math.round((new Date(e.event_date) - new Date(todayISO)) / 86400000)
-            const [, mo, d] = e.event_date.split('-').map(Number)
+            const n = daysBetweenISO(todayISO, e.event_date)
             return (
               <div key={e.id} className="home-event">
                 <span className="home-event-flag">🚩</span>
                 <span className="home-event-title">{e.title}</span>
-                <span className="home-event-date">{mo}/{d}</span>
+                <span className="home-event-date">{formatMD(e.event_date, false)}</span>
                 <span className={`home-event-left ${n <= 3 ? 'near' : ''}`}>{n === 0 ? '今日！' : `あと${n}日`}</span>
               </div>
             )
@@ -169,7 +169,7 @@ export default function HomeScreen({ character, accessory, pendingSession, onRes
           {lateIsOpen && lateDates.map((date) => (
             <div key={date}>
               <div className="late-date">{formatMD(date)}</div>
-              {lateItems.filter((i) => i.date === date).map((item) => <TaskRow key={`${item.task.id}|${item.date}`} item={item} showSubject {...rowProps} />)}
+              {lateItems.filter((i) => i.date === date).map((item) => <TaskRow key={completionKey(item.task.id, item.date)} item={item} showSubject {...rowProps} />)}
             </div>
           ))}
         </section>
@@ -178,14 +178,14 @@ export default function HomeScreen({ character, accessory, pendingSession, onRes
       {groups.map(([subject, list]) => (
         <section key={subject} className="task-group">
           <div className="task-subject" style={subjectStyle(subject)}>{SUBJECT_EMOJI[subject]} {subject}</div>
-          {list.map((item) => <TaskRow key={`${item.task.id}|${item.date}`} item={item} {...rowProps} />)}
+          {list.map((item) => <TaskRow key={completionKey(item.task.id, item.date)} item={item} {...rowProps} />)}
         </section>
       ))}
 
       {soonItems.length > 0 && (
         <section className="task-group">
           <div className="task-subject soon-label">⏰ もうすぐ</div>
-          {soonItems.map((item) => <TaskRow key={`${item.task.id}|${item.date}`} item={item} soon showSubject {...rowProps} />)}
+          {soonItems.map((item) => <TaskRow key={completionKey(item.task.id, item.date)} item={item} soon showSubject {...rowProps} />)}
         </section>
       )}
 
@@ -195,14 +195,14 @@ export default function HomeScreen({ character, accessory, pendingSession, onRes
             <span>🌙 明日の分 {tomorrowItems.length}個</span>
             <span className="late-toggle-hint">{tomorrowOpen ? '▲ 閉じる' : '▼ 開く'}</span>
           </button>
-          {tomorrowOpen && tomorrowItems.map((item) => <TaskRow key={`${item.task.id}|${item.date}`} item={item} soon noNote showSubject {...rowProps} />)}
+          {tomorrowOpen && tomorrowItems.map((item) => <TaskRow key={completionKey(item.task.id, item.date)} item={item} soon noNote showSubject {...rowProps} />)}
         </section>
       )}
 
       {doneToday.length > 0 && (
         <section className="task-group">
           <div className="task-subject done-label">✅ 今日終わったこと（押すと戻せるよ）</div>
-          {doneToday.map((item) => <TaskRow key={`${item.task.id}|${item.date}`} item={item} done showSubject {...rowProps} />)}
+          {doneToday.map((item) => <TaskRow key={completionKey(item.task.id, item.date)} item={item} done showSubject {...rowProps} />)}
         </section>
       )}
     </div>

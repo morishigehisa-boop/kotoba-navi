@@ -1,11 +1,21 @@
 import { useEffect, useState } from 'react'
-import { TASK_POINT_OPTIONS, DEFAULT_TASK_POINTS, SUBJECTS, SUBJECT_EMOJI, SUBJECT_COLORS, FREQUENCIES, WEEKDAY_LABELS, toISODate, describeSchedule, fetchTasks, saveTask, deleteTask, reorderTasks } from '../../lib/tasks'
+import { TASK_POINT_OPTIONS, DEFAULT_TASK_POINTS, SUBJECTS, SUBJECT_EMOJI, SUBJECT_COLORS, FREQUENCIES, LINK_APPS, taskPoints, describeSchedule, fetchTasks, saveTask, deleteTask, reorderTasks } from '../../lib/tasks'
+import { toISODate, WEEKDAY_LABELS } from '../../lib/dates'
+import { toggleItem } from '../../lib/utils'
 import { LoadingView, ErrorView } from '../common/Status'
 import { useSubjectFilter } from './useSubjectFilter'
 import { useConfirm } from './useConfirm'
 import { useToast } from './useToast'
+import { useDragReorder } from './useDragReorder'
+import SubjectFilter from './SubjectFilter'
 
-const emptyForm = () => ({ subject: '算数', title: '', due_date: toISODate(), frequency: 'once', weekdays: [], end_date: '', link_to: '', points: DEFAULT_TASK_POINTS, auto_complete: false })
+const emptyForm = () => ({ subject: SUBJECTS[0], title: '', due_date: toISODate(), frequency: 'once', weekdays: [], end_date: '', link_to: '', points: DEFAULT_TASK_POINTS, auto_complete: false })
+// 登録済みのやること → 入力フォームの値（編集・複製で使う）
+const taskToForm = (t) => ({
+  subject: t.subject, title: t.title, due_date: t.due_date, frequency: t.frequency, weekdays: t.weekdays || [],
+  end_date: t.end_date || '', link_to: t.link_to || '', points: taskPoints(t), auto_complete: !!t.auto_complete
+})
+const SMALL_BTN = { padding: '6px 12px', fontSize: 12 }
 
 // 「やること」の登録・編集・おやすみ（無効化）・削除。子どものホーム画面に表示される。
 export default function TasksPanel() {
@@ -17,9 +27,7 @@ export default function TasksPanel() {
   const [saving, setSaving] = useState(false)
   const [formOpen, setFormOpen] = useState(false) // 登録・編集のポップアップ
   const [duplicating, setDuplicating] = useState(false) // 複製元から作っているとき
-  const [filterSubjects, setFilterSubjects] = useSubjectFilter('kotoba_navi_admin_subjects') // 一覧に出す教科（前回の選択を引き継ぐ）
-  const [dragId, setDragId] = useState(null)
-  const [dragOverId, setDragOverId] = useState(null)
+  const [filterSubjects, setFilterSubjects] = useSubjectFilter() // 一覧に出す教科（前回の選択を引き継ぐ）
   const [confirm, confirmModal] = useConfirm()
   const [notify, toastEl] = useToast()
 
@@ -35,12 +43,9 @@ export default function TasksPanel() {
 
   const visible = tasks.filter((t) => filterSubjects.includes(t.subject))
   const allOn = filterSubjects.length === SUBJECTS.length
-  const toggleFilter = (sub) =>
-    setFilterSubjects((p) => (p.includes(sub) ? p.filter((x) => x !== sub) : [...p, sub]))
 
   const set = (patch) => setForm((f) => ({ ...f, ...patch }))
-  const toggleWeekday = (d) =>
-    set({ weekdays: form.weekdays.includes(d) ? form.weekdays.filter((x) => x !== d) : [...form.weekdays, d] })
+  const toggleWeekday = (d) => set({ weekdays: toggleItem(form.weekdays, d) })
 
   // ポップアップを閉じて、入力をもとに戻す
   function resetForm() {
@@ -50,24 +55,11 @@ export default function TasksPanel() {
     setFormOpen(false)
   }
 
-  // 登録済みのやることをコピーした入力内容で、新規登録のポップアップを開く（内容を変えて登録できる）
-  function startDuplicate(t) {
-    setForm({ subject: t.subject, title: t.title, due_date: t.due_date, frequency: t.frequency, weekdays: t.weekdays || [], end_date: t.end_date || '', link_to: t.link_to || '', points: t.points ?? DEFAULT_TASK_POINTS, auto_complete: !!t.auto_complete })
-    setEditingId(null)
-    setDuplicating(true)
-    setFormOpen(true)
-  }
-
-  function startNew() {
-    setForm(emptyForm())
-    setEditingId(null)
-    setDuplicating(false)
-    setFormOpen(true)
-  }
-
-  function startEdit(t) {
-    setEditingId(t.id)
-    setForm({ subject: t.subject, title: t.title, due_date: t.due_date, frequency: t.frequency, weekdays: t.weekdays || [], end_date: t.end_date || '', link_to: t.link_to || '', points: t.points ?? DEFAULT_TASK_POINTS, auto_complete: !!t.auto_complete })
+  // ポップアップを開く。duplicate：登録済みのやることをコピーした内容で新規登録する（内容を変えて登録できる）
+  function openForm({ task = null, duplicate = false } = {}) {
+    setForm(task ? taskToForm(task) : emptyForm())
+    setEditingId(task && !duplicate ? task.id : null)
+    setDuplicating(duplicate)
     setFormOpen(true)
   }
 
@@ -115,15 +107,7 @@ export default function TasksPanel() {
     }
   }
 
-  function handleDrop(targetId) {
-    setDragOverId(null)
-    if (dragId === null || dragId === targetId) return setDragId(null)
-    const next = [...tasks]
-    const [moved] = next.splice(tasks.findIndex((t) => t.id === dragId), 1)
-    next.splice(tasks.findIndex((t) => t.id === targetId), 0, moved)
-    setDragId(null)
-    applyOrder(next)
-  }
+  const drag = useDragReorder(tasks, applyOrder)
 
   async function toggleActive(t) {
     try {
@@ -186,15 +170,14 @@ export default function TasksPanel() {
                 <label className="f-label">開く先（ホームの「始める」ボタン）</label>
                 <select value={form.link_to} onChange={(e) => set({ link_to: e.target.value })}>
                   <option value="">なし</option>
-                  <option value="kotoba">📚 ことばナビ</option>
-                  <option value="sansu">🔢 さんすうナビ</option>
+                  {Object.entries(LINK_APPS).map(([key, app]) => <option key={key} value={key}>{app.emoji} {app.label}</option>)}
                 </select>
               </div>
               {form.link_to && (
                 <div className="task-form-wide">
                   <label className="auto-complete-check">
                     <input type="checkbox" checked={form.auto_complete} onChange={(e) => set({ auto_complete: e.target.checked })} />
-                    <span>アプリの学習を終えたら、自動で完了にする（{form.link_to === 'sansu' ? 'さんすうナビを最後までやったとき' : 'ことばナビの「今日やる問題」を終えたとき'}）</span>
+                    <span>アプリの学習を終えたら、自動で完了にする（{LINK_APPS[form.link_to]?.autoLabel}）</span>
                   </label>
                 </div>
               )}
@@ -226,18 +209,9 @@ export default function TasksPanel() {
       <div className="card">
         <div className="task-list-head">
           <h2>登録済みのやること（{allOn ? `${tasks.length}件` : `${visible.length}/${tasks.length}件`}）</h2>
-          <button className="btn btn-primary" onClick={startNew}>＋ やることを登録</button>
+          <button className="btn btn-primary" onClick={() => openForm()}>＋ やることを登録</button>
         </div>
-        <div className="cal-filter">
-          <span className="cal-filter-label">教科:</span>
-          {/* 全教科ONのときに押すと全部OFF、それ以外は全部ON */}
-          <button className={`cal-chip ${allOn ? 'on' : ''}`} onClick={() => setFilterSubjects(allOn ? [] : SUBJECTS)}>すべて</button>
-          {SUBJECTS.map((sub) => (
-            <button key={sub} className={`cal-chip ${filterSubjects.includes(sub) ? 'on' : ''}`} style={{ '--c': SUBJECT_COLORS[sub]?.main }} onClick={() => toggleFilter(sub)}>
-              {SUBJECT_EMOJI[sub]} {sub}
-            </button>
-          ))}
-        </div>
+        <SubjectFilter subjects={filterSubjects} onChange={setFilterSubjects} />
         <p className="lead" style={{ marginBottom: 10 }}>行をドラッグ&ドロップして順番を変えられます。子どもの画面では、同じ教科の中でこの順に並びます。</p>
         {loading ? <LoadingView /> : loadFailed ? <ErrorView onRetry={firstLoad} /> : tasks.length === 0 ? <p className="empty">まだ登録がありません</p> : visible.length === 0 ? <p className="empty">この教科のやることはありません</p> : (
           <table>
@@ -248,35 +222,26 @@ export default function TasksPanel() {
               {visible.map((t) => {
                 const finished = t.end_date && t.end_date < today
                 return (
-                  <tr
-                    key={t.id}
-                    draggable
-                    onDragStart={() => setDragId(t.id)}
-                    onDragOver={(e) => { e.preventDefault(); setDragOverId(t.id) }}
-                    onDragEnd={() => { setDragId(null); setDragOverId(null) }}
-                    onDrop={() => handleDrop(t.id)}
-                    className={`drag-row ${dragOverId === t.id ? 'drag-over' : ''} ${dragId === t.id ? 'dragging' : ''}`}
-                    style={{ opacity: t.is_active && !finished ? 1 : 0.5 }}
-                  >
+                  <tr key={t.id} {...drag.rowProps(t)} className={drag.rowClass(t)} style={{ opacity: t.is_active && !finished ? 1 : 0.5 }}>
                     <td className="drag-handle" title="ドラッグして並び替え">⠿</td>
                     <td><span className="pill" style={{ background: SUBJECT_COLORS[t.subject]?.soft, color: SUBJECT_COLORS[t.subject]?.main }}>{SUBJECT_EMOJI[t.subject]} {t.subject}</span></td>
                     <td>
                       {t.title}
-                      {t.link_to && <span className="pill pill-ok" style={{ marginLeft: 6 }}>▶ {t.link_to === 'sansu' ? 'さんすうナビ' : 'ことばナビ'}{t.auto_complete ? '（自動完了）' : ''}</span>}
+                      {t.link_to && <span className="pill pill-ok" style={{ marginLeft: 6 }}>▶ {LINK_APPS[t.link_to]?.label}{t.auto_complete ? '（自動完了）' : ''}</span>}
                     </td>
                     <td>{describeSchedule(t)}</td>
-                    <td>{t.points ?? DEFAULT_TASK_POINTS} pt</td>
+                    <td>{taskPoints(t)} pt</td>
                     <td>{t.due_date}</td>
                     <td>{t.end_date || '—'}{finished ? '（終了）' : ''}</td>
                     <td>
-                      <button className="btn btn-secondary" style={{ padding: '6px 12px', fontSize: 12 }} onClick={() => toggleActive(t)}>
+                      <button className="btn btn-secondary" style={SMALL_BTN} onClick={() => toggleActive(t)}>
                         {t.is_active ? '表示中' : '休止中'}
                       </button>
                     </td>
                     <td>
                       <div className="row-actions">
-                        <button className="btn btn-secondary" style={{ padding: '6px 12px', fontSize: 12 }} onClick={() => startEdit(t)}>編集</button>
-                        <button className="btn btn-secondary" style={{ padding: '6px 12px', fontSize: 12 }} onClick={() => startDuplicate(t)}>複製</button>
+                        <button className="btn btn-secondary" style={SMALL_BTN} onClick={() => openForm({ task: t })}>編集</button>
+                        <button className="btn btn-secondary" style={SMALL_BTN} onClick={() => openForm({ task: t, duplicate: true })}>複製</button>
                         <button className="btn btn-danger" onClick={() => handleDelete(t)}>削除</button>
                       </div>
                     </td>

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { toISODate, fetchMilestones, saveMilestone, deleteMilestone } from '../../lib/tasks'
+import { fetchMilestones, saveMilestone, deleteMilestone } from '../../lib/tasks'
+import { toISODate } from '../../lib/dates'
 import { LoadingView, ErrorView } from '../common/Status'
 import { useConfirm } from './useConfirm'
 import { useToast } from './useToast'
@@ -31,15 +32,10 @@ export default function MilestonesPanel() {
     setFormOpen(false)
   }
 
-  function startNew() {
-    setEditingId(null)
-    setForm(emptyForm())
-    setFormOpen(true)
-  }
-
-  function startEdit(m) {
-    setEditingId(m.id)
-    setForm({ event_date: m.event_date, title: m.title })
+  // ポップアップを開く（m を渡すと編集）
+  function openForm(m = null) {
+    setEditingId(m?.id ?? null)
+    setForm(m ? { event_date: m.event_date, title: m.title } : emptyForm())
     setFormOpen(true)
   }
 
@@ -51,7 +47,7 @@ export default function MilestonesPanel() {
     try {
       await saveMilestone({ event_date: form.event_date, title }, editingId)
       setMilestones(await fetchMilestones())
-      notify(editingId ? 'イベントを更新しました' : 'イベントを登録しました')
+      notify(editingId ? 'イベントを更新しました' : 'イベントを登録しました', 'success')
       closeForm()
     } catch (err) {
       notify(`保存に失敗しました：${err.message}`)
@@ -99,7 +95,7 @@ export default function MilestonesPanel() {
       <div className="card">
         <div className="task-list-head">
           <h2>登録済みのイベント（{milestones.length}件）</h2>
-          <button className="btn btn-primary" onClick={startNew}>＋ イベントを登録</button>
+          <button className="btn btn-primary" onClick={() => openForm()}>＋ イベントを登録</button>
         </div>
         {milestones.length === 0 ? (
           <p className="empty">まだイベントがありません</p>
@@ -109,7 +105,7 @@ export default function MilestonesPanel() {
               <li key={m.id} className={m.event_date < todayISO ? 'past' : ''}>
                 <span className="ms-items-date">{m.event_date}</span>
                 <span className="ms-items-title">{m.title}</span>
-                <button className="btn btn-secondary" style={{ padding: '6px 12px', fontSize: 12 }} onClick={() => startEdit(m)}>編集</button>
+                <button className="btn btn-secondary" style={{ padding: '6px 12px', fontSize: 12 }} onClick={() => openForm(m)}>編集</button>
                 <button className="btn btn-danger" onClick={() => remove(m)}>削除</button>
               </li>
             ))}

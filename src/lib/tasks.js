@@ -1,7 +1,9 @@
 import { supabase } from './supabase'
+import { fetchAllRows, run } from './db'
+import { toISODate, parseISO, addDaysISO, lastDayOfMonth, WEEKDAY_LABELS } from './dates'
 
 // 「やること」（タスク管理）の取得・保存と、「今日の分」を計算する関数。
-// 日付は端末のローカル日付の 'YYYY-MM-DD' 文字列で扱う（タイムゾーンのずれを避ける）。
+// 日付は端末のローカル日付の 'YYYY-MM-DD' 文字列で扱う（lib/dates.js）。
 
 export const SUBJECTS = ['算数', '国語', '理科', '社会']
 export const SUBJECT_EMOJI = { 算数: '🔢', 国語: '📖', 理科: '🔬', 社会: '🌏' }
@@ -20,31 +22,24 @@ export const FREQUENCIES = [
   { value: 'weekly', label: '毎週' },
   { value: 'monthly', label: '毎月' }
 ]
-export const WEEKDAY_LABELS = ['日', '月', '火', '水', '木', '金', '土']
-export const UPCOMING_DAYS = 3
+const UPCOMING_DAYS = 3
 
-const PAGE_SIZE = 1000
-
-export function toISODate(d = new Date()) {
-  const p = (n) => String(n).padStart(2, '0')
-  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`
+// ホームの「始める」ボタンで開くアプリ（tasks.link_to の値）。autoLabel＝自動完了になるタイミング
+export const LINK_APPS = {
+  kotoba: { label: 'ことばナビ', emoji: '📚', autoLabel: 'ことばナビの「今日やる問題」を終えたとき' },
+  sansu: { label: 'さんすうナビ', emoji: '🔢', autoLabel: 'さんすうナビを最後までやったとき' }
 }
 
-// 'YYYY-MM-DD' を、ずれのないローカル日付に直す
-function parseISO(s) {
-  const [y, m, d] = s.split('-').map(Number)
-  return new Date(y, m - 1, d)
-}
+// ポイントの選択肢（登録画面）と初期値。DBの check 制約（10,50,100,150,200）と合わせる
+export const TASK_POINT_OPTIONS = [200, 150, 100, 50, 10]
+export const DEFAULT_TASK_POINTS = 100
+export const taskPoints = (task) => task.points ?? DEFAULT_TASK_POINTS
 
-function addDays(iso, n) {
-  const d = parseISO(iso)
-  d.setDate(d.getDate() + n)
-  return toISODate(d)
-}
+// 完了の記録を探すときのキー（やることID＋その回の日付）
+export const completionKey = (taskId, iso) => `${taskId}|${iso}`
 
-function lastDayOfMonth(y, m0) {
-  return new Date(y, m0 + 1, 0).getDate()
-}
+// 毎週のくり返しの曜日。曜日を選んでいない場合は、期日の曜日を使う
+const weekdaysOf = (task) => (task.weekdays?.length ? task.weekdays : [parseISO(task.due_date).getDay()])
 
 // そのタスクが、指定日に「出番」かどうか
 export function occursOn(task, iso) {
@@ -56,11 +51,8 @@ export function occursOn(task, iso) {
       return iso === task.due_date
     case 'daily':
       return true
-    case 'weekly': {
-      // 曜日を選んでいない場合は、期日の曜日を使う
-      const days = task.weekdays?.length ? task.weekdays : [parseISO(task.due_date).getDay()]
-      return days.includes(d.getDay())
-    }
+    case 'weekly':
+      return weekdaysOf(task).includes(d.getDay())
     case 'monthly': {
       // 29〜31日が期日の月は、月末に寄せる
       const want = Math.min(parseISO(task.due_date).getDate(), lastDayOfMonth(d.getFullYear(), d.getMonth()))
@@ -71,25 +63,21 @@ export function occursOn(task, iso) {
   }
 }
 
-const key = (taskId, iso) => `${taskId}|${iso}`
-
-// '2026-10-08' → '10/8（木）'
-export function formatMD(iso) {
-  const d = parseISO(iso)
-  return `${d.getMonth() + 1}/${d.getDate()}（${WEEKDAY_LABELS[d.getDay()]}）`
-}
+// 並び順：教科の順 → 管理画面で並べた順（sort_order）
+const bySubject = (a, b) => SUBJECTS.indexOf(a.task.subject) - SUBJECTS.indexOf(b.task.subject)
+const byOrder = (a, b) => a.task.sort_order - b.task.sort_order
 
 /**
  * ホームに出す一覧をつくる。
  * 「くり返し」は、設定した曜日・日ごとに「期限が当日の1件」として扱う。
  * - todayItems : 今日の分 ＋ 過去の分で未完了のもの（late: true）。完了するまで毎日出し続ける
- * - upcoming   : 3日以内に期日がくる「1どだけ」
+ * - upcoming   : 3日以内に期日がくる「1度だけ」
  * - doneToday  : 今日完了したもの（過去の分を今日やった場合も含む。まちがえて押したとき戻せる）
  * @param completions [{ task_id, occurrence_date, completed_at? }]
  */
 export function buildHomeTasks(tasks, completions, todayISO) {
-  const completedAt = new Map(completions.map((c) => [key(c.task_id, c.occurrence_date), c.completed_at]))
-  const limit = addDays(todayISO, UPCOMING_DAYS)
+  const completedAt = new Map(completions.map((c) => [completionKey(c.task_id, c.occurrence_date), c.completed_at]))
+  const limit = addDaysISO(todayISO, UPCOMING_DAYS)
   const todayItems = []
   const doneToday = []
   const upcoming = []
@@ -97,25 +85,22 @@ export function buildHomeTasks(tasks, completions, todayISO) {
   tasks.forEach((t) => {
     if (!t.is_active) return
     if (t.frequency === 'once' && t.due_date > todayISO) {
-      if (t.due_date <= limit && !completedAt.has(key(t.id, t.due_date))) upcoming.push({ task: t, date: t.due_date })
+      if (t.due_date <= limit && !completedAt.has(completionKey(t.id, t.due_date))) upcoming.push({ task: t, date: t.due_date })
       return
     }
     // 期日から今日（終了日があればその日）までの「出番」を1件ずつ数える
     const last = t.end_date && t.end_date < todayISO ? t.end_date : todayISO
-    for (let d = t.due_date; d <= last; d = addDays(d, 1)) {
+    for (let d = t.due_date; d <= last; d = addDaysISO(d, 1)) {
       if (!occursOn(t, d)) continue
-      const doneAt = completedAt.get(key(t.id, d))
+      const doneAt = completedAt.get(completionKey(t.id, d))
       const late = d < todayISO
-      if (doneAt === undefined) todayItems.push({ task: t, date: d, late, overdue: late })
-      // 今日完了したものだけ「きょうおわったこと」に出す（完了日時が不明なときは今日の分だけ）
-      else if (doneAt ? toISODate(new Date(doneAt)) === todayISO : d === todayISO) doneToday.push({ task: t, date: d, late, overdue: false })
+      if (doneAt === undefined) todayItems.push({ task: t, date: d, late })
+      // 今日完了したものだけ「今日終わったこと」に出す（完了日時が不明なときは今日の分だけ）
+      else if (doneAt ? toISODate(new Date(doneAt)) === todayISO : d === todayISO) doneToday.push({ task: t, date: d, late })
     }
   })
 
-  const bySubject = (a, b) => SUBJECTS.indexOf(a.task.subject) - SUBJECTS.indexOf(b.task.subject)
-  // 同じ条件のときは、管理画面で並べた順（sort_order）にする
-  const byOrder = (a, b) => a.task.sort_order - b.task.sort_order
-  todayItems.sort((a, b) => Number(b.overdue) - Number(a.overdue) || a.date.localeCompare(b.date) || bySubject(a, b) || byOrder(a, b))
+  todayItems.sort((a, b) => Number(b.late) - Number(a.late) || a.date.localeCompare(b.date) || bySubject(a, b) || byOrder(a, b))
   upcoming.sort((a, b) => a.date.localeCompare(b.date) || bySubject(a, b) || byOrder(a, b))
   doneToday.sort((a, b) => bySubject(a, b) || byOrder(a, b) || a.date.localeCompare(b.date))
   return { todayItems, upcoming, doneToday }
@@ -123,68 +108,51 @@ export function buildHomeTasks(tasks, completions, todayISO) {
 
 // あしたの分（くり返しも含む）。まだ終わらせられないので、完了の記録は見ない
 export function buildTomorrowItems(tasks, todayISO) {
-  const date = addDays(todayISO, 1)
+  const date = addDaysISO(todayISO, 1)
   return tasks
     .filter((t) => t.is_active && occursOn(t, date))
     .map((task) => ({ task, date }))
-    .sort((a, b) => SUBJECTS.indexOf(a.task.subject) - SUBJECTS.indexOf(b.task.subject) || a.task.sort_order - b.task.sort_order)
+    .sort((a, b) => bySubject(a, b) || byOrder(a, b))
 }
 
 // 管理画面の一覧に出す、くり返しの説明文
 export function describeSchedule(t) {
-  if (t.frequency === 'once') return '1度だけ'
-  if (t.frequency === 'daily') return '毎日'
-  if (t.frequency === 'weekly') {
-    const days = t.weekdays?.length ? t.weekdays : [parseISO(t.due_date).getDay()]
-    return `毎週（${[...days].sort().map((d) => WEEKDAY_LABELS[d]).join('・')}）`
-  }
-  return `毎月（${parseISO(t.due_date).getDate()}日）`
+  if (t.frequency === 'weekly') return `毎週（${[...weekdaysOf(t)].sort().map((d) => WEEKDAY_LABELS[d]).join('・')}）`
+  if (t.frequency === 'monthly') return `毎月（${parseISO(t.due_date).getDate()}日）`
+  return FREQUENCIES.find((f) => f.value === t.frequency)?.label || ''
 }
 
-async function fetchAll(table, build) {
-  let all = []
-  let from = 0
-  while (true) {
-    const { data, error } = await build(supabase.from(table)).range(from, from + PAGE_SIZE - 1)
-    if (error) throw error
-    all = all.concat(data)
-    if (data.length < PAGE_SIZE) break
-    from += PAGE_SIZE
-  }
-  return all
+// 「アプリの学習を終えたら自動で完了にする」やることを1件探す。
+// 対象は link_to が同じで auto_complete のやること。遅れている分があれば古い順に1件ずつ（まとめて消さない）
+export function findAutoCompleteTarget(tasks, completions, todayISO, app) {
+  const linked = tasks.filter((t) => t.auto_complete && t.link_to === app)
+  return buildHomeTasks(linked, completions, todayISO).todayItems[0] || null
 }
 
+// ---- 取得・保存 ----
 export const fetchTasks = () =>
-  fetchAll('tasks', (q) => q.select('*').order('sort_order', { ascending: true }).order('created_at', { ascending: true }).order('id', { ascending: true }))
+  fetchAllRows('tasks', (q) => q.select('*').order('sort_order', { ascending: true }).order('created_at', { ascending: true }).order('id', { ascending: true }))
 
 export const fetchTaskCompletions = () =>
-  fetchAll('task_completions', (q) => q.select('task_id, occurrence_date, completed_at, points_awarded').order('id', { ascending: true }))
+  fetchAllRows('task_completions', (q) => q.select('task_id, occurrence_date, completed_at, points_awarded').order('id', { ascending: true }))
 
-export async function saveTask(values, id) {
-  const q = id ? supabase.from('tasks').update(values).eq('id', id) : supabase.from('tasks').insert(values)
-  const { error } = await q
-  if (error) throw error
-}
+export const saveTask = (values, id) =>
+  run(id ? supabase.from('tasks').update(values).eq('id', id) : supabase.from('tasks').insert(values))
 
 // 並べ替え：順番が変わった行だけ sort_order を更新する（1始まりの連番）
 export async function reorderTasks(ordered) {
   const changed = ordered.map((t, i) => ({ id: t.id, order: i + 1, old: t.sort_order })).filter((r) => r.order !== r.old)
-  const results = await Promise.all(changed.map((r) => supabase.from('tasks').update({ sort_order: r.order }).eq('id', r.id)))
-  const failed = results.find((r) => r.error)
-  if (failed) throw failed.error
+  await Promise.all(changed.map((r) => run(supabase.from('tasks').update({ sort_order: r.order }).eq('id', r.id))))
 }
 
-export async function deleteTask(id) {
-  const { error } = await supabase.from('tasks').delete().eq('id', id)
-  if (error) throw error
-}
+export const deleteTask = (id) => run(supabase.from('tasks').delete().eq('id', id))
 
 // 完了を記録する。そのときのポイントも一緒に残す（あとでポイント設定を変えても、取り消しがずれないように）
 // 戻り値：新しく記録できたら true、すでに完了ずみ（二重タップ）なら false → ポイントの二重加算を防ぐ
 export async function completeTask(taskId, occurrenceDate, points) {
   const { error } = await supabase.from('task_completions').insert({ task_id: taskId, occurrence_date: occurrenceDate, points_awarded: points })
   if (error) {
-    if (error.code === '23505') return false
+    if (error.code === '23505') return false // 一意制約違反＝すでに完了ずみ
     throw error
   }
   return true
@@ -192,60 +160,17 @@ export async function completeTask(taskId, occurrenceDate, points) {
 
 // 完了を取り消す。戻り値：取り消した完了で付いていたポイント（なければ0）
 export async function uncompleteTask(taskId, occurrenceDate) {
-  const { data, error } = await supabase
-    .from('task_completions')
-    .delete()
-    .eq('task_id', taskId)
-    .eq('occurrence_date', occurrenceDate)
-    .select('points_awarded')
-  if (error) throw error
+  const data = await run(
+    supabase.from('task_completions').delete().eq('task_id', taskId).eq('occurrence_date', occurrenceDate).select('points_awarded')
+  )
   return (data || []).reduce((sum, r) => sum + (r.points_awarded || 0), 0)
 }
 
-// ポイントの選択肢（登録画面）と初期値
-export const TASK_POINT_OPTIONS = [200, 150, 100, 50, 10]
-export const DEFAULT_TASK_POINTS = 100
+// ---- マイルストーン（テスト・行事などの目標日）。ホームと予定カレンダーの上に表示する ----
+export const fetchMilestones = () =>
+  fetchAllRows('milestones', (q) => q.select('id, event_date, title').order('event_date', { ascending: true }).order('id', { ascending: true }))
 
-// 「アプリの学習を終えたら自動で完了にする」やるべきものを1件探す。
-// 対象は link_to が同じで auto_complete のやること。遅れている分があれば古い順に1件ずつ（まとめて消さない）
-export function findAutoCompleteTarget(tasks, completions, todayISO, app) {
-  const done = new Set(completions.map((c) => `${c.task_id}|${c.occurrence_date}`))
-  const { todayItems } = buildHomeTasks(
-    tasks.filter((t) => t.auto_complete && t.link_to === app),
-    completions,
-    todayISO
-  )
-  return todayItems.find((i) => !done.has(`${i.task.id}|${i.date}`)) || null
-}
+export const saveMilestone = ({ event_date, title }, id) =>
+  run(id ? supabase.from('milestones').update({ event_date, title }).eq('id', id) : supabase.from('milestones').insert({ event_date, title }))
 
-// ---- マイルストーン（テスト・行事などの目標日）。予定カレンダーの上に表示する ----
-// 件数は少ない想定だが、1,000行上限に当たらないよう .range() でページ分けして取る
-export async function fetchMilestones() {
-  const PAGE = 1000
-  let all = []
-  let from = 0
-  while (true) {
-    const { data, error } = await supabase
-      .from('milestones')
-      .select('id, event_date, title')
-      .order('event_date', { ascending: true })
-      .order('id', { ascending: true })
-      .range(from, from + PAGE - 1)
-    if (error) throw error
-    all = all.concat(data)
-    if (data.length < PAGE) break
-    from += PAGE
-  }
-  return all
-}
-
-export async function saveMilestone({ event_date, title }, id) {
-  const q = id ? supabase.from('milestones').update({ event_date, title }).eq('id', id) : supabase.from('milestones').insert({ event_date, title })
-  const { error } = await q
-  if (error) throw error
-}
-
-export async function deleteMilestone(id) {
-  const { error } = await supabase.from('milestones').delete().eq('id', id)
-  if (error) throw error
-}
+export const deleteMilestone = (id) => run(supabase.from('milestones').delete().eq('id', id))

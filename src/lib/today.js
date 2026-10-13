@@ -1,41 +1,61 @@
 // 「今日やる問題集」「締切をすぎた問題」の自動抽出ロジック。
 // 入力は Supabase から取得した questions / question_sets(+questionIds) の配列。
 // 純粋関数として実装し、UIコンポーネントからテストしやすくしている。
+import { shuffle } from './utils'
 
-export const TODAY_SET_MAX = 50
+const TODAY_SET_MAX = 50
 
-export const TIER_THRESHOLDS = [
+const TIER_THRESHOLDS = [
   { maxDays: 7, mode: 'dominate' },  // 残り7日以内：締切が近い順、独占OK
   { maxDays: 14, mode: 'split' },    // 残り14日以内：均等割り
   { maxDays: 30, mode: 'split' }     // 残り30日以内：均等割り（これより先は今日の対象外）
 ]
 
 const BOX_INTERVAL_DAYS = [0, 2, 4, 7, 14] // ライトナー式：箱ごとの復習間隔（日）
+export const MASTERED_BOX = 4 // 4回連続正解で「完璧」
+
+// 定着度の5段階（未正解・1回・2回連続・3回連続・完璧）。short はグラフの説明（title）用
+export const BOX_LEVELS = [
+  { label: 'まだこれから', short: '未正解', color: '#D8D2C0' },
+  { label: '1回 正解', short: '1回', color: '#FFD9A0' },
+  { label: '2回連続 正解', short: '2回', color: '#FFB86B' },
+  { label: '3回連続 正解', short: '3回', color: '#FF9A45' },
+  { label: '🌟 完璧！', short: '完璧', color: '#FF8A3D' }
+]
 
 export function boxOf(q) {
   // 定着判定は「連続正解数(streak_count)」を基準にする。
   // 累計正解数(correct_count)だと不正解を挟んでも増え続けてしまうため使わない。
   if (q.last_correct === false || q.last_correct === null) return 0
-  return Math.min(q.streak_count, 4)
+  return Math.min(q.streak_count, MASTERED_BOX)
+}
+
+export const isMastered = (q) => boxOf(q) >= MASTERED_BOX
+
+// 問題の一覧を、定着度の段階ごとに数える → [未正解, 1回, 2回, 3回, 完璧]
+export function countByBox(questions) {
+  const counts = BOX_LEVELS.map(() => 0)
+  questions.forEach((q) => { counts[boxOf(q)] += 1 })
+  return counts
+}
+
+// 問題集の進み具合（ID一覧から問題を引いて数える）
+export function setProgress(set, questionsById) {
+  const members = set.questionIds.map((id) => questionsById.get(id)).filter(Boolean)
+  const counts = countByBox(members)
+  const total = members.length
+  const mastered = counts[MASTERED_BOX]
+  return { total, counts, mastered, rate: total > 0 ? Math.round((mastered / total) * 100) : 0 }
 }
 
 function daysBetween(d1, d2) {
   return Math.floor((d2 - d1) / (1000 * 60 * 60 * 24))
 }
 
-export function isDueToday(q, today) {
+function isDueToday(q, today) {
   const box = boxOf(q)
   if (!q.last_answered_at) return true
   return daysBetween(new Date(q.last_answered_at), today) >= BOX_INTERVAL_DAYS[box]
-}
-
-function shuffle(arr) {
-  const a = [...arr]
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1))
-    ;[a[i], a[j]] = [a[j], a[i]]
-  }
-  return a
 }
 
 // 締切が近い順に「独占OK」で詰める
@@ -105,7 +125,7 @@ export function buildTodaySet(questions, goalSets) {
       const goal = new Date(set.goal_at)
       const remainingDays = Math.max(1, Math.ceil((goal - today) / (1000 * 60 * 60 * 24)))
       const members = set.questionIds.map((id) => byId.get(id)).filter(Boolean)
-      const notMastered = members.filter((q) => boxOf(q) < 4)
+      const notMastered = members.filter((q) => !isMastered(q))
       const dueInSet = shuffle(notMastered.filter((q) => isDueToday(q, today)))
       const dueIds = new Set(dueInSet.map((q) => q.id))
       const paddingPool = shuffle(notMastered.filter((q) => !dueIds.has(q.id)))
@@ -152,7 +172,7 @@ export function buildOverdueSet(questions, allGoalSets) {
     const goal = new Date(set.goal_at)
     if (goal >= today) return
     const members = set.questionIds.map((id) => byId.get(id)).filter(Boolean)
-    pool = pool.concat(members.filter((q) => boxOf(q) < 4))
+    pool = pool.concat(members.filter((q) => !isMastered(q)))
   })
   pool = dedupe(pool)
   const totalOverdue = pool.length

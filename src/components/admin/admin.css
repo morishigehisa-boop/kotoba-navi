@@ -77,9 +77,6 @@ textarea { width: 100%; min-height: 130px; font-family: monospace; font-size: 12
 
 .progress-stack { display: flex; height: 10px; border-radius: 6px; overflow: hidden; background: #EDEAE0; width: 140px; }
 .progress-seg { height: 100%; }
-.seg-none { background: #D8D2C0; }
-.seg-mid { background: #F5A742; }
-.seg-done { background: #4CB27A; }
 .progress-stack-label { font-size: 11px; color: #8A8678; margin-top: 4px; }
 
 .modal-backdrop {
@@ -275,9 +272,6 @@ a.area-btn { text-decoration: none; display: inline-block; }
 .ms-none { font-size: 13px; color: #A39565; padding: 4px 0; }
 .ms-chip { font-size: 13px; font-weight: 800; color: #5C4A0B; background: #fff; border: 1px solid #F2DFA6; border-radius: 16px; padding: 5px 12px; }
 .ms-left { margin-left: 8px; color: #E36A1E; font-size: 12px; }
-.ms-panel { margin-bottom: 12px; }
-.ms-form { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 10px; }
-.ms-form input[type=text] { flex: 1; min-width: 160px; }
 .ms-items { list-style: none; margin: 0; padding: 0; }
 .ms-items li { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-top: 1px solid #EFEDE4; font-size: 14px; }
 .ms-items li.past { opacity: .5; }

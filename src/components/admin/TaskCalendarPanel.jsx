@@ -1,20 +1,22 @@
 import { useEffect, useMemo, useState } from 'react'
-import { SUBJECTS, SUBJECT_EMOJI, WEEKDAY_LABELS, subjectStyle, toISODate, occursOn, fetchTasks, fetchTaskCompletions, fetchMilestones } from '../../lib/tasks'
+import { subjectStyle, occursOn, completionKey, fetchTasks, fetchTaskCompletions, fetchMilestones } from '../../lib/tasks'
+import { toISODate, parseISO, addDaysISO, daysBetweenISO, formatMD, WEEKDAY_LABELS } from '../../lib/dates'
+import { loadString, saveString, STORAGE_KEYS } from '../../lib/storage'
 import { LoadingView, ErrorView } from '../common/Status'
 import { useSubjectFilter } from './useSubjectFilter'
+import SubjectFilter from './SubjectFilter'
 
-const RANGES = [7, 10, 30] // ひょうじする日数の選びかた
-const RANGE_KEY = 'kotoba_navi_admin_cal_range'
+const RANGES = [7, 10, 30] // 表示する日数の選び方
+const DEFAULT_RANGE = 10
 
 // 「くりかえし」か「1どだけ」かを示す記号（タスクの右はしに出す）
 const MARK = { repeat: { icon: '🔁', label: '繰り返し' }, once: { icon: '①', label: '1度だけ' } }
 
 // startISO から count 日分の日付（'YYYY-MM-DD'）を作る
 function buildDays(startISO, count) {
-  const [y, m, d] = startISO.split('-').map(Number)
   return Array.from({ length: count }, (_, i) => {
-    const dt = new Date(y, m - 1, d + i)
-    return { iso: toISODate(dt), label: `${dt.getMonth() + 1}/${dt.getDate()}`, wd: dt.getDay() }
+    const iso = addDaysISO(startISO, i)
+    return { iso, label: formatMD(iso, false), wd: parseISO(iso).getDay() }
   })
 }
 
@@ -25,16 +27,17 @@ export default function TaskCalendarPanel() {
   const [completions, setCompletions] = useState([])
   const [milestones, setMilestones] = useState([])
   const [failed, setFailed] = useState(false)
-  const [subjects, setSubjects] = useSubjectFilter('kotoba_navi_admin_subjects') // 表示する教科（前回の選択を引き継ぐ）
+  const [subjects, setSubjects] = useSubjectFilter() // 表示する教科（前回の選択を引き継ぐ）
   const [range, setRangeState] = useState(() => {
-    try { const n = Number(localStorage.getItem(RANGE_KEY)); return RANGES.includes(n) ? n : 10 } catch { return 10 }
+    const n = Number(loadString(STORAGE_KEYS.adminCalRange))
+    return RANGES.includes(n) ? n : DEFAULT_RANGE
   })
   const [offset, setOffset] = useState(0) // 今日から何日ずらしているか
   const todayISO = toISODate()
 
   function setRange(n) {
     setRangeState(n)
-    try { localStorage.setItem(RANGE_KEY, String(n)) } catch {}
+    saveString(STORAGE_KEYS.adminCalRange, String(n))
   }
 
   function load() {
@@ -45,16 +48,15 @@ export default function TaskCalendarPanel() {
   }
   useEffect(load, [])
 
-  const doneKeys = useMemo(() => new Set(completions.map((c) => `${c.task_id}|${c.occurrence_date}`)), [completions])
+  const doneKeys = useMemo(() => new Set(completions.map((c) => completionKey(c.task_id, c.occurrence_date))), [completions])
 
   const days = useMemo(() => {
-    const [y, m, d] = todayISO.split('-').map(Number)
-    const list = buildDays(toISODate(new Date(y, m - 1, d + offset)), range)
+    const list = buildDays(addDaysISO(todayISO, offset), range)
     return list.map((day) => ({
       ...day,
       items: (tasks || [])
         .filter((t) => t.is_active && subjects.includes(t.subject) && occursOn(t, day.iso))
-        .map((t) => ({ task: t, done: doneKeys.has(`${t.id}|${day.iso}`) }))
+        .map((t) => ({ task: t, done: doneKeys.has(completionKey(t.id, day.iso)) }))
     }))
   }, [tasks, subjects, doneKeys, todayISO, range, offset])
 
@@ -66,14 +68,10 @@ export default function TaskCalendarPanel() {
   }, [milestones])
   // 上の黄色い帯は、表示中の期間に関係なく「今日から1ヶ月先まで」のイベントを出す
   const upcomingEvents = useMemo(() => {
-    const [y, m, d] = todayISO.split('-').map(Number)
-    const limit = toISODate(new Date(y, m, d)) // 1ヶ月後の同じ日
+    const t = parseISO(todayISO)
+    const limit = toISODate(new Date(t.getFullYear(), t.getMonth() + 1, t.getDate())) // 1ヶ月後の同じ日
     return milestones.filter((e) => e.event_date >= todayISO && e.event_date <= limit)
   }, [milestones, todayISO])
-  const daysUntil = (iso) => Math.round((new Date(iso) - new Date(todayISO)) / 86400000)
-
-  const allOn = subjects.length === SUBJECTS.length
-  const toggle = (s) => setSubjects((p) => (p.includes(s) ? p.filter((x) => x !== s) : [...p, s]))
 
   if (failed) return <ErrorView onRetry={load} />
   if (tasks === null) return <LoadingView />
@@ -87,11 +85,10 @@ export default function TaskCalendarPanel() {
             <span className="ms-none">今後1ヶ月のイベントはありません</span>
           ) : (
             upcomingEvents.map((m) => {
-              const n = daysUntil(m.event_date)
-              const [, mo, d] = m.event_date.split('-').map(Number)
+              const n = daysBetweenISO(todayISO, m.event_date)
               return (
                 <span key={m.id} className="ms-chip">
-                  🚩 {mo}/{d}（{WEEKDAY_LABELS[new Date(m.event_date).getUTCDay()]}）{m.title}
+                  🚩 {formatMD(m.event_date)}{m.title}
                   {n >= 0 && <b className="ms-left">{n === 0 ? '今日' : `あと${n}日`}</b>}
                 </span>
               )
@@ -100,16 +97,7 @@ export default function TaskCalendarPanel() {
         </div>
       </div>
 
-      <div className="cal-filter">
-        <span className="cal-filter-label">教科:</span>
-        {/* 全教科ONのときに押すと全部OFF、それ以外は全部ON */}
-        <button className={`cal-chip ${allOn ? 'on' : ''}`} onClick={() => setSubjects(allOn ? [] : SUBJECTS)}>すべて</button>
-        {SUBJECTS.map((s) => (
-          <button key={s} className={`cal-chip ${subjects.includes(s) ? 'on' : ''}`} style={subjectStyle(s)} onClick={() => toggle(s)}>
-            {SUBJECT_EMOJI[s]} {s}
-          </button>
-        ))}
-      </div>
+      <SubjectFilter subjects={subjects} onChange={setSubjects} />
       <div className="cal-nav">
         <button className="cal-nav-btn" onClick={() => setOffset((o) => o - range)} aria-label="前の期間">←</button>
         <div className="cal-nav-label">{days[0].label} 〜 {days[days.length - 1].label}</div>
@@ -122,7 +110,7 @@ export default function TaskCalendarPanel() {
         </div>
       </div>
       <p className="cal-note">
-        {MARK.repeat.icon} ＝{MARK.repeat.label}　{MARK.once.icon} ＝{MARK.once.label}。やることは期日の日に出て、終わらないと翌日以降も「遅れている分」として残ります。休止中のものは出ません。
+        {MARK.repeat.icon} ＝{MARK.repeat.label} {MARK.once.icon} ＝{MARK.once.label}。やることは期日の日に出て、終わらないと翌日以降も「遅れている分」として残ります。休止中のものは出ません。
       </p>
 
       <div className={`cal-grid r${range}`}>

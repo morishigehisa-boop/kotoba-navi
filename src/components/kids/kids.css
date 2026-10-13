@@ -67,7 +67,6 @@ body { margin: 0; background: var(--bg); }
 .label-taigigo { font-size: 15px; padding: 5px 14px; color: white; background: var(--bad); box-shadow: 0 2px 0 var(--bad-dark); }
 .label.label-2 { left: auto; right: 20px; color: var(--purple); background: #EEEDFE; }
 .sentence { font-size: 17px; font-weight: 700; line-height: 1.7; color: var(--ink); margin-bottom: 14px; text-align: left; width: 100%; }
-.blank { border-bottom: 2px dashed var(--purple); padding: 0 4px; color: var(--purple); font-weight: 800; }
 .kanji-hint { display: inline-block; border: 2px solid var(--purple); border-radius: 8px; padding: 1px 8px; color: var(--purple); font-weight: 800; margin: 0 2px; }
 .reading-tag { display: inline-block; background: var(--sky); color: white; font-size: 13px; font-weight: 800; padding: 4px 12px; border-radius: 12px; letter-spacing: 1px; }
 
@@ -121,20 +120,11 @@ body { margin: 0; background: var(--bg); }
 .today-icon { background: #FFE3C6; color: var(--fox-dark); }
 .overdue-card { border: 2px solid var(--bad); background: #FFF2F2; }
 .overdue-icon { background: #FDE1E1; color: var(--bad-dark); }
-.progress-card { border: 2px solid var(--purple); background: #F6F3FF; }
-.progress-icon { background: #EEEDFE; color: var(--purple); }
-.shop-card { border: 2px solid var(--gold); background: #FFFBEB; }
-.shop-icon { background: #FFF3C4; color: #B5860B; }
 
 .set-card-progress { flex-direction: column; align-items: stretch; gap: 0; }
 .set-card-top { display: flex; align-items: center; gap: 14px; width: 100%; }
 .set-progress-wrap { height: 10px; background: #F3EEDF; border-radius: 8px; overflow: hidden; margin-top: 10px; display: flex; }
 .set-progress-seg { height: 100%; transition: width .5s ease; }
-.set-progress-bar { height: 100%; border-radius: 8px; transition: width .5s ease; }
-.set-progress-bar.tier-none { background: #D8D2C0; }
-.set-progress-bar.tier-mid { background: linear-gradient(90deg, var(--gold), var(--fox)); }
-.set-progress-bar.tier-done { background: var(--ok); }
-.set-progress-label { font-size: 11px; color: var(--ink-soft); font-weight: 600; margin-top: 4px; }
 
 .set-count.tier-none { background: #EDEAE0; color: #8A8678; }
 .set-count.tier-mid { background: #FFF1DA; color: var(--fox-dark); }
@@ -146,18 +136,6 @@ body { margin: 0; background: var(--bg); }
   color: var(--fox-dark); box-shadow: 0 3px 0 rgba(0,0,0,0.05);
 }
 .freeze-badge { color: var(--sky); font-size: 12px; }
-
-.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
-.two-col.three-col { grid-template-columns: 1fr 1fr 1fr; }
-.two-col .set-card { margin-bottom: 0; flex-direction: column; text-align: center; align-items: center; gap: 6px; padding: 14px 10px; }
-.two-col .set-body { flex: none; }
-.sugoroku-card { border: 2px solid #6E9CE0; background: #EEF3FF; }
-.sugoroku-icon { background: #DCE7FF; color: #4A6FBF; }
-
-.fox-accessory {
-  position: absolute; top: -6px; right: -2px; font-size: 34px;
-  filter: drop-shadow(0 2px 2px rgba(0,0,0,0.15));
-}
 
 .milestone-backdrop {
   position: fixed; inset: 0; background: rgba(0,0,0,0.45); display: flex; align-items: center;
@@ -244,9 +222,6 @@ body { margin: 0; background: var(--bg); }
 .cal-day-num { font-size: 11px; color: var(--ink-soft); }
 .cal-stamp { font-size: 16px; margin-top: -2px; }
 
-.calendar-card { border: 2px solid var(--sky); background: #F0F9FF; }
-.calendar-icon { background: #E1F1FC; color: var(--sky); }
-
 /* 部屋の背景（すごろくで解放） */
 .room-bg { width: 100%; border-radius: 20px; overflow: hidden; position: relative; margin-bottom: 4px; }
 .room-bg-svg { width: 100%; height: 100%; display: block; position: absolute; inset: 0; }
@@ -257,14 +232,6 @@ body { margin: 0; background: var(--bg); }
 /* すごろく画面 */
 .sugoroku-stage-name { text-align: center; font-size: 15px; font-weight: 800; color: var(--ink); margin: 8px 0 2px; }
 .sugoroku-progress { text-align: center; font-size: 12px; color: var(--ink-soft); margin-bottom: 12px; }
-.sugoroku-board { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 10px; }
-.sugoroku-square {
-  aspect-ratio: 1; border-radius: 12px; background: #F3EEDF; display: flex; align-items: center; justify-content: center;
-  font-size: 12px; font-weight: 800; color: var(--ink-soft); position: relative; border: 2px solid transparent;
-}
-.sugoroku-square.done { background: var(--fox); color: white; }
-.sugoroku-square.current { border-color: var(--fox-dark); background: #FFF3E1; }
-.sugoroku-token { position: absolute; top: -14px; font-size: 20px; }
 .sugoroku-mastery-hint { text-align: center; font-size: 12px; color: var(--ink-soft); margin-top: 12px; }
 
 /* 部屋の背景 着せ替え */

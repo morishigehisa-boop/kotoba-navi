@@ -1,432 +1,242 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Character from './Character'
 import Confetti from './Confetti'
-import { addFurigana, setCustomFurigana } from '../../lib/furigana'
-import { playTaskDone, playTaskAllDone, playCorrect, playWrong, playFanfareBig, playCharacterUnlock, playItemGet, playLevelUp, playBadgeGet, playComeback, isMuted, setMuted } from '../../lib/sound'
-import { fetchQuestions, fetchQuestionSetsWithItems, recordAnswer, fetchProgress, updateProgress, fetchFuriganaEntries, logPoints } from '../../lib/api'
-import { buildTodaySet, buildOverdueSet } from '../../lib/today'
-import {
-  computeStreakUpdate,
-  titleForPoints,
-  SHOP_ITEMS_BY_CHARACTER,
-  itemsForCharacter,
-  CHARACTERS,
-  ownedKey,
-  isItemOwned,
-  isCharacterComplete,
-  nextLockedCharacter,
-  categoryProgress,
-  tierForRate,
-  WEEKLY_MISSIONS,
-  weeklyResetIfNeeded,
-  stageInfo,
-  STAGE_THEMES
-} from '../../lib/gamification'
-import { boxOf } from '../../lib/today'
+import RoomBackground from './RoomBackground'
+import BottomNav from './BottomNav'
+import HomeScreen from './HomeScreen'
+import SansuScreen from './SansuScreen'
 import RecordScreen from './RecordScreen'
 import OverallRecord from './OverallRecord'
 import PointHistory from './PointHistory'
 import ShopScreen from './ShopScreen'
 import SugorokuScreen from './SugorokuScreen'
-import HomeScreen from './HomeScreen'
-import SansuScreen from './SansuScreen'
-import BottomNav from './BottomNav'
+import ModalCard, { QuitConfirm } from './ModalCard'
+import { StudyHeader } from './AnswerButtons'
+import SelectScreen from './kotoba/SelectScreen'
+import QuizCard from './kotoba/QuizCard'
+import { QuizSummary, ReviewSummary } from './kotoba/QuizSummary'
+import { useKotobaSession } from './kotoba/useKotobaSession'
+import { useProgress } from './useProgress'
+import { useRewardChecks } from './useRewardChecks'
+import { happyMascot, SAD_MASCOT } from './feedback'
 import { LoadingView, ErrorView } from '../common/Status'
-import { toISODate, fetchTasks, fetchTaskCompletions, completeTask, findAutoCompleteTarget } from '../../lib/tasks'
-import RoomBackground from './RoomBackground'
+import { setCustomFurigana } from '../../lib/furigana'
+import { playTaskDone, playTaskAllDone, playCorrect, playWrong, playFanfareBig, playComeback, isMuted, setMuted } from '../../lib/sound'
+import { fetchQuestions, fetchQuestionSetsWithItems, recordAnswer, fetchProgress, fetchFuriganaEntries } from '../../lib/api'
+import { buildTodaySet, buildOverdueSet } from '../../lib/today'
+import { titleForPoints, characterById, POINTS } from '../../lib/gamification'
+import { fetchTasks, fetchTaskCompletions, completeTask, findAutoCompleteTarget } from '../../lib/tasks'
+import { toISODate } from '../../lib/dates'
+import { loadString, saveString, loadJSON, saveJSON, STORAGE_KEYS } from '../../lib/storage'
 import './kids.css'
 
-// 9. 「今日やる問題」を途中でやめても、次回起動時に続きから再開できるようにする
-const SESSION_KEY = 'kotoba_navi_pending_session'
-function saveSessionSnapshot(snapshot) {
-  try { localStorage.setItem(SESSION_KEY, JSON.stringify(snapshot)) } catch {}
-}
-function loadSessionSnapshot() {
-  try {
-    const raw = localStorage.getItem(SESSION_KEY)
-    return raw ? JSON.parse(raw) : null
-  } catch {
-    return null
-  }
-}
-function clearSessionSnapshot() {
-  try { localStorage.removeItem(SESSION_KEY) } catch {}
-}
-
-function Ruby({ text }) {
-  if (!text) return null
-  return <span dangerouslySetInnerHTML={{ __html: addFurigana(text) }} />
-}
-
-function shuffle(arr) {
-  const a = [...arr]
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1))
-    ;[a[i], a[j]] = [a[j], a[i]]
-  }
-  return a
-}
-
-const HAPPY_LINES = ['やったね！', 'その調子！', 'さすが！', 'よくできました！']
-// 未正解・1回・2回・3回・かんぺき の5段階（がんばりグラフと同じ配色）
-const BOX_BAR_COLORS = ['#D8D2C0', '#FFD9A0', '#FFB86B', '#FF9A45', '#FF8A3D']
-
-function formatGoalShort(iso) {
-  const d = new Date(iso)
-  return `${d.getMonth() + 1}/${d.getDate()}`
-}
-
-// やること（ホーム）の完了ごほうび
-const TASK_ALL_DONE_BONUS = 200
-const TASK_BONUS_KEY = 'kotoba_navi_task_bonus_date'
-// 「ぜんぶ終わった」ボーナスは、1日1回だけ（取り消して付けなおしても増えない）
+// 「今日のやることを全部達成」ボーナスは、1日1回だけ（取り消して付けなおしても増えない）
 function claimTaskBonus() {
   const today = toISODate()
-  try {
-    if (localStorage.getItem(TASK_BONUS_KEY) === today) return false
-    localStorage.setItem(TASK_BONUS_KEY, today)
-  } catch {}
+  if (loadString(STORAGE_KEYS.taskBonusDate) === today) return false
+  saveString(STORAGE_KEYS.taskBonusDate, today)
   return true
 }
 
-// さんすうで「習得」を数えた問題のID。開き直しても二重にすごろくを進めないよう端末に保存する
-const SANSU_COUNTED_KEY = 'kotoba_navi_sansu_counted'
-function loadSansuCounted() {
-  try { return new Set(JSON.parse(localStorage.getItem(SANSU_COUNTED_KEY) || '[]')) } catch { return new Set() }
-}
-function saveSansuCounted(set) {
-  try { localStorage.setItem(SANSU_COUNTED_KEY, JSON.stringify([...set])) } catch {}
-}
+// 下のメニューのどれを光らせるか（画面 → メニュー）
+const NAV_OF_SCREEN = { home: 'home', select: 'kotoba', quiz: 'kotoba', sansu: 'sansu', record: 'record', shop: 'shop' }
 
+/**
+ * 子ども画面全体。画面の切りかえと、学習 → ごほうび（ポイント・連続日数・すごろく・やること）のつなぎ役。
+ * 画面: 'home' | 'select'（ことばナビのはじめ）| 'quiz' | 'sansu' | 'record' | 'shop'
+ */
 export default function KidsApp({ initialScreen = 'home' }) {
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState(false)
   const [questions, setQuestions] = useState([])
   const [allSets, setAllSets] = useState([])
-  const [progress, setProgress] = useState(null) // { streak_count, longest_streak, points, freeze_tokens, last_activity_date, owned_items, equipped_item }
-
-  const [screen, setScreen] = useState(initialScreen) // 'home' | 'select' | 'quiz' | 'record' | 'shop' | 'sansu'
-  const answeringRef = useRef(false)
+  const [screen, setScreen] = useState(initialScreen)
+  const [backTo, setBackTo] = useState('home') // きろく・ショップの「もどる」先
   const [recordTab, setRecordTab] = useState('record') // きろく画面の中の切り替え：'record'（がんばり記録）／'sugoroku'
   const [sansuStage, setSansuStage] = useState('setup') // さんすうナビの 'setup' | 'study' | 'result'（学習中は下のメニューを隠す）
-  const [backTo, setBackTo] = useState('home') // きろく・ショップ・すごろくの「もどる」先
-  const [loadError, setLoadError] = useState(false)
-  const [mode, setMode] = useState('main') // 'main' | 'review'
-  const [sessionQuestions, setSessionQuestions] = useState([])
-  const [idx, setIdx] = useState(0)
-  const [revealed, setRevealed] = useState(false)
-  const [correctCount, setCorrectCount] = useState(0)
-  const [wrongQuestions, setWrongQuestions] = useState([])
-  const [reviewList, setReviewList] = useState([])
-  const [reviewIdx, setReviewIdx] = useState(0)
-  const [reviewCorrect, setReviewCorrect] = useState(0)
-  const [reviewFailed, setReviewFailed] = useState([])
 
   const [mascot, setMascot] = useState({ state: 'idle', text: '' })
-  const [isTodayAutoSession, setIsTodayAutoSession] = useState(false)
-  const [choiceFeedback, setChoiceFeedback] = useState(null)
   const [confettiOn, setConfettiOn] = useState(false)
   const [struggleToast, setStruggleToast] = useState(false)
+  const [pointToast, setPointToast] = useState(null) // { n, key }：やることでもらったポイントの表示
+  const pointToastTimer = useRef(null)
   const [showQuitConfirm, setShowQuitConfirm] = useState(false)
   const [soundMuted, setSoundMuted] = useState(() => isMuted())
-  const [pendingSession, setPendingSession] = useState(null)
-  const categoryTierRef = useRef(new Map())
-  const seededCategoryTierRef = useRef(false)
-  const masteredQuestionsRef = useRef(new Set())
-  const masteredSansuRef = useRef(loadSansuCounted()) // さんすうで、習得を数えた問題
-  const [pointToast, setPointToast] = useState(null) // { n, key }：もらったポイントの表示
-  const pointToastTimer = useRef(null)
-  const seededMasteredRef = useRef(false)
+  const [milestone, setMilestone] = useState(null) // 連続日数のお祝い
+  const [newCharacter, setNewCharacter] = useState(null) // 新キャラクター解放のお祝い
 
   function celebrate() {
     setConfettiOn(false)
     requestAnimationFrame(() => setConfettiOn(true))
   }
-  const [milestone, setMilestone] = useState(null) // マイルストーン達成のお祝いモーダル
-  const [newCharacter, setNewCharacter] = useState(null) // 新キャラクター解放のお祝いモーダル
+
+  const rewards = useProgress({ celebrate, setMascot, onMilestone: setMilestone, onNewCharacter: setNewCharacter })
+  const { progress } = rewards
+
+  const goalSets = useMemo(() => allSets.filter((s) => s.goal_at), [allSets])
+  // 目標日があってもなくても、一覧では全ての問題集を選べるようにする
+  const sortedSets = useMemo(() => [...allSets].sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0)), [allSets])
+  const questionsById = useMemo(() => new Map(questions.map((q) => [q.id, q])), [questions])
+  const today = useMemo(() => buildTodaySet(questions, goalSets), [questions, goalSets])
+  const overdue = useMemo(() => buildOverdueSet(questions, goalSets), [questions, goalSets])
+
+  // 問題集の完成・カテゴリーバッジ・すごろく（ことばナビの「完璧」）の判定
+  const rewardChecks = useRewardChecks({ loading, questions, questionsById, sets: sortedSets, celebrate, onMastered: rewards.addMasteryEvent })
+
+  const session = useKotobaSession({ questionsById, onAnswer: handleKotobaAnswer })
 
   const loadAll = useCallback(async () => {
     setLoadError(false)
     setLoading(true)
     try {
-      const [qs, sets, prog, furiganaEntries] = await Promise.all([
-        fetchQuestions(), fetchQuestionSetsWithItems(), fetchProgress(), fetchFuriganaEntries()
-      ])
+      const [qs, sets, prog, furiganaEntries] = await Promise.all([fetchQuestions(), fetchQuestionSetsWithItems(), fetchProgress(), fetchFuriganaEntries()])
       setCustomFurigana(furiganaEntries)
       setQuestions(qs)
       setAllSets(sets)
-      setProgress(prog)
-
-      const snapshot = loadSessionSnapshot()
-      if (snapshot && snapshot.questionIds?.length > 0) {
-        const stillExists = snapshot.questionIds.some((id) => qs.some((q) => q.id === id))
-        if (stillExists) setPendingSession(snapshot)
-        else clearSessionSnapshot()
-      }
+      rewards.load(prog)
+      session.restorePending(qs)
     } catch (e) {
       console.error(e)
-      setLoadError(true) // 読み込みに失敗したら、「よみこみちゅう」のまま止まらず、やりなおせるようにする
+      setLoadError(true) // 読み込みに失敗したら、読み込み中のまま止まらず、やりなおせるようにする
     } finally {
       setLoading(false)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   useEffect(() => { loadAll() }, [loadAll])
 
-  const goalSets = useMemo(() => allSets.filter((s) => s.goal_at), [allSets])
-  // 目標日時があってもなくても、一覧では全ての問題集を選べるようにする
-  const allSetsSorted = useMemo(() => [...allSets].sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0)), [allSets])
-  const questionsById = useMemo(() => new Map(questions.map((q) => [q.id, q])), [questions])
-
-  // 「問題集がかんぺきになった」効果音を、既にかんぺきな問題集で誤って鳴らさないための記録
-  const completedSetsRef = useRef(new Set())
-  const seededCompletedRef = useRef(false)
-  useEffect(() => {
-    if (seededCompletedRef.current || loading) return
-    allSetsSorted.forEach((set) => {
-      const allDone = set.questionIds.length > 0 && set.questionIds.every((id) => {
-        const q = questionsById.get(id)
-        return q && boxOf(q) >= 4
-      })
-      if (allDone) completedSetsRef.current.add(set.id)
-    })
-    seededCompletedRef.current = true
-  }, [loading, allSetsSorted, questionsById])
-
-  // カテゴリーバッジも同様に、既に到達済みのティアを起動時に記録しておく
-  useEffect(() => {
-    if (seededCategoryTierRef.current || loading || questions.length === 0) return
-    categoryProgress(questions).forEach((c) => {
-      if (c.tier) categoryTierRef.current.set(c.category, c.tier.id)
-    })
-    seededCategoryTierRef.current = true
-  }, [loading, questions])
-
-  // すごろく：既に「かんぺき」になっている問題を、起動時に記録しておく（二重カウント防止）
-  useEffect(() => {
-    if (seededMasteredRef.current || loading || questions.length === 0) return
-    questions.forEach((q) => { if (boxOf(q) >= 4) masteredQuestionsRef.current.add(q.id) })
-    seededMasteredRef.current = true
-  }, [loading, questions])
-
-  // 4. すごろく風マップ：問題が新たに「かんぺき」になるたびに進める
-  function checkMasteryProgress(updatedQuestion) {
-    if (boxOf(updatedQuestion) < 4) return
-    if (masteredQuestionsRef.current.has(updatedQuestion.id)) return
-    masteredQuestionsRef.current.add(updatedQuestion.id)
-    addMasteryEvent()
+  // 正解1問ぶんのごほうび（ことばナビ・さんすうナビ共通）
+  function rewardCorrect(source, label) {
+    rewards.addPoints(POINTS.correct, source, label)
+    rewards.addWeeklyCount()
   }
 
-  // 「習得」が1つ増えたことをすごろくに反映する（ことばナビの「完璧」・さんすうの「3回連続正解」の共通処理）
-  function addMasteryEvent() {
-    setProgress((prev) => {
-      const prevTotal = prev.mastery_event_total || 0
-      const nextTotal = prevTotal + 1
-      const prevInfo = stageInfo(prevTotal)
-      const nextInfo = stageInfo(nextTotal)
-      let patch = { mastery_event_total: nextTotal }
-      let next = { ...prev, ...patch }
-
-      if (nextInfo.boardPosition > prevInfo.boardPosition && nextInfo.squareInStage === 0) {
-        const newThemeId = nextInfo.theme.id
-        if (!prev.unlocked_backgrounds.includes(newThemeId)) {
-          const nextBackgrounds = [...prev.unlocked_backgrounds, newThemeId]
-          patch.unlocked_backgrounds = nextBackgrounds
-          next.unlocked_backgrounds = nextBackgrounds
-          setTimeout(() => { playFanfareBig(); celebrate() }, 300)
-        }
+  // ---- ことばナビ ----
+  function handleKotobaAnswer(q, isCorrect, mode) {
+    if (mode === 'review') {
+      if (isCorrect) {
+        rewards.addPoints(POINTS.review, 'kotoba', 'ことばナビ 復習')
+        playCorrect()
+        setMascot({ state: 'happy', text: '今度はできたね！' })
+      } else {
+        playWrong()
+        setMascot({ state: 'sad', text: 'もう一回見直してみよう' })
       }
-
-      updateProgress(patch).catch(console.error)
-      return next
-    })
-  }
-
-  // 正解によって、まだお祝いしていない問題集が新たに「かんぺき」になったら効果音を鳴らす
-  function checkSetCompletion(updatedQuestion) {
-    allSetsSorted.forEach((set) => {
-      if (completedSetsRef.current.has(set.id)) return
-      if (!set.questionIds.includes(updatedQuestion.id)) return
-      const allDone = set.questionIds.every((id) => {
-        const q = id === updatedQuestion.id ? updatedQuestion : questionsById.get(id)
-        return q && boxOf(q) >= 4
-      })
-      if (allDone) {
-        completedSetsRef.current.add(set.id)
-        playFanfareBig()
-        celebrate()
-      }
-    })
-  }
-
-  // 6. カテゴリー別マスターバッジ：新しいティア（どう/ぎん/きん）に到達したら演出
-  function checkCategoryBadge(updatedQuestion) {
-    const updatedQuestions = questions.map((q) => (q.id === updatedQuestion.id ? updatedQuestion : q))
-    const cats = categoryProgress(updatedQuestions)
-    const target = cats.find((c) => c.category === updatedQuestion.category)
-    if (!target) return
-    const newTierId = target.tier ? target.tier.id : null
-    const prevTierId = categoryTierRef.current.get(updatedQuestion.category) || null
-    if (newTierId && newTierId !== prevTierId) {
-      categoryTierRef.current.set(updatedQuestion.category, newTierId)
-      playBadgeGet()
-      celebrate()
+      recordAnswer({ question: q, isCorrect, sessionType: 'review' }).catch(console.error)
+      return
     }
-  }
 
-  const today = useMemo(() => buildTodaySet(questions, goalSets), [questions, goalSets])
-  const overdue = useMemo(() => buildOverdueSet(questions, goalSets), [questions, goalSets])
-
-  function patchQuestionLocal(id, patch) {
-    setQuestions((prev) => prev.map((q) => (q.id === id ? { ...q, ...patch } : q)))
-  }
-
-  // ポイントを加算し、DBにも永続化する
-  // source / label は、ポイント履歴（point_logs）に残すための情報
-  function addPoints(n, source = 'other', label) {
-    logPoints(source, n, label)
-    setProgress((prev) => {
-      const nextPoints = Math.max(0, prev.points + n) // やることの取り消しでマイナスになる場合があるので、0未満にはしない
-      const prevTitle = titleForPoints(prev.points)
-      const nextTitle = titleForPoints(nextPoints)
-      const next = { ...prev, points: nextPoints }
-      updateProgress({ points: nextPoints }).catch(console.error)
-      if (n > 0 && nextTitle !== prevTitle) {
-        setTimeout(() => { playLevelUp(); celebrate(); setMascot({ state: 'happy', text: `称号アップ！「${nextTitle}」になったよ！` }) }, 200)
-      }
-      return next
-    })
-  }
-
-  // 1. 週替わりミッション：正解のたびに呼ぶ。週が変わっていれば自動リセットしてから加算する。
-  // delta：進める数（正解1問＝1。やることは、ポイント÷10＝正解何問ぶんか）。取り消しのときはマイナス
-  function incrementWeeklyMission(delta = 1) {
-    setProgress((prev) => {
-      const reset = weeklyResetIfNeeded(prev)
-      const base = reset ? { ...prev, ...reset } : prev
-      const nextCount = Math.max(0, (base.weekly_correct_count || 0) + delta)
-      const claimed = [...(base.weekly_missions_claimed || [])]
-      let bonus = 0
-      let newlyClaimed = null
-      WEEKLY_MISSIONS.forEach((m) => {
-        if (delta > 0 && nextCount >= m.count && !claimed.includes(m.id)) {
-          claimed.push(m.id)
-          bonus += m.reward
-          newlyClaimed = m
-        }
-      })
-      const nextPoints = base.points + bonus
-      const next = {
-        ...base,
-        weekly_correct_count: nextCount,
-        weekly_missions_claimed: claimed,
-        points: nextPoints
-      }
-      updateProgress({
-        weekly_correct_count: nextCount,
-        weekly_missions_claimed: claimed,
-        points: nextPoints,
-        week_start_date: next.week_start_date
-      }).catch(console.error)
-      if (newlyClaimed) {
-        logPoints('mission', bonus, '今週のミッション')
-        setTimeout(() => { playBadgeGet(); celebrate() }, 260)
-      }
-      return next
-    })
-  }
-
-  // 「1問でもやれば継続」のストリーク判定。同じ日に何度呼んでも安全(冪等)。
-  function creditTodayActivity() {
-    setProgress((prev) => {
-      const result = computeStreakUpdate(prev)
-      if (!result.changed) return prev
-      const next = {
-        ...prev,
-        streak_count: result.streak_count,
-        freeze_tokens: result.freeze_tokens,
-        last_activity_date: result.last_activity_date,
-        longest_streak: Math.max(prev.longest_streak, result.streak_count)
-      }
-      updateProgress({
-        streak_count: next.streak_count,
-        freeze_tokens: next.freeze_tokens,
-        last_activity_date: next.last_activity_date,
-        longest_streak: next.longest_streak
-      }).catch(console.error)
-      if (result.newMilestone) setMilestone(result.newMilestone)
-      return next
-    })
-  }
-
-  // きろく・ショップ・すごろくを開くとき、「もどる」で今いた画面に戻れるようにする
-  function openFrom(next) {
-    setBackTo(screen)
-    setScreen(next)
-  }
-
-  // 下のメニュー（ホーム／ことば／さんすう／きろく／ショップ）
-  function handleNavSelect(key) {
-    if (screen === key || (key === 'kotoba' && screen === 'select')) return
-    if (key === 'home') setScreen('home')
-    else if (key === 'kotoba') setScreen('select')
-    else if (key === 'sansu') {
-      setScreen('sansu')
-      setMascot({ state: 'idle', text: 'さんすうも一緒に頑張ろう！' })
-    } else openFrom(key)
-  }
-
-  // さんすうナビも、ことばナビと同じポイント・連続日数にためる
-  function handleSansuAnswered(isCorrect) {
-    creditTodayActivity()
+    rewards.creditTodayActivity()
     if (isCorrect) {
-      addPoints(10, 'sansu', 'さんすう 正解')
-      incrementWeeklyMission()
-      playCorrect()
-      setMascot({ state: 'happy', text: HAPPY_LINES[Math.floor(Math.random() * HAPPY_LINES.length)] })
+      rewardCorrect('kotoba', 'ことばナビ 正解')
+      const wasStruggling = (q.wrong_count || 0) >= 3 && q.last_correct !== true
+      if (wasStruggling) {
+        playComeback()
+        celebrate()
+        setStruggleToast(true)
+        setTimeout(() => setStruggleToast(false), 2200)
+        setMascot({ state: 'happy', text: '苦手だった問題、ついにできたね！！' })
+      } else {
+        playCorrect()
+        setMascot(happyMascot())
+      }
     } else {
       playWrong()
-      setMascot({ state: 'sad', text: 'だいじょうぶ、次で覚えよう' })
+      setMascot(SAD_MASCOT)
+    }
+    recordAnswer({ question: q, isCorrect, sessionType: 'main' })
+      .then((patch) => {
+        if (!patch) return
+        const updated = { ...q, ...patch }
+        setQuestions((prev) => prev.map((x) => (x.id === q.id ? updated : x)))
+        if (isCorrect) rewardChecks.afterCorrect(updated)
+      })
+      .catch(console.error)
+  }
+
+  function startKotoba(list, options) {
+    session.startSet(list, options)
+    setScreen('quiz')
+    setMascot({ state: 'idle', text: '今日も一緒に頑張ろう！' })
+  }
+
+  function startToday() {
+    if (today.picked.length === 0) {
+      setMascot({ state: 'happy', text: '今日はもうやることないよ！すごい！' })
+      return
+    }
+    startKotoba(today.picked, { isToday: true })
+  }
+
+  function resumeKotoba() {
+    if (!session.resume()) return
+    setScreen('quiz')
+    setMascot({ state: 'idle', text: '続きから頑張ろう！' })
+  }
+
+  function handleKotobaFinished() {
+    rewards.addPoints(POINTS.finishBonus, 'bonus', 'ことばナビ 最後までできた')
+    if (!session.isToday) return
+    autoCompleteLinkedTask('kotoba') // 「今日やる問題」を終えたら、連動するやることを完了にする
+    if (today.leftoverDueTotal === 0) playFanfareBig()
+  }
+
+  // ---- さんすうナビ（ことばナビと同じポイント・連続日数にためる） ----
+  const sansuCountedRef = useRef(null) // すごろくに数えた、さんすうの問題ID（開き直しても二重に数えないよう端末に保存）
+  if (sansuCountedRef.current === null) sansuCountedRef.current = new Set(loadJSON(STORAGE_KEYS.sansuCounted, []))
+
+  function handleSansuAnswered(isCorrect) {
+    rewards.creditTodayActivity()
+    if (isCorrect) {
+      rewardCorrect('sansu', 'さんすう 正解')
+      playCorrect()
+      setMascot(happyMascot())
+    } else {
+      playWrong()
+      setMascot(SAD_MASCOT)
     }
   }
 
   // さんすうの問題が3回連続正解（習得）になったら、ことばナビの「完璧」と同じようにすごろくを進める
   function handleSansuMastered(question) {
-    if (masteredSansuRef.current.has(question.id)) return
-    masteredSansuRef.current.add(question.id)
-    saveSansuCounted(masteredSansuRef.current)
-    addMasteryEvent()
+    if (sansuCountedRef.current.has(question.id)) return
+    sansuCountedRef.current.add(question.id)
+    saveJSON(STORAGE_KEYS.sansuCounted, [...sansuCountedRef.current])
+    rewards.addMasteryEvent()
   }
 
   function handleSansuFinished() {
-    addPoints(20, 'bonus', 'さんすう 最後までできた')
+    rewards.addPoints(POINTS.finishBonus, 'bonus', 'さんすう 最後までできた')
     autoCompleteLinkedTask('sansu')
     playFanfareBig()
     celebrate()
     setMascot({ state: 'happy', text: '最後までできたね！すごい！' })
   }
 
-  // ホームの「やること」を完了／取り消したときのごほうび
+  // ---- やること（ホーム） ----
   function showPointToast(n) {
     clearTimeout(pointToastTimer.current)
     setPointToast({ n, key: Date.now() })
     pointToastTimer.current = setTimeout(() => setPointToast(null), 1800)
   }
 
-  // ホームの「やること」を完了／取り消したときの処理。ポイント・連続日数・今週のミッション・履歴をまとめて反映する
+  // やることを完了／取り消したときの処理。ポイント・連続日数・今週のミッション・履歴をまとめて反映する
   // points: そのやることのポイント（取り消しのときは、完了したときに付いたポイント）
   function handleTaskChange(kind, { allTodayDone, points, title }) {
+    const missionCount = Math.round(points / POINTS.correct) // ミッションは「正解何問ぶんか」で数える
     if (kind === 'undone') {
-      addPoints(-points, 'task', `取り消し：${title}`)
-      incrementWeeklyMission(-Math.round(points / 10))
+      rewards.addPoints(-points, 'task', `取り消し：${title}`)
+      rewards.addWeeklyCount(-missionCount)
       return
     }
-    creditTodayActivity() // やることだけをやった日も「連続」に数える
-    addPoints(points, 'task', title)
-    incrementWeeklyMission(Math.round(points / 10)) // 正解1問＝10ptとして、正解何問ぶんかで数える
+    rewards.creditTodayActivity() // やることだけをやった日も「連続」に数える
+    rewards.addPoints(points, 'task', title)
+    rewards.addWeeklyCount(missionCount)
     showPointToast(points)
     playTaskDone()
     if (allTodayDone && claimTaskBonus()) {
-      addPoints(TASK_ALL_DONE_BONUS, 'bonus', '今日のやることを全部達成')
+      rewards.addPoints(POINTS.taskAllDone, 'bonus', '今日のやることを全部達成')
       playTaskAllDone()
       celebrate()
     }
@@ -439,8 +249,7 @@ export default function KidsApp({ initialScreen = 'home' }) {
       const target = findAutoCompleteTarget(tasks, completions, toISODate(), app)
       if (!target) return
       const { task, date } = target
-      const inserted = await completeTask(task.id, date, task.points)
-      if (!inserted) return // すでに完了ずみ
+      if (!(await completeTask(task.id, date, task.points))) return // すでに完了ずみ
       handleTaskChange('done', { allTodayDone: false, points: task.points, title: task.title })
       setMascot({ state: 'happy', text: `「${task.title}」を完了にしたよ！` })
     } catch (e) {
@@ -448,230 +257,31 @@ export default function KidsApp({ initialScreen = 'home' }) {
     }
   }
 
-  function startSet(list, { isToday = false, randomize = true } = {}) {
-    setSessionQuestions(randomize ? shuffle(list) : [...list])
-    setIdx(0)
-    setCorrectCount(0)
-    setWrongQuestions([])
-    setMode('main')
-    setIsTodayAutoSession(isToday)
-    setRevealed(false)
-    setScreen('quiz')
-    setMascot({ state: 'idle', text: '今日も一緒に頑張ろう！' })
-    setPendingSession(null)
-  }
-
-  function resumeSession() {
-    if (!pendingSession) return
-    const list = pendingSession.questionIds.map((id) => questionsById.get(id)).filter(Boolean)
-    if (list.length === 0) { setPendingSession(null); clearSessionSnapshot(); return }
-    setSessionQuestions(list)
-    setIdx(Math.min(pendingSession.idx || 0, list.length))
-    setCorrectCount(pendingSession.correctCount || 0)
-    setWrongQuestions((pendingSession.wrongQuestionIds || []).map((id) => questionsById.get(id)).filter(Boolean))
-    setMode('main')
-    setIsTodayAutoSession(!!pendingSession.isTodayAutoSession)
-    setRevealed(false)
-    setScreen('quiz')
-    setMascot({ state: 'idle', text: '続きから頑張ろう！' })
-    setPendingSession(null)
-  }
-
-  function dismissPendingSession() {
-    setPendingSession(null)
-    clearSessionSnapshot()
-  }
-
-  function currentList() {
-    return mode === 'review' ? reviewList : sessionQuestions
-  }
-  function currentIdx() {
-    return mode === 'review' ? reviewIdx : idx
-  }
-  const list = currentList()
-  const i = currentIdx()
-  const current = list[i]
-  const finished = i >= list.length
-
-  // 「今日やる問題」実行中のセッションを自動保存し、終わったら消す
-  useEffect(() => {
-    if (screen !== 'quiz' || mode !== 'main' || sessionQuestions.length === 0) return
-    if (idx >= sessionQuestions.length) {
-      clearSessionSnapshot()
-      return
-    }
-    saveSessionSnapshot({
-      questionIds: sessionQuestions.map((q) => q.id),
-      idx,
-      correctCount,
-      wrongQuestionIds: wrongQuestions.map((q) => q.id),
-      isTodayAutoSession
-    })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [screen, mode, sessionQuestions, idx, correctCount, wrongQuestions, isTodayAutoSession])
-
-  function goNext() {
-    answeringRef.current = false
-    setRevealed(false)
-    setChoiceFeedback(null)
-    if (mode === 'main') setIdx((v) => v + 1)
-    else setReviewIdx((v) => v + 1)
-  }
-
-  function handleReveal() {
-    setRevealed(true)
-  }
-
-  function handleAnswer(isCorrect) {
-    // 次の問題へ進むまでの間（約0.7秒）の連打・二重タップは無視する（問題が飛ばされるのを防ぐ）
-    if (answeringRef.current) return
-    answeringRef.current = true
-    try {
-      const q = current
-      if (mode === 'main') {
-        creditTodayActivity()
-        if (isCorrect) {
-          const wasStruggling = (q.wrong_count || 0) >= 3 && q.last_correct !== true
-          setCorrectCount((v) => v + 1)
-          addPoints(10, 'kotoba', 'ことばナビ 正解')
-          incrementWeeklyMission()
-          if (wasStruggling) {
-            playComeback()
-            celebrate()
-            setStruggleToast(true)
-            setTimeout(() => setStruggleToast(false), 2200)
-            setMascot({ state: 'happy', text: '苦手だった問題、ついにできたね！！' })
-          } else {
-            playCorrect()
-            setMascot({ state: 'happy', text: HAPPY_LINES[Math.floor(Math.random() * HAPPY_LINES.length)] })
-          }
-        } else {
-          setWrongQuestions((v) => [...v, q])
-          playWrong()
-          setMascot({ state: 'sad', text: 'だいじょうぶ、次で覚えよう' })
-        }
-        recordAnswer({ question: q, isCorrect, sessionType: 'main' })
-          .then((patch) => {
-            if (!patch) return
-            patchQuestionLocal(q.id, patch)
-            if (isCorrect) {
-              const updated = { ...q, ...patch }
-              checkSetCompletion(updated)
-              checkCategoryBadge(updated)
-              checkMasteryProgress(updated)
-            }
-          })
-          .catch(console.error)
-      } else {
-        if (isCorrect) {
-          setReviewCorrect((v) => v + 1)
-          addPoints(5, 'kotoba', 'ことばナビ 復習')
-          playCorrect()
-          setMascot({ state: 'happy', text: '今度はできたね！' })
-        } else {
-          setReviewFailed((v) => [...v, q])
-          playWrong()
-          setMascot({ state: 'sad', text: 'もう一回見直してみよう' })
-        }
-        recordAnswer({ question: q, isCorrect, sessionType: 'review' }).catch(console.error)
-      }
-    } catch (err) {
-      console.error(err) // 演出などで失敗しても、次の問題へは必ず進める
-    }
-    setTimeout(goNext, 700)
-  }
-
-  function handleChoiceSelect(choice) {
-    if (choiceFeedback) return
-    const isCorrect = choice === current.content.answer
-    setChoiceFeedback({ chosen: choice, correct: current.content.answer })
-    setTimeout(() => handleAnswer(isCorrect), 700)
-  }
-
-  function handleQuit() {
-    setShowQuitConfirm(true)
-  }
-
-  function restartSameSet() {
-    setSessionQuestions((prev) => shuffle(prev))
-    setIdx(0)
-    setCorrectCount(0)
-    setWrongQuestions([])
-    setMode('main')
-    setRevealed(false)
-  }
-
-  function startReview() {
-    setMode('review')
-    setReviewList(shuffle(wrongQuestions))
-    setReviewIdx(0)
-    setReviewCorrect(0)
-    setReviewFailed([])
-    setRevealed(false)
-  }
-
-  function backToSummaryFromReview() {
-    setMode('main')
-  }
-
-  function reviewAgain() {
-    setReviewList(shuffle(reviewFailed))
-    setReviewFailed([])
-    setReviewIdx(0)
-    setReviewCorrect(0)
-    setRevealed(false)
-  }
-
-  function continueToday() {
-    const next = buildTodaySet(questions, goalSets)
-    startSet(next.picked, { isToday: true })
-  }
-
-  async function handlePurchase(item) {
-    const key = ownedKey(progress.active_character, item.id)
-    if (progress.points < item.cost || progress.owned_items.includes(key)) return
-    const nextOwned = [...progress.owned_items, key]
-    const nextPoints = progress.points - item.cost
-    let patch = { owned_items: nextOwned, points: nextPoints }
-    playItemGet()
-
-    // 今のキャラクターのアイテムを全部集めたら、次のキャラクターを解放する
-    if (isCharacterComplete(nextOwned, progress.active_character)) {
-      const locked = nextLockedCharacter(progress.unlocked_characters)
-      if (locked) {
-        patch.unlocked_characters = [...progress.unlocked_characters, locked.id]
-        setNewCharacter(locked)
-        setTimeout(playCharacterUnlock, 320)
-      }
-    }
-
-    setProgress((prev) => ({ ...prev, ...patch }))
-    await updateProgress(patch).catch(console.error)
-  }
-
-  async function handleEquip(itemId) {
-    setProgress((prev) => ({ ...prev, equipped_item: itemId }))
-    await updateProgress({ equipped_item: itemId }).catch(console.error)
-  }
-
-  async function handleEquipBackground(themeId) {
-    setProgress((prev) => ({ ...prev, active_background: themeId }))
-    await updateProgress({ active_background: themeId }).catch(console.error)
-  }
-
-  async function handleSwitchCharacter(characterId) {
-    if (!progress.unlocked_characters.includes(characterId)) return
-    // アイテムはキャラクターごとに所持しているので、切り替え時にそうびは一旦外す
-    setProgress((prev) => ({ ...prev, active_character: characterId, equipped_item: null }))
-    await updateProgress({ active_character: characterId, equipped_item: null }).catch(console.error)
+  // ---- 画面の切りかえ ----
+  function handleNavSelect(key) {
+    if (NAV_OF_SCREEN[screen] === key && screen !== 'quiz') return
+    if (key === 'kotoba') setScreen('select')
+    else if (key === 'sansu') {
+      setScreen('sansu')
+      setMascot({ state: 'idle', text: 'さんすうも一緒に頑張ろう！' })
+    } else if (key === 'record' || key === 'shop') {
+      setBackTo(screen) // 「もどる」で今いた画面に戻れるようにする
+      setScreen(key)
+    } else setScreen(key)
   }
 
   if (loadError) return <div className="app"><ErrorView onRetry={loadAll} /></div>
   if (loading || !progress) return <div className="app"><LoadingView /></div>
 
-  // 学習中（ことばナビの出題・さんすうナビの出題）は、下のメニューを隠して集中できるようにする
-  const showNav = !(screen === 'quiz' && !finished) && !(screen === 'sansu' && sansuStage === 'study')
-  const navActive = { home: 'home', select: 'kotoba', quiz: 'kotoba', sansu: 'sansu', record: 'record', shop: 'shop' }[screen]
+  const sansuStudying = screen === 'sansu' && sansuStage === 'study'
+  const quizStudying = screen === 'quiz' && !session.finished
+  // 学習中（ことばナビ・さんすうナビの出題）は、下のメニューを隠して集中できるようにする
+  const showNav = !quizStudying && !sansuStudying
+  // 問題を解いている間は、小さなキャラ＋ふきだしの1行だけ出す。ホーム・すごろくはキャラを自分で表示する
+  const showMascotStrip = screen === 'quiz' || sansuStudying
+  const showMascotZone = !showMascotStrip && screen !== 'home' && !(screen === 'record' && recordTab === 'sugoroku')
+  const characterProps = { character: progress.active_character, state: mascot.state, accessory: progress.equipped_item }
+  const goBack = () => setScreen(backTo)
 
   return (
     <div className={`app ${showNav ? 'has-nav' : ''}`}>
@@ -679,14 +289,11 @@ export default function KidsApp({ initialScreen = 'home' }) {
       {pointToast && <div className="point-toast" key={pointToast.key}>⭐ +{pointToast.n}pt</div>}
       {struggleToast && <div className="struggle-toast">🎊 苦手克服！</div>}
       <div className="topbar">
-        <div className="stat streak">
-          <span className="flame">🔥</span>
-          {progress.streak_count} 日連続
-        </div>
+        <div className="stat streak"><span className="flame">🔥</span>{progress.streak_count} 日連続</div>
         <button
           className="stat mute-btn"
           title={soundMuted ? '音をオンにする' : '音をオフにする'}
-          onClick={() => { const next = !soundMuted; setMuted(next); setSoundMuted(next) }}
+          onClick={() => { setMuted(!soundMuted); setSoundMuted(!soundMuted) }}
         >
           {soundMuted ? '🔇' : '🔊'}
         </button>
@@ -695,34 +302,22 @@ export default function KidsApp({ initialScreen = 'home' }) {
 
       {screen === 'quiz' && (
         <div id="quizChrome">
-          <div className="quit-row">
-            <button className="quit-btn" onClick={handleQuit}>
-              ✕ やめる
-            </button>
-          </div>
-          <div className="progress-wrap">
-            <div className="progress-bar" style={{ width: `${Math.min(100, Math.round((i / Math.max(1, list.length)) * 100))}%` }} />
-          </div>
+          <StudyHeader done={session.progress.done} total={session.progress.total} onQuit={() => setShowQuitConfirm(true)} />
         </div>
       )}
 
-      {/* 問題を解いている間は、小さなキャラ＋ふきだしの1行だけ出す（場所をとらずにリアクションできる） */}
-      {(screen === 'quiz' || (screen === 'sansu' && sansuStage === 'study')) && (
+      {showMascotStrip && (
         <div className="mascot-strip">
-          <div className="mascot-strip-fox" key={`${mascot.state}|${mascot.text}`}>
-            <Character character={progress.active_character} state={mascot.state} accessory={progress.equipped_item} />
-          </div>
+          <div className="mascot-strip-fox" key={`${mascot.state}|${mascot.text}`}><Character {...characterProps} /></div>
           {mascot.text && <div className="mascot-strip-bubble">{mascot.text}</div>}
         </div>
       )}
 
-      {!(screen === 'record' && recordTab === 'sugoroku') && screen !== 'home' && screen !== 'quiz' && !(screen === 'sansu' && sansuStage === 'study') && (
+      {showMascotZone && (
         <>
           <div className={`mascot-zone ${progress.active_background ? 'has-room' : ''}`}>
-            {progress.active_background && (
-              <RoomBackground themeId={progress.active_background} height={130} />
-            )}
-            <Character character={progress.active_character} state={mascot.state} accessory={progress.equipped_item} />
+            {progress.active_background && <RoomBackground themeId={progress.active_background} height={130} />}
+            <Character {...characterProps} />
           </div>
           <div className="speech">{mascot.text}</div>
         </>
@@ -732,9 +327,9 @@ export default function KidsApp({ initialScreen = 'home' }) {
         <HomeScreen
           character={progress.active_character}
           accessory={progress.equipped_item}
-          pendingSession={pendingSession}
-          onResumeSession={resumeSession}
-          onOpenApp={(app) => handleNavSelect(app === 'sansu' ? 'sansu' : 'kotoba')}
+          pendingSession={session.pendingSession}
+          onResumeSession={resumeKotoba}
+          onOpenApp={(app) => handleNavSelect(app)}
           onTaskChange={handleTaskChange}
         />
       )}
@@ -743,28 +338,19 @@ export default function KidsApp({ initialScreen = 'home' }) {
         <SelectScreen
           today={today}
           overdue={overdue}
-          staticSets={allSetsSorted}
+          sets={sortedSets}
           questionsById={questionsById}
           title={titleForPoints(progress.points)}
           freezeTokens={progress.freeze_tokens}
           weeklyCorrectCount={progress.weekly_correct_count || 0}
           weeklyMissionsClaimed={progress.weekly_missions_claimed || []}
-          onStartToday={() => {
-            if (today.picked.length === 0) {
-              setMascot({ state: 'happy', text: '今日はもうやることないよ！すごい！' })
-              return
-            }
-            startSet(today.picked, { isToday: true })
-          }}
-          onStartOverdue={() => startSet(overdue.picked, { isToday: false })}
-          onStartSet={(set) => {
-            const list = set.questionIds.map((id) => questionsById.get(id)).filter(Boolean)
-            // 管理画面でランダム出題がオンの問題集は、開くたびに順番を入れ替える
-            startSet(list, { isToday: false, randomize: !!set.shuffle })
-          }}
-          pendingSession={pendingSession}
-          onResumeSession={resumeSession}
-          onDismissSession={dismissPendingSession}
+          pendingSession={session.pendingSession}
+          onResumeSession={resumeKotoba}
+          onDismissSession={session.dismissPending}
+          onStartToday={startToday}
+          onStartOverdue={() => startKotoba(overdue.picked)}
+          // 管理画面でランダム出題がオンの問題集は、開くたびに順番を入れ替える
+          onStartSet={(set) => startKotoba(set.questionIds.map((id) => questionsById.get(id)).filter(Boolean), { randomize: !!set.shuffle })}
         />
       )}
 
@@ -778,13 +364,13 @@ export default function KidsApp({ initialScreen = 'home' }) {
             <>
               <OverallRecord />
               <PointHistory />
-              <RecordScreen questions={questions} onBack={() => setScreen(backTo)} />
+              <RecordScreen questions={questions} onBack={goBack} />
             </>
           ) : (
             <SugorokuScreen
               masteryEventTotal={progress.mastery_event_total || 0}
-              characterEmoji={CHARACTERS.find((c) => c.id === progress.active_character)?.emoji || '🦊'}
-              onBack={() => setScreen(backTo)}
+              characterEmoji={characterById(progress.active_character).emoji}
+              onBack={goBack}
             />
           )}
         </>
@@ -799,11 +385,11 @@ export default function KidsApp({ initialScreen = 'home' }) {
           unlockedCharacters={progress.unlocked_characters}
           unlockedBackgrounds={progress.unlocked_backgrounds || []}
           activeBackground={progress.active_background}
-          onPurchase={handlePurchase}
-          onEquip={handleEquip}
-          onSwitchCharacter={handleSwitchCharacter}
-          onEquipBackground={handleEquipBackground}
-          onBack={() => setScreen(backTo)}
+          onPurchase={rewards.purchase}
+          onEquip={rewards.equip}
+          onSwitchCharacter={rewards.switchCharacter}
+          onEquipBackground={rewards.equipBackground}
+          onBack={goBack}
         />
       )}
 
@@ -817,428 +403,69 @@ export default function KidsApp({ initialScreen = 'home' }) {
         />
       )}
 
-      {screen === 'quiz' && !finished && (
+      {quizStudying && (
         <QuizCard
-          item={current}
-          revealed={revealed}
-          reviewMode={mode === 'review'}
-          choiceFeedback={choiceFeedback}
-          onReveal={handleReveal}
-          onAnswer={handleAnswer}
-          onChoice={handleChoiceSelect}
+          item={session.current}
+          revealed={session.revealed}
+          reviewMode={session.mode === 'review'}
+          choiceFeedback={session.choiceFeedback}
+          onReveal={session.reveal}
+          onAnswer={session.answer}
+          onChoice={session.choose}
         />
       )}
 
-      {screen === 'quiz' && finished && mode === 'main' && (
-        <Summary
-          correctCount={correctCount}
-          total={sessionQuestions.length}
+      {screen === 'quiz' && session.finished && session.mode === 'main' && (
+        <QuizSummary
+          correctCount={session.main.correct}
+          total={session.main.list.length}
           streak={progress.streak_count}
-          wrongCount={wrongQuestions.length}
-          isTodayAutoSession={isTodayAutoSession}
-          questions={questions}
-          goalSets={goalSets}
-          onRestart={restartSameSet}
-          onReview={startReview}
+          wrongCount={session.main.wrong.length}
+          leftoverToday={session.isToday ? today.leftoverDueTotal : null}
+          onShown={handleKotobaFinished}
+          onRestart={session.restart}
+          onReview={session.startReview}
           onPickAnother={() => setScreen('select')}
-          onContinueToday={continueToday}
-          onFinishBonus={() => {
-            addPoints(20, 'bonus', 'ことばナビ 最後までできた')
-            if (isTodayAutoSession) autoCompleteLinkedTask('kotoba') // 「今日やる問題」を終えたら、連動するやることを完了にする
-          }}
+          onContinueToday={() => startKotoba(today.picked, { isToday: true })}
         />
       )}
 
-      {screen === 'quiz' && finished && mode === 'review' && (
+      {screen === 'quiz' && session.finished && session.mode === 'review' && (
         <ReviewSummary
-          reviewCorrect={reviewCorrect}
-          total={reviewList.length}
-          stillWrongCount={reviewFailed.length}
-          onBack={backToSummaryFromReview}
-          onReviewAgain={reviewAgain}
+          reviewCorrect={session.review.correct}
+          total={session.review.list.length}
+          stillWrongCount={session.review.failed.length}
+          onBack={session.backToSummary}
+          onReviewAgain={session.reviewAgain}
         />
       )}
 
-      {showNav && <BottomNav active={navActive} onSelect={handleNavSelect} />}
+      {showNav && <BottomNav active={NAV_OF_SCREEN[screen]} onSelect={handleNavSelect} />}
 
-      {milestone && <MilestoneModal milestone={milestone} onClose={() => setMilestone(null)} />}
-      {newCharacter && <NewCharacterModal character={newCharacter} onClose={() => setNewCharacter(null)} />}
+      {milestone && (
+        <ModalCard
+          emoji={milestone.emoji}
+          label={milestone.label}
+          hint="ストリークフリーズを1個もらったよ！"
+          onClose={() => setMilestone(null)}
+          actions={[{ label: 'やったー！', onClick: () => setMilestone(null) }]}
+        />
+      )}
+      {newCharacter && (
+        <ModalCard
+          emoji={newCharacter.emoji}
+          label="新しいキャラクター解放！"
+          hint={`「${newCharacter.name}」が ショップから選べるようになったよ！`}
+          onClose={() => setNewCharacter(null)}
+          actions={[{ label: 'やったー！', onClick: () => setNewCharacter(null) }]}
+        />
+      )}
       {showQuitConfirm && (
-        <QuitConfirmModal
+        <QuitConfirm
+          hint="ここまでの記録は残りません。"
           onCancel={() => setShowQuitConfirm(false)}
-          onQuit={() => { setShowQuitConfirm(false); clearSessionSnapshot(); setScreen('select') }}
+          onQuit={() => { setShowQuitConfirm(false); session.quit(); setScreen('select') }}
         />
-      )}
-    </div>
-  )
-}
-
-function MilestoneModal({ milestone, onClose }) {
-  return (
-    <div className="milestone-backdrop" onClick={onClose}>
-      <div className="milestone-card" onClick={(e) => e.stopPropagation()}>
-        <div className="milestone-emoji">{milestone.emoji}</div>
-        <div className="milestone-label">{milestone.label}</div>
-        <div className="hint">ストリークフリーズを1個もらったよ！</div>
-        <button className="restart" onClick={onClose}>やったー！</button>
-      </div>
-    </div>
-  )
-}
-
-function NewCharacterModal({ character, onClose }) {
-  return (
-    <div className="milestone-backdrop" onClick={onClose}>
-      <div className="milestone-card" onClick={(e) => e.stopPropagation()}>
-        <div className="milestone-emoji">{character.emoji}</div>
-        <div className="milestone-label">新しいキャラクター解放！</div>
-        <div className="hint">「{character.name}」が ショップから選べるようになったよ！</div>
-        <button className="restart" onClick={onClose}>やったー！</button>
-      </div>
-    </div>
-  )
-}
-
-function QuitConfirmModal({ onCancel, onQuit }) {
-  return (
-    <div className="milestone-backdrop" onClick={onCancel}>
-      <div className="milestone-card" onClick={(e) => e.stopPropagation()}>
-        <div className="milestone-emoji">🤔</div>
-        <div className="milestone-label">途中でやめますか？</div>
-        <div className="hint">ここまでの記録は残りません。</div>
-        <button className="restart" onClick={onCancel}>続ける</button>
-        <button className="restart pick-another" onClick={onQuit}>やめる</button>
-      </div>
-    </div>
-  )
-}
-
-function SelectScreen({ today, overdue, staticSets, questionsById, title, freezeTokens, weeklyCorrectCount, weeklyMissionsClaimed, onStartToday, onStartOverdue, onStartSet, pendingSession, onResumeSession, onDismissSession }) {
-  const todaySub =
-    today.picked.length === 0
-      ? '今日はやることなし！'
-      : today.totalEligible > today.picked.length
-      ? `候補${today.totalEligible}問から${today.picked.length}問を抽出`
-      : `${today.picked.length}問を自動で作成`
-
-  const nextMission = WEEKLY_MISSIONS.find((m) => !weeklyMissionsClaimed.includes(m.id))
-
-  return (
-    <div>
-      <div className="title-banner">
-        <span>🎖️ {title}</span>
-        <span className="freeze-badge">🧊 フリーズ ×{freezeTokens}</span>
-      </div>
-
-      {pendingSession && (
-        <div className="resume-card">
-          <div className="resume-text">
-            📖 前回の続きがあります（{pendingSession.idx || 0}/{pendingSession.questionIds.length}問目）
-          </div>
-          <div className="resume-buttons">
-            <button className="restart" style={{ marginTop: 0 }} onClick={onResumeSession}>続きからやる</button>
-            <button className="btn-dismiss-resume" onClick={onDismissSession}>消す</button>
-          </div>
-        </div>
-      )}
-
-      <button className="set-card today-card" onClick={onStartToday}>
-        <div className="set-icon today-icon">🔥</div>
-        <div className="set-body">
-          <div className="set-name">今日やる問題</div>
-          <div className="set-sub">{todaySub}</div>
-        </div>
-        <div className="set-count">{today.picked.length}問</div>
-      </button>
-
-      {overdue.picked.length > 0 && (
-        <button className="set-card overdue-card" onClick={onStartOverdue}>
-          <div className="set-icon overdue-icon">⏰</div>
-          <div className="set-body">
-            <div className="set-name">締切を過ぎた問題</div>
-            <div className="set-sub">
-              {overdue.totalOverdue > overdue.picked.length
-                ? `候補${overdue.totalOverdue}問から${overdue.picked.length}問`
-                : 'まだできていないよ'}
-            </div>
-          </div>
-          <div className="set-count">{overdue.picked.length}問</div>
-        </button>
-      )}
-
-      {nextMission ? (
-        <div className="mission-card">
-          <div className="mission-title">
-            <span>📅 今週のミッション</span>
-            <span>{Math.min(weeklyCorrectCount, nextMission.count)}/{nextMission.count}問</span>
-          </div>
-          <div className="mission-bar-wrap">
-            <div className="mission-bar" style={{ width: `${Math.min(100, Math.round((weeklyCorrectCount / nextMission.count) * 100))}%` }} />
-          </div>
-          <div className="hint" style={{ marginTop: 6, marginBottom: 0 }}>あと{Math.max(0, nextMission.count - weeklyCorrectCount)}問で ⭐{nextMission.reward}pt ゲット！</div>
-        </div>
-      ) : (
-        <div className="mission-card">
-          <div className="mission-title"><span>📅 今週のミッション</span><span className="mission-done">全部達成！！🎉</span></div>
-        </div>
-      )}
-
-      <div className="set-heading" style={{ marginTop: 18 }}>
-        問題集を選んでね
-      </div>
-      {staticSets.map((set) => {
-        const members = set.questionIds.map((id) => questionsById.get(id)).filter(Boolean)
-        const total = members.length
-        const boxCounts = [0, 1, 2, 3, 4].map((b) => members.filter((q) => boxOf(q) === b).length)
-        const mastered = boxCounts[4]
-        const rate = total > 0 ? Math.round((mastered / total) * 100) : 0
-        const tier = rate === 0 ? 'tier-none' : rate === 100 ? 'tier-done' : 'tier-mid'
-        return (
-          <button className="set-card set-card-progress" key={set.id} onClick={() => onStartSet(set)}>
-            <div className="set-card-top">
-              <div className="set-icon" style={{ background: '#FFF1DA', color: '#E36A1E' }}>
-                📖
-              </div>
-              <div className="set-body">
-                <div className="set-name">{set.name}</div>
-                <div className="set-sub">
-                  {set.questionIds.length}問
-                  {set.goal_at && <span className="goal-tag"> ・🎯 {formatGoalShort(set.goal_at)}まで</span>}
-                </div>
-              </div>
-              <div className={`set-count ${tier}`}>{rate}%</div>
-            </div>
-            <div className="set-progress-wrap" title={`未正解${boxCounts[0]}・1回${boxCounts[1]}・2回${boxCounts[2]}・3回${boxCounts[3]}・完璧${boxCounts[4]}`}>
-              {BOX_BAR_COLORS.map((color, i) => (
-                total > 0 && boxCounts[i] > 0 ? (
-                  <div key={i} className="set-progress-seg" style={{ width: `${(boxCounts[i] / total) * 100}%`, background: color }} />
-                ) : null
-              ))}
-            </div>
-          </button>
-        )
-      })}
-      {staticSets.length === 0 && <div className="hint">まだ問題集がありません（管理画面で作成してください）</div>}
-    </div>
-  )
-}
-
-function QuizCard({ item, revealed, reviewMode, choiceFeedback, onReveal, onAnswer, onChoice }) {
-  const c = item.content
-
-  if (c.choices) {
-    return (
-      <div>
-        {reviewMode && <div className="hint" style={{ marginBottom: 8 }}>📖 復習タイム（正解数にはカウントされません）</div>}
-        <div className="card" style={{ alignItems: 'flex-start' }}>
-          <div className="label">{item.category === '同訓異字' ? '同訓' : '同音'}</div>
-          <div className="reading-tag" style={{ marginTop: 20 }}>
-            {c.reading}
-          </div>
-          <div className="sentence" style={{ marginTop: 12 }}>
-            <Ruby text={c.sentence} />
-          </div>
-          {c.q && (
-            <>
-              <div className="label label-2">意味</div>
-              <div className="meaning with-sentence"><Ruby text={c.q} /></div>
-            </>
-          )}
-        </div>
-        <div className="choice-grid">
-          {c.choices.map((choice) => {
-            let cls = 'choice-btn'
-            if (choiceFeedback) {
-              if (choice === choiceFeedback.correct) cls += ' choice-correct'
-              else if (choice === choiceFeedback.chosen) cls += ' choice-wrong'
-            }
-            return (
-              <button key={choice} className={cls} disabled={!!choiceFeedback} onClick={() => onChoice(choice)}>
-                <Ruby text={choice} />
-              </button>
-            )
-          })}
-        </div>
-      </div>
-    )
-  }
-
-  if (c.sentenceA) {
-    let labelText = '対になる表現'
-    let labelClass = 'label'
-    let hintText = '2つとも何ということわざ？'
-    if (item.category === '類義語') {
-      labelText = '類義語'
-      labelClass = 'label label-ruigigo'
-      hintText = 'この二つの文章の意味になる類義語は何？'
-    } else if (item.category === '対義語') {
-      labelText = '対義語'
-      labelClass = 'label label-taigigo'
-      hintText = 'この二つの文章の意味になる対義語は何？'
-    }
-    return (
-      <div>
-        {reviewMode && <div className="hint" style={{ marginBottom: 8 }}>📖 復習タイム（正解数にはカウントされません）</div>}
-        <div className="card" style={{ alignItems: 'flex-start' }}>
-          <div className={labelClass}>{labelText}</div>
-          <div className="pair-block" style={{ marginTop: 20 }}>
-            <div className="pair-sentence">
-              <span className="pair-num">1</span>
-              <Ruby text={c.sentenceA} />
-            </div>
-            <div className={`pair-answer ${revealed ? '' : 'pair-answer-hidden'}`}><Ruby text={c.answerA} /></div>
-          </div>
-          <div className="pair-block">
-            <div className="pair-sentence">
-              <span className="pair-num">2</span>
-              <Ruby text={c.sentenceB} />
-            </div>
-            <div className={`pair-answer ${revealed ? '' : 'pair-answer-hidden'}`}><Ruby text={c.answerB} /></div>
-          </div>
-          {!revealed && <div className="hint">{hintText}</div>}
-        </div>
-        {!revealed ? (
-          <button className="btn btn-reveal" onClick={onReveal}>
-            タップして答えを見る
-          </button>
-        ) : (
-          <div className="btn-row">
-            <button className="btn btn-bad" onClick={() => onAnswer(false)}>もう少し</button>
-            <button className="btn btn-ok" onClick={() => onAnswer(true)}>できた！</button>
-          </div>
-        )}
-      </div>
-    )
-  }
-
-  const isArrayAnswer = Array.isArray(c.a)
-  return (
-    <div>
-      {reviewMode && <div className="hint" style={{ marginBottom: 8 }}>📖 復習タイム（正解数にはカウントされません）</div>}
-      <div className="card">
-        {item.answer_type === 'meaning_first_fill' ? (
-          <>
-            <div className="label">意味</div>
-            <div className="meaning"><Ruby text={c.q} /></div>
-            <div className="label label-2">例文</div>
-            <div className="sentence with-meaning"><Ruby text={c.sentence} /></div>
-          </>
-        ) : (
-          <>
-            {c.sentence ? (
-              <>
-                <div className="label">例文</div>
-                <div className="sentence"><Ruby text={c.sentence} /></div>
-                <div className="label label-2">意味</div>
-              </>
-            ) : (
-              <div className="label">意味</div>
-            )}
-            <div className={`meaning${c.sentence ? ' with-sentence' : ''}`}>
-              <Ruby text={c.q} />
-            </div>
-          </>
-        )}
-        {c.shown && <div className="shown-proverb"><Ruby text={c.shown} /></div>}
-        {!revealed ? (
-          <div className="hint">
-            {c.shown
-              ? '似た意味のことわざは？'
-              : item.answer_type === 'meaning_first_fill'
-              ? `当てはまる${item.category}は？`
-              : item.answer_type === 'wago_fill'
-              ? '当てはまる和語は？'
-              : c.sentence
-              ? '当てはまる慣用句は？'
-              : '答えを考えてみよう'}
-          </div>
-        ) : isArrayAnswer ? (
-          <>
-            {c.a.length > 1 && <div className="multi-badge">答えは {c.a.length}つあります</div>}
-            {c.a.map((x) => (
-              <div className="answer" key={x}><Ruby text={x} /></div>
-            ))}
-          </>
-        ) : (
-          <div className="answer"><Ruby text={c.a} /></div>
-        )}
-      </div>
-      {!revealed ? (
-        <button className="btn btn-reveal" onClick={onReveal}>
-          タップして答えを見る
-        </button>
-      ) : (
-        <div className="btn-row">
-          <button className="btn btn-bad" onClick={() => onAnswer(false)}>もう少し</button>
-          <button className="btn btn-ok" onClick={() => onAnswer(true)}>できた！</button>
-        </div>
-      )}
-    </div>
-  )
-}
-
-function Summary({
-  correctCount, total, streak, wrongCount, isTodayAutoSession, questions, goalSets,
-  onRestart, onReview, onPickAnother, onContinueToday, onFinishBonus
-}) {
-  useEffect(() => {
-    onFinishBonus()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  const rate = total > 0 ? Math.round((correctCount / total) * 100) : 0
-  const todayCheck = isTodayAutoSession ? buildTodaySet(questions, goalSets) : null
-  const leftover = todayCheck ? todayCheck.leftoverDueTotal : 0
-
-  useEffect(() => {
-    if (isTodayAutoSession && leftover === 0) playFanfareBig()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  return (
-    <div className="card summary">
-      <h2>今日の結果</h2>
-      <div className="big">{correctCount} / {total}</div>
-      <div className="hint">正解率 {rate}%</div>
-      <div className="badges">
-        <div className="badge">⭐ +{correctCount * 10 + 20} ポイント</div>
-        <div className="badge">🔥 {streak}日連続</div>
-      </div>
-      {leftover > 0 && (
-        <>
-          <div className="hint" style={{ margin: '14px 0 4px', color: 'var(--fox-dark)', fontWeight: 700 }}>
-            まだ今日やるべき問題が{leftover}問残っています
-          </div>
-          <button className="restart today-continue" onClick={onContinueToday}>
-            続けて今日の分をやる（あと{leftover}問）
-          </button>
-        </>
-      )}
-      <button className="restart" onClick={onRestart}>もう一度最初から</button>
-      {wrongCount > 0 && (
-        <button className="restart review-btn" onClick={onReview}>
-          間違えた問題を復習する（{wrongCount}問）
-        </button>
-      )}
-      <button className="restart pick-another" onClick={onPickAnother}>別の問題集を選ぶ</button>
-    </div>
-  )
-}
-
-function ReviewSummary({ reviewCorrect, total, stillWrongCount, onBack, onReviewAgain }) {
-  return (
-    <div className="card summary">
-      <h2>復習結果</h2>
-      <div className="big">{reviewCorrect} / {total}</div>
-      <div className="hint">※この結果は最初の正解数には反映されません</div>
-      <div className="badges">
-        <div className="badge">⭐ +{reviewCorrect * 5} ポイント</div>
-      </div>
-      <button className="restart" onClick={onBack}>結果画面にもどる</button>
-      {stillWrongCount > 0 && (
-        <button className="restart today-continue" onClick={onReviewAgain}>
-          まだ間違えた問題をもう一度（{stillWrongCount}問）
-        </button>
       )}
     </div>
   )

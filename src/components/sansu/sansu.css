@@ -1,19 +1,12 @@
+/* さんすうナビ管理画面（/admin/sansu）専用。ほかの画面とは別ページなので、ページ全体の見た目もここで決める */
 :root {
   --text: #6b6375;
   --text-h: #08060d;
   --bg: #fff;
   --border: #e5e4e7;
-  --code-bg: #f4f3ec;
   --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
-
   --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
   --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
 
   font: 18px/145% var(--sans);
   letter-spacing: 0.18px;
@@ -36,22 +29,19 @@
     --text-h: #f3f4f6;
     --bg: #16171d;
     --border: #2e303a;
-    --code-bg: #1f2028;
     --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
   }
+}
 
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
+* {
+  box-sizing: border-box;
 }
 
 body {
   margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", sans-serif;
+  background: #fef9f0;
+  color: #333;
 }
 
 #root {
@@ -63,7 +53,6 @@ body {
   min-height: 100svh;
   display: flex;
   flex-direction: column;
-  box-sizing: border-box;
 }
 
 h1,
@@ -95,95 +84,10 @@ p {
   margin: 0;
 }
 
-code,
-.counter {
-  font-family: var(--mono);
-  display: inline-flex;
-  border-radius: 4px;
-  color: var(--text-h);
-}
-
-code {
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
-}
-* {
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", sans-serif;
-  background: #fef9f0;
-  color: #333;
-}
-
-.loading {
-  padding: 40px;
-  text-align: center;
-  font-size: 18px;
-}
-
-.setup-screen,
-.study-screen,
-.result-screen,
 .admin-panel {
-  max-width: 480px;
+  max-width: 700px;
   margin: 0 auto;
   padding: 20px 16px 60px;
-}
-
-.setup-screen h1 {
-  text-align: center;
-  color: #ff8c42;
-  font-size: 28px;
-}
-
-.setup-screen h2 {
-  font-size: 16px;
-  margin-top: 24px;
-  margin-bottom: 8px;
-  color: #666;
-}
-
-.chip-group {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.chip {
-  padding: 8px 16px;
-  border-radius: 20px;
-  border: 2px solid #ddd;
-  background: white;
-  font-size: 14px;
-  cursor: pointer;
-}
-
-.chip-active {
-  border-color: #ff8c42;
-  background: #ffedd9;
-  color: #d9640a;
-  font-weight: bold;
-}
-
-.question-count {
-  margin-top: 24px;
-  text-align: center;
-  font-size: 15px;
-  color: #666;
-}
-
-.mastered-filter {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 20px;
-  font-size: 14px;
-  color: #666;
 }
 
 .primary-button {
@@ -216,57 +120,6 @@ body {
   cursor: pointer;
 }
 
-.study-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 12px;
-}
-
-.quit-button {
-  padding: 6px 12px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  background: white;
-  color: #999;
-  font-size: 13px;
-  cursor: pointer;
-}
-
-.progress {
-  text-align: center;
-  color: #999;
-}
-
-.question-card {
-  background: white;
-  border-radius: 16px;
-  padding: 24px 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-}
-
-.unit-badge {
-  display: inline-block;
-  padding: 4px 12px;
-  background: #ffedd9;
-  color: #d9640a;
-  border-radius: 12px;
-  font-size: 13px;
-  margin-bottom: 12px;
-}
-
-.question-text {
-  font-size: 20px;
-  line-height: 1.6;
-  white-space: pre-wrap;
-}
-
-.question-image {
-  width: 100%;
-  border-radius: 8px;
-  margin: 12px 0;
-}
-
 .image-file-list {
   display: flex;
   flex-wrap: wrap;
@@ -293,86 +146,6 @@ body {
   padding: 0;
 }
 
-.answer-box {
-  margin-top: 16px;
-  padding: 16px;
-  background: #f0f9f4;
-  border-radius: 12px;
-}
-
-.answer-label {
-  font-size: 13px;
-  color: #4caf50;
-  margin: 0 0 4px;
-}
-
-.answer-text {
-  font-size: 20px;
-  font-weight: bold;
-  margin: 0;
-}
-
-.judge-buttons {
-  display: flex;
-  gap: 12px;
-  margin-top: 16px;
-}
-
-.correct-button,
-.incorrect-button {
-  flex: 1;
-  padding: 16px;
-  border: none;
-  border-radius: 12px;
-  font-size: 18px;
-  font-weight: bold;
-  cursor: pointer;
-}
-
-.correct-button {
-  background: #4caf50;
-  color: white;
-}
-
-.incorrect-button {
-  background: #f44336;
-  color: white;
-}
-
-.result-screen h1 {
-  text-align: center;
-  color: #ff8c42;
-}
-
-.result-card {
-  background: white;
-  border-radius: 16px;
-  padding: 32px 20px;
-  text-align: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-}
-
-.result-rate {
-  font-size: 48px;
-  font-weight: bold;
-  color: #ff8c42;
-  margin: 0;
-}
-
-.result-detail {
-  font-size: 16px;
-  margin: 8px 0 0;
-}
-
-.result-detail-sub {
-  font-size: 14px;
-  color: #999;
-  margin: 4px 0 0;
-}
-
-.admin-panel {
-  max-width: 700px;
-}
 
 .admin-form {
   display: flex;

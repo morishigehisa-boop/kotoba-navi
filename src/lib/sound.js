@@ -1,18 +1,17 @@
+import { loadString, saveString, STORAGE_KEYS } from './storage'
+
 // Web Audio APIで効果音をその場で生成する（音声ファイル不要 = ランニングコストゼロ）
 let actx = null
 
-// 音のオン/オフ設定（localStorageに保存して次回起動時も引き継ぐ）
-const MUTE_KEY = 'kotoba_navi_muted'
-let muted = (() => {
-  try { return localStorage.getItem(MUTE_KEY) === '1' } catch { return false }
-})()
+// 音のオン/オフ設定（端末に保存して次回起動時も引き継ぐ）
+let muted = loadString(STORAGE_KEYS.muted) === '1'
 
 export function isMuted() {
   return muted
 }
 export function setMuted(value) {
   muted = value
-  try { localStorage.setItem(MUTE_KEY, value ? '1' : '0') } catch {}
+  saveString(STORAGE_KEYS.muted, value ? '1' : '0')
 }
 
 // iPhoneは、画面を切りかえたり しばらく放置したりすると AudioContext が止まる／閉じることがある。

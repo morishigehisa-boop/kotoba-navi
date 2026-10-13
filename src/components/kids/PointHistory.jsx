@@ -1,10 +1,11 @@
 import { useState } from 'react'
-import { supabase } from '../../lib/supabase'
+import { fetchPointLogs } from '../../lib/api'
 
 const PAGE = 50 // 1回に読む件数（Supabaseの1,000行上限を超えないよう、range で区切る）
 const SOURCE_LABEL = { kotoba: 'ことばナビ', sansu: 'さんすう', task: 'やること', bonus: 'ボーナス', mission: 'ミッション', other: 'そのほか' }
 
 const dayOf = (iso) => new Date(iso).toLocaleDateString('ja-JP', { timeZone: 'Asia/Tokyo', month: 'numeric', day: 'numeric', weekday: 'short' })
+const signed = (n) => (n > 0 ? `+${n}` : `${n}`)
 const timeOf = (iso) => new Date(iso).toLocaleTimeString('ja-JP', { timeZone: 'Asia/Tokyo', hour: '2-digit', minute: '2-digit' })
 
 // ポイントが「いつ・なにで・いくつ」増えた（減った）かの一覧。ひらいたときだけ読み込む
@@ -18,16 +19,16 @@ export default function PointHistory() {
   async function loadMore(from = rows.length) {
     setLoading(true)
     setFailed(false)
-    const { data, error } = await supabase
-      .from('point_logs')
-      .select('id, source, delta, label, created_at')
-      .order('created_at', { ascending: false })
-      .order('id', { ascending: false })
-      .range(from, from + PAGE - 1)
-    setLoading(false)
-    if (error) { console.error(error); setFailed(true); return }
-    setRows((prev) => (from === 0 ? data : [...prev, ...data]))
-    setHasMore(data.length === PAGE)
+    try {
+      const data = await fetchPointLogs(from, PAGE)
+      setRows((prev) => (from === 0 ? data : [...prev, ...data]))
+      setHasMore(data.length === PAGE)
+    } catch (e) {
+      console.error(e)
+      setFailed(true)
+    } finally {
+      setLoading(false)
+    }
   }
 
   function toggleOpen() {
@@ -55,14 +56,12 @@ export default function PointHistory() {
         <div className="point-history-body">
           {groups.map((g) => (
             <div key={g.day}>
-              <div className="point-history-day">
-                {g.day}<span>{g.items.reduce((s, r) => s + r.delta, 0) > 0 ? '+' : ''}{g.items.reduce((s, r) => s + r.delta, 0)}pt</span>
-              </div>
+              <div className="point-history-day">{g.day}<span>{signed(g.items.reduce((s, r) => s + r.delta, 0))}pt</span></div>
               {g.items.map((r) => (
                 <div key={r.id} className="point-history-row">
                   <span className="point-history-time">{timeOf(r.created_at)}</span>
                   <span className="point-history-label">{r.label || SOURCE_LABEL[r.source] || 'ポイント'}</span>
-                  <span className={`point-history-delta ${r.delta < 0 ? 'minus' : ''}`}>{r.delta > 0 ? '+' : ''}{r.delta}</span>
+                  <span className={`point-history-delta ${r.delta < 0 ? 'minus' : ''}`}>{signed(r.delta)}</span>
                 </div>
               ))}
             </div>

@@ -1,182 +1,79 @@
 import { useEffect, useState } from 'react'
-import { supabase } from '../../lib/supabase'
+import {
+  SANSU_DIFFICULTIES, difficultyLabel, fetchRecentSansuQuestions, insertSansuQuestion, deleteSansuQuestion,
+  fetchSansuOptions, addSansuOption, uploadSansuImage
+} from '../../lib/sansuApi'
+import { loadString, saveString, STORAGE_KEYS } from '../../lib/storage'
 import CropModal from './CropModal'
 import OptionsManager from './OptionsManager'
 
-const DIFFICULTIES = [
-  { value: 'easy', label: '易しい' },
-  { value: 'normal', label: 'ふつう' },
-  { value: 'hard', label: '難しい' },
-]
-
+const RECENT_LIMIT = 200 // 下の一覧に出す件数
 const NEW_OPTION_VALUE = '__new__'
-const LAST_UNIT_KEY = 'sansu_last_unit'
-const LAST_SOURCE_KEY = 'sansu_last_source'
 
+// さんすうナビの問題登録（/admin/sansu）
 export default function AdminPanel() {
   const [questions, setQuestions] = useState([])
   const [loading, setLoading] = useState(true)
   const [uploading, setUploading] = useState(false)
+  const [options, setOptions] = useState({ units: [], sources: [] })
 
-  const [units, setUnits] = useState([])
-  const [sources, setSources] = useState([])
-
-  const [unit, setUnit] = useState('')
-  const [newUnitInput, setNewUnitInput] = useState('')
-  const [sourceName, setSourceName] = useState('')
-  const [newSourceInput, setNewSourceInput] = useState('')
-
+  // 単元・教材名：一覧から選ぶか、新しく入力する（新しい名前は登録時に一覧へ追加する）
+  const [unit, setUnit] = useState({ selected: '', typed: '' })
+  const [source, setSource] = useState({ selected: '', typed: '' })
   const [difficulty, setDifficulty] = useState('normal')
   const [questionText, setQuestionText] = useState('')
   const [answer, setAnswer] = useState('')
-  const [imageFiles, setImageFiles] = useState([])
-  const [answerImageFiles, setAnswerImageFiles] = useState([])
-  const [cropQueue, setCropQueue] = useState([]) // [{file, target: 'question'|'answer'}]
-  const [croppingItem, setCroppingItem] = useState(null)
   const [pageNumber, setPageNumber] = useState('')
+  const [images, setImages] = useState({ question: [], answer: [] }) // 切り取り済みの画像ファイル
+  const [cropQueue, setCropQueue] = useState([]) // [{ id, file, target: 'question'|'answer' }]（1枚ずつ切り取る）
   const [message, setMessage] = useState('')
 
   useEffect(() => {
     loadQuestions()
-    loadOptions()
+    loadOptions(true)
   }, [])
 
-  async function loadOptions() {
-    const { data } = await supabase
-      .from('sansu_meta_options')
-      .select('*')
-      .order('name')
-    const unitList = (data || []).filter((o) => o.option_type === 'unit')
-    const sourceList = (data || []).filter((o) => o.option_type === 'source')
-    setUnits(unitList)
-    setSources(sourceList)
-
-    // 前回選択したものを初期値に（まだ選ばれていない場合のみ）
-    const lastUnit = localStorage.getItem(LAST_UNIT_KEY)
-    if (lastUnit && unitList.some((u) => u.name === lastUnit)) {
-      setUnit((prev) => prev || lastUnit)
+  async function loadOptions(restoreLast = false) {
+    try {
+      const opts = await fetchSansuOptions()
+      setOptions(opts)
+      if (!restoreLast) return
+      // 前回選択したものを初期値に（まだ選ばれていない場合のみ）
+      const lastUnit = loadString(STORAGE_KEYS.sansuLastUnit)
+      if (lastUnit && opts.units.some((u) => u.name === lastUnit)) setUnit((p) => (p.selected ? p : { selected: lastUnit, typed: '' }))
+      const lastSource = loadString(STORAGE_KEYS.sansuLastSource)
+      if (lastSource && opts.sources.some((s) => s.name === lastSource)) setSource((p) => (p.selected ? p : { selected: lastSource, typed: '' }))
+    } catch (e) {
+      setMessage(`単元・教材名を読み込めませんでした：${e.message}`)
     }
-    const lastSource = localStorage.getItem(LAST_SOURCE_KEY)
-    if (lastSource && sourceList.some((s) => s.name === lastSource)) {
-      setSourceName((prev) => prev || lastSource)
-    }
-  }
-
-  async function registerOptionIfNew(type, name) {
-    const trimmed = name.trim()
-    if (!trimmed) return
-    await supabase
-      .from('sansu_meta_options')
-      .insert({ option_type: type, name: trimmed })
-      .select()
-    loadOptions()
-  }
-
-  function handleUnitSelect(value) {
-    if (value === NEW_OPTION_VALUE) {
-      setUnit('')
-      setNewUnitInput('')
-    } else {
-      setUnit(value)
-      setNewUnitInput('')
-    }
-  }
-
-  function handleSourceSelect(value) {
-    if (value === NEW_OPTION_VALUE) {
-      setSourceName('')
-      setNewSourceInput('')
-    } else {
-      setSourceName(value)
-      setNewSourceInput('')
-    }
-  }
-
-  useEffect(() => {
-    if (!croppingItem && cropQueue.length > 0) {
-      setCroppingItem(cropQueue[0])
-      setCropQueue((prev) => prev.slice(1))
-    }
-  }, [cropQueue, croppingItem])
-
-  function queueFilesForCrop(fileList, target) {
-    const files = Array.from(fileList || [])
-    setCropQueue((prev) => [...prev, ...files.map((file) => ({ file, target }))])
-  }
-
-  function handleCropConfirm(croppedFile) {
-    if (croppingItem.target === 'question') {
-      setImageFiles((prev) => [...prev, croppedFile])
-    } else {
-      setAnswerImageFiles((prev) => [...prev, croppedFile])
-    }
-    setCroppingItem(null)
-  }
-
-  function handleCropCancel() {
-    setCroppingItem(null)
   }
 
   async function loadQuestions() {
     setLoading(true)
-    const { data, error } = await supabase
-      .from('sansu_questions')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .limit(200)
-    if (!error) setQuestions(data || [])
-    setLoading(false)
+    try {
+      setQuestions(await fetchRecentSansuQuestions(RECENT_LIMIT))
+    } catch (e) {
+      setMessage(`問題を読み込めませんでした：${e.message}`)
+    } finally {
+      setLoading(false)
+    }
   }
 
-  async function uploadImage(file) {
-    const ext = file.name.split('.').pop()
-    const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
-
-    // 簡易リサイズ・圧縮（幅1000pxまで、JPEG品質0.8）
-    const compressed = await compressImage(file)
-
-    const { error } = await supabase.storage
-      .from('sansu-images')
-      .upload(fileName, compressed, { contentType: 'image/jpeg' })
-    if (error) throw error
-
-    const { data } = supabase.storage.from('sansu-images').getPublicUrl(fileName)
-    return data.publicUrl
+  function queueFilesForCrop(fileList, target) {
+    setCropQueue((prev) => [...prev, ...Array.from(fileList || []).map((file, i) => ({ id: `${Date.now()}-${i}`, file, target }))])
   }
 
-  function compressImage(file) {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader()
-      reader.onload = (e) => {
-        const img = new Image()
-        img.onload = () => {
-          const maxWidth = 1000
-          const scale = Math.min(1, maxWidth / img.width)
-          const canvas = document.createElement('canvas')
-          canvas.width = img.width * scale
-          canvas.height = img.height * scale
-          const ctx = canvas.getContext('2d')
-          ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
-          canvas.toBlob(
-            (blob) => resolve(blob),
-            'image/jpeg',
-            0.8
-          )
-        }
-        img.onerror = reject
-        img.src = e.target.result
-      }
-      reader.onerror = reject
-      reader.readAsDataURL(file)
-    })
+  const cropping = cropQueue[0] || null
+  function handleCropConfirm(croppedFile) {
+    setImages((prev) => ({ ...prev, [cropping.target]: [...prev[cropping.target], croppedFile] }))
+    setCropQueue((prev) => prev.slice(1))
   }
 
   async function handleSubmit(e) {
     e.preventDefault()
-    const finalUnit = (unit || newUnitInput).trim()
-    const finalSource = (sourceName || newSourceInput).trim()
-
-    if (!finalUnit || (!answer.trim() && answerImageFiles.length === 0)) {
+    const finalUnit = (unit.selected || unit.typed).trim()
+    const finalSource = (source.selected || source.typed).trim()
+    if (!finalUnit || (!answer.trim() && images.answer.length === 0)) {
       setMessage('単元は必須です。答えはテキストか画像のどちらかを入力してください')
       return
     }
@@ -184,18 +81,11 @@ export default function AdminPanel() {
     setMessage('')
     try {
       const imageUrls = []
-      for (const file of imageFiles) {
-        const url = await uploadImage(file)
-        imageUrls.push(url)
-      }
-
+      for (const file of images.question) imageUrls.push(await uploadSansuImage(file))
       const answerImageUrls = []
-      for (const file of answerImageFiles) {
-        const url = await uploadImage(file)
-        answerImageUrls.push(url)
-      }
+      for (const file of images.answer) answerImageUrls.push(await uploadSansuImage(file))
 
-      const { error } = await supabase.from('sansu_questions').insert({
+      await insertSansuQuestion({
         unit: finalUnit,
         difficulty,
         question_text: questionText.trim(),
@@ -203,28 +93,24 @@ export default function AdminPanel() {
         image_urls: imageUrls,
         answer_image_urls: answerImageUrls,
         source_name: finalSource || null,
-        page_number: pageNumber.trim() || null,
+        page_number: pageNumber.trim() || null
       })
-      if (error) throw error
 
-      // 新規入力があればオプションリストに登録
-      if (newUnitInput.trim()) await registerOptionIfNew('unit', newUnitInput)
-      if (newSourceInput.trim()) await registerOptionIfNew('source', newSourceInput)
+      // 新しく入力した名前は、選択肢の一覧に登録する
+      if (!unit.selected && unit.typed.trim()) await addSansuOption('unit', unit.typed)
+      if (!source.selected && source.typed.trim()) await addSansuOption('source', source.typed)
+      loadOptions()
 
-      // 前回選択値として記憶
-      localStorage.setItem(LAST_UNIT_KEY, finalUnit)
-      if (finalSource) localStorage.setItem(LAST_SOURCE_KEY, finalSource)
-
-      setUnit(finalUnit)
-      setSourceName(finalSource)
-      setNewUnitInput('')
-      setNewSourceInput('')
+      // 前回選択値として記憶（続けて同じ単元・教材を登録しやすくする）
+      saveString(STORAGE_KEYS.sansuLastUnit, finalUnit)
+      if (finalSource) saveString(STORAGE_KEYS.sansuLastSource, finalSource)
+      setUnit({ selected: finalUnit, typed: '' })
+      setSource({ selected: finalSource, typed: '' })
 
       setMessage('登録しました')
       setQuestionText('')
       setAnswer('')
-      setImageFiles([])
-      setAnswerImageFiles([])
+      setImages({ question: [], answer: [] })
       loadQuestions()
     } catch (err) {
       setMessage('エラー: ' + err.message)
@@ -234,9 +120,13 @@ export default function AdminPanel() {
   }
 
   async function handleDelete(id) {
-    if (!confirm('この問題を削除しますか？')) return
-    await supabase.from('sansu_questions').delete().eq('id', id)
-    loadQuestions()
+    if (!window.confirm('この問題を削除しますか？')) return
+    try {
+      await deleteSansuQuestion(id)
+      loadQuestions()
+    } catch (e) {
+      setMessage(`削除できませんでした：${e.message}`)
+    }
   }
 
   return (
@@ -245,152 +135,45 @@ export default function AdminPanel() {
       <h1>さんすうナビ 管理</h1>
 
       <form onSubmit={handleSubmit} className="admin-form">
-        <label>
-          テスト／教材名
-          <select
-            value={sources.some((s) => s.name === sourceName) ? sourceName : sourceName ? NEW_OPTION_VALUE : ''}
-            onChange={(e) => handleSourceSelect(e.target.value)}
-          >
-            <option value="">選択してください</option>
-            {sources.map((s) => (
-              <option key={s.id} value={s.name}>
-                {s.name}
-              </option>
-            ))}
-            <option value={NEW_OPTION_VALUE}>＋ 新しく追加</option>
-          </select>
-          {(sourceName === '' || !sources.some((s) => s.name === sourceName)) && (
-            <input
-              type="text"
-              value={newSourceInput}
-              onChange={(e) => setNewSourceInput(e.target.value)}
-              placeholder="新しい教材名を入力"
-              className="new-option-input"
-            />
-          )}
-        </label>
+        <OptionSelect label="テスト／教材名" options={options.sources} value={source} onChange={setSource} placeholder="新しい教材名を入力" />
 
         <label>
           ページ数
-          <input
-            type="text"
-            value={pageNumber}
-            onChange={(e) => setPageNumber(e.target.value)}
-            placeholder="例: 12"
-          />
+          <input type="text" value={pageNumber} onChange={(e) => setPageNumber(e.target.value)} placeholder="例: 12" />
         </label>
 
-        <label>
-          単元
-          <select
-            value={units.some((u) => u.name === unit) ? unit : unit ? NEW_OPTION_VALUE : ''}
-            onChange={(e) => handleUnitSelect(e.target.value)}
-          >
-            <option value="">選択してください</option>
-            {units.map((u) => (
-              <option key={u.id} value={u.name}>
-                {u.name}
-              </option>
-            ))}
-            <option value={NEW_OPTION_VALUE}>＋ 新しく追加</option>
-          </select>
-          {(unit === '' || !units.some((u) => u.name === unit)) && (
-            <input
-              type="text"
-              value={newUnitInput}
-              onChange={(e) => setNewUnitInput(e.target.value)}
-              placeholder="新しい単元名を入力"
-              className="new-option-input"
-            />
-          )}
-        </label>
+        <OptionSelect label="単元" options={options.units} value={unit} onChange={setUnit} placeholder="新しい単元名を入力" />
 
         <label>
           難易度
           <select value={difficulty} onChange={(e) => setDifficulty(e.target.value)}>
-            {DIFFICULTIES.map((d) => (
-              <option key={d.value} value={d.value}>
-                {d.label}
-              </option>
-            ))}
+            {SANSU_DIFFICULTIES.map((d) => <option key={d.value} value={d.value}>{d.label}</option>)}
           </select>
         </label>
 
         <label>
           問題文
-          <textarea
-            value={questionText}
-            onChange={(e) => setQuestionText(e.target.value)}
-            placeholder="問題文（図形問題は補足のみでも可）"
-            rows={6}
-          />
+          <textarea value={questionText} onChange={(e) => setQuestionText(e.target.value)} placeholder="問題文（図形問題は補足のみでも可）" rows={6} />
         </label>
 
-        <label>
-          画像（図形問題など、複数登録可）
-          <input
-            type="file"
-            accept="image/*"
-            multiple
-            onChange={(e) => {
-              queueFilesForCrop(e.target.files, 'question')
-              e.target.value = ''
-            }}
-          />
-        </label>
-        {imageFiles.length > 0 && (
-          <div className="image-file-list">
-            {imageFiles.map((f, i) => (
-              <span key={i} className="image-file-chip">
-                {f.name}
-                <button
-                  type="button"
-                  onClick={() => setImageFiles((prev) => prev.filter((_, idx) => idx !== i))}
-                >
-                  ×
-                </button>
-              </span>
-            ))}
-          </div>
-        )}
+        <ImageInput
+          label="画像（図形問題など、複数登録可）"
+          files={images.question}
+          onPick={(list) => queueFilesForCrop(list, 'question')}
+          onRemove={(i) => setImages((p) => ({ ...p, question: p.question.filter((_, idx) => idx !== i) }))}
+        />
 
         <label>
           答え（テキストまたは画像のどちらか）
-          <input
-            type="text"
-            value={answer}
-            onChange={(e) => setAnswer(e.target.value)}
-            placeholder="答え（画像のみで登録する場合は空欄可）"
-          />
+          <input type="text" value={answer} onChange={(e) => setAnswer(e.target.value)} placeholder="答え（画像のみで登録する場合は空欄可）" />
         </label>
 
-        <label>
-          答えの画像（図形の解説など、複数登録可）
-          <input
-            type="file"
-            accept="image/*"
-            multiple
-            onChange={(e) => {
-              queueFilesForCrop(e.target.files, 'answer')
-              e.target.value = ''
-            }}
-          />
-        </label>
-        {answerImageFiles.length > 0 && (
-          <div className="image-file-list">
-            {answerImageFiles.map((f, i) => (
-              <span key={i} className="image-file-chip">
-                {f.name}
-                <button
-                  type="button"
-                  onClick={() => setAnswerImageFiles((prev) => prev.filter((_, idx) => idx !== i))}
-                >
-                  ×
-                </button>
-              </span>
-            ))}
-          </div>
-        )}
+        <ImageInput
+          label="答えの画像（図形の解説など、複数登録可）"
+          files={images.answer}
+          onPick={(list) => queueFilesForCrop(list, 'answer')}
+          onRemove={(i) => setImages((p) => ({ ...p, answer: p.answer.filter((_, idx) => idx !== i) }))}
+        />
 
         <button type="submit" className="primary-button" disabled={uploading}>
           {uploading ? 'アップロード中...' : '登録する'}
@@ -399,27 +182,17 @@ export default function AdminPanel() {
         {message && <p className="admin-message">{message}</p>}
       </form>
 
-      <OptionsManager units={units} sources={sources} onChange={loadOptions} />
+      <OptionsManager units={options.units} sources={options.sources} onChange={() => loadOptions()} />
 
-      <h2>登録済み問題（最新200件）</h2>
+      <h2>登録済み問題（最新{RECENT_LIMIT}件）</h2>
       {loading ? (
         <p>読み込み中...</p>
       ) : (
         <table className="admin-table">
           <thead>
             <tr>
-              <th>教材名</th>
-              <th>ページ</th>
-              <th>単元</th>
-              <th>難易度</th>
-              <th>問題文</th>
-              <th>答え</th>
-              <th>画像</th>
-              <th>答え画像</th>
-              <th>連続正解</th>
-              <th>習得</th>
-              <th>最終回答</th>
-              <th></th>
+              <th>教材名</th><th>ページ</th><th>単元</th><th>難易度</th><th>問題文</th><th>答え</th>
+              <th>画像</th><th>答え画像</th><th>連続正解</th><th>習得</th><th>最終回答</th><th></th>
             </tr>
           </thead>
           <tbody>
@@ -428,34 +201,73 @@ export default function AdminPanel() {
                 <td>{q.source_name}</td>
                 <td>{q.page_number}</td>
                 <td>{q.unit}</td>
-                <td>{q.difficulty}</td>
+                <td>{difficultyLabel(q.difficulty)}</td>
                 <td>{q.question_text}</td>
                 <td>{q.answer}</td>
                 <td>{q.image_urls?.length > 0 ? `${q.image_urls.length}枚` : ''}</td>
                 <td>{q.answer_image_urls?.length > 0 ? `${q.answer_image_urls.length}枚` : ''}</td>
                 <td>{q.consecutive_correct}</td>
                 <td>{q.is_mastered ? '✓' : ''}</td>
-                <td>
-                  {q.last_answered_at
-                    ? new Date(q.last_answered_at).toLocaleDateString('ja-JP')
-                    : ''}
-                </td>
-                <td>
-                  <button onClick={() => handleDelete(q.id)}>削除</button>
-                </td>
+                <td>{q.last_answered_at ? new Date(q.last_answered_at).toLocaleDateString('ja-JP') : ''}</td>
+                <td><button onClick={() => handleDelete(q.id)}>削除</button></td>
               </tr>
             ))}
           </tbody>
         </table>
       )}
 
-      {croppingItem && (
+      {cropping && (
         <CropModal
-          file={croppingItem.file}
+          key={cropping.id}
+          file={cropping.file}
           onConfirm={handleCropConfirm}
-          onCancel={handleCropCancel}
+          onCancel={() => setCropQueue((prev) => prev.slice(1))}
         />
       )}
     </div>
+  )
+}
+
+// 一覧から選ぶか、「＋ 新しく追加」で名前を入力するセレクト
+// value: { selected: 一覧から選んだ名前, typed: 入力中の新しい名前 }
+function OptionSelect({ label, options, value, onChange, placeholder }) {
+  const known = options.some((o) => o.name === value.selected)
+  return (
+    <label>
+      {label}
+      <select
+        value={known ? value.selected : value.selected ? NEW_OPTION_VALUE : ''}
+        onChange={(e) => onChange({ selected: e.target.value === NEW_OPTION_VALUE ? '' : e.target.value, typed: '' })}
+      >
+        <option value="">選択してください</option>
+        {options.map((o) => <option key={o.id} value={o.name}>{o.name}</option>)}
+        <option value={NEW_OPTION_VALUE}>＋ 新しく追加</option>
+      </select>
+      {!known && (
+        <input type="text" value={value.typed} onChange={(e) => onChange({ selected: '', typed: e.target.value })} placeholder={placeholder} className="new-option-input" />
+      )}
+    </label>
+  )
+}
+
+// 画像を選ぶ（選んだあと切り取り画面が出る）＋選んだ画像の一覧
+function ImageInput({ label, files, onPick, onRemove }) {
+  return (
+    <>
+      <label>
+        {label}
+        <input type="file" accept="image/*" multiple onChange={(e) => { onPick(e.target.files); e.target.value = '' }} />
+      </label>
+      {files.length > 0 && (
+        <div className="image-file-list">
+          {files.map((f, i) => (
+            <span key={i} className="image-file-chip">
+              {f.name}
+              <button type="button" onClick={() => onRemove(i)}>×</button>
+            </span>
+          ))}
+        </div>
+      )}
+    </>
   )
 }
