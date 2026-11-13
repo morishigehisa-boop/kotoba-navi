@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
 import Character from './Character'
 import { LoadingView, ErrorView } from '../common/Status'
-import { SUBJECTS, SUBJECT_EMOJI, subjectStyle, taskPoints, completionKey, buildHomeTasks, buildTomorrowItems, fetchMilestones, fetchTasks, fetchTaskCompletions, completeTask, uncompleteTask } from '../../lib/tasks'
+import { SUBJECTS, SUBJECT_EMOJI, subjectStyle, taskPoints, completionKey, buildHomeTasks, buildTomorrowItems, fetchMilestones, fetchTasks, fetchTaskCompletions, fetchTaskMoves, moveTaskToToday, completeTask, uncompleteTask } from '../../lib/tasks'
 import { toISODate, formatMD, daysBetweenISO } from '../../lib/dates'
 
 const LATE_OPEN_LIMIT = 5 // おくれている分が これ以下なら、はじめから ひらいておく
 
-function TaskRow({ item, done, soon, noNote, showSubject, onToggle, onOpenApp }) {
+function TaskRow({ item, done, soon, noNote, showSubject, onToggle, onOpenApp, onMoveToday }) {
   const { task } = item
   return (
     <div className={`task-row ${done ? 'done' : ''} ${soon ? 'soon' : ''}`} style={subjectStyle(task.subject)}>
@@ -16,9 +16,12 @@ function TaskRow({ item, done, soon, noNote, showSubject, onToggle, onOpenApp })
           {showSubject && <span className="task-subject-tag">{SUBJECT_EMOJI[task.subject]} {task.subject}</span>}
           <span className="task-title">{task.title}</span>
           {soon && !noNote && <span className="task-note">{formatMD(item.date)} まで</span>}
-          {done && item.late && <span className="task-note">{formatMD(item.date)} の分</span>}
+          {(item.movedFrom || (done && item.late)) && <span className="task-note">{formatMD(item.date)} の分</span>}
         </span>
       </button>
+      {!done && !soon && item.late && onMoveToday && (
+        <button className="task-move" onClick={() => onMoveToday(item)}>今日にする</button>
+      )}
       {!done && !soon && task.link_to && (
         <button className="task-go" onClick={() => onOpenApp(task.link_to)}>▶ 始める</button>
       )}
@@ -32,6 +35,7 @@ function TaskRow({ item, done, soon, noNote, showSubject, onToggle, onOpenApp })
 export default function HomeScreen({ character, accessory, pendingSession, onResumeSession, onOpenApp, onTaskChange }) {
   const [tasks, setTasks] = useState(null)
   const [completions, setCompletions] = useState([])
+  const [moves, setMoves] = useState([]) // 「今日にする」「消す（管理画面）」の記録
   const [loadFailed, setLoadFailed] = useState(false)
   const [todayISO, setTodayISO] = useState(() => toISODate())
   const [error, setError] = useState('')
@@ -41,8 +45,8 @@ export default function HomeScreen({ character, accessory, pendingSession, onRes
 
   function load() {
     setLoadFailed(false)
-    Promise.all([fetchTasks(), fetchTaskCompletions()])
-      .then(([t, c]) => { setTasks(t); setCompletions(c) })
+    Promise.all([fetchTasks(), fetchTaskCompletions(), fetchTaskMoves()])
+      .then(([t, c, m]) => { setTasks(t); setCompletions(c); setMoves(m) })
       .catch((e) => { console.error(e); setLoadFailed(true) })
   }
 
@@ -59,10 +63,10 @@ export default function HomeScreen({ character, accessory, pendingSession, onRes
   }, [])
 
   const { todayItems, upcoming, doneToday } = useMemo(
-    () => buildHomeTasks(tasks || [], completions, todayISO),
-    [tasks, completions, todayISO]
+    () => buildHomeTasks(tasks || [], completions, todayISO, moves),
+    [tasks, completions, todayISO, moves]
   )
-  const tomorrowItems = useMemo(() => buildTomorrowItems(tasks || [], todayISO), [tasks, todayISO])
+  const tomorrowItems = useMemo(() => buildTomorrowItems(tasks || [], completions, todayISO), [tasks, completions, todayISO])
   const tomorrowISO = tomorrowItems[0]?.date
   // 「もうすぐ」には、あしたの分を二重に出さない
   const soonItems = upcoming.filter((i) => i.date !== tomorrowISO)
@@ -98,9 +102,24 @@ export default function HomeScreen({ character, accessory, pendingSession, onRes
       setError('うまくいかなかったよ。もう一度押してね')
       return
     }
-    const after = buildHomeTasks(tasks, next, todayISO)
-    const allTodayDone = after.todayItems.every((i) => i.late) && after.doneToday.some((i) => !i.late)
+    const after = buildHomeTasks(tasks, next, todayISO, moves)
+    // 明日の分を先に終わらせたときは、「今日の分を全部達成」には数えない
+    const allTodayDone = item.date <= todayISO && after.todayItems.every((i) => i.late) && after.doneToday.some((i) => !i.late)
     onTaskChange(toDone ? 'done' : 'undone', { allTodayDone, points, title })
+  }
+
+  // 遅れている1日分を、今日の分にする（先に画面へ反映して、失敗したら元にもどす）
+  async function handleMoveToday(item) {
+    const prev = moves
+    setMoves([...prev.filter((m) => !(m.task_id === item.task.id && m.from_date === item.date)), { task_id: item.task.id, from_date: item.date, to_date: todayISO }])
+    setError('')
+    try {
+      await moveTaskToToday(item, todayISO)
+    } catch (e) {
+      console.error(e)
+      setMoves(prev)
+      setError('うまくいかなかったよ。もう一度押してね')
+    }
   }
 
   const message = tasks === null
@@ -112,6 +131,7 @@ export default function HomeScreen({ character, accessory, pendingSession, onRes
         : `あと${todayLeft.length}個！頑張ろう`
 
   const groups = SUBJECTS.map((s) => [s, todayLeft.filter((i) => i.task.subject === s)]).filter(([, list]) => list.length > 0)
+  const tomorrowDone = tomorrowItems.filter((i) => i.done).length
   const lateDates = [...new Set(lateItems.map((i) => i.date))].sort()
   const rowProps = { onToggle: handleToggle, onOpenApp }
 
@@ -169,7 +189,7 @@ export default function HomeScreen({ character, accessory, pendingSession, onRes
           {lateIsOpen && lateDates.map((date) => (
             <div key={date}>
               <div className="late-date">{formatMD(date)}</div>
-              {lateItems.filter((i) => i.date === date).map((item) => <TaskRow key={completionKey(item.task.id, item.date)} item={item} showSubject {...rowProps} />)}
+              {lateItems.filter((i) => i.date === date).map((item) => <TaskRow key={completionKey(item.task.id, item.date)} item={item} showSubject onMoveToday={handleMoveToday} {...rowProps} />)}
             </div>
           ))}
         </section>
@@ -192,10 +212,10 @@ export default function HomeScreen({ character, accessory, pendingSession, onRes
       {tomorrowItems.length > 0 && (
         <section className="task-group late-group tomorrow-group">
           <button className="late-toggle" aria-expanded={tomorrowOpen} onClick={() => setTomorrowOpen(!tomorrowOpen)}>
-            <span>🌙 明日の分 {tomorrowItems.length}個</span>
+            <span>🌙 明日の分 {tomorrowItems.length}個{tomorrowDone > 0 && `（${tomorrowDone}個 終わった）`}</span>
             <span className="late-toggle-hint">{tomorrowOpen ? '▲ 閉じる' : '▼ 開く'}</span>
           </button>
-          {tomorrowOpen && tomorrowItems.map((item) => <TaskRow key={completionKey(item.task.id, item.date)} item={item} soon noNote showSubject {...rowProps} />)}
+          {tomorrowOpen && tomorrowItems.map((item) => <TaskRow key={completionKey(item.task.id, item.date)} item={item} done={item.done} showSubject {...rowProps} />)}
         </section>
       )}
 

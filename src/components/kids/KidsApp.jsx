@@ -25,7 +25,7 @@ import { playTaskDone, playTaskAllDone, playCorrect, playWrong, playFanfareBig, 
 import { fetchQuestions, fetchQuestionSetsWithItems, recordAnswer, fetchProgress, fetchFuriganaEntries } from '../../lib/api'
 import { buildTodaySet, buildOverdueSet } from '../../lib/today'
 import { titleForPoints, characterById, POINTS } from '../../lib/gamification'
-import { fetchTasks, fetchTaskCompletions, completeTask, findAutoCompleteTarget } from '../../lib/tasks'
+import { fetchTasks, fetchTaskCompletions, fetchTaskMoves, completeTask, findAutoCompleteTarget } from '../../lib/tasks'
 import { toISODate } from '../../lib/dates'
 import { loadString, saveString, loadJSON, saveJSON, STORAGE_KEYS } from '../../lib/storage'
 import './kids.css'
@@ -245,8 +245,8 @@ export default function KidsApp({ initialScreen = 'home' }) {
   // アプリの学習を終えたとき、「自動で完了にする」設定のやること（1件）を完了にする
   async function autoCompleteLinkedTask(app) {
     try {
-      const [tasks, completions] = await Promise.all([fetchTasks(), fetchTaskCompletions()])
-      const target = findAutoCompleteTarget(tasks, completions, toISODate(), app)
+      const [tasks, completions, moves] = await Promise.all([fetchTasks(), fetchTaskCompletions(), fetchTaskMoves()])
+      const target = findAutoCompleteTarget(tasks, completions, toISODate(), app, moves)
       if (!target) return
       const { task, date } = target
       if (!(await completeTask(task.id, date, task.points))) return // すでに完了ずみ

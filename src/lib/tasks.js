@@ -73,10 +73,14 @@ const byOrder = (a, b) => a.task.sort_order - b.task.sort_order
  * - todayItems : 今日の分 ＋ 過去の分で未完了のもの（late: true）。完了するまで毎日出し続ける
  * - upcoming   : 3日以内に期日がくる「1度だけ」
  * - doneToday  : 今日完了したもの（過去の分を今日やった場合も含む。まちがえて押したとき戻せる）
+ * 「今日にする」で移した分（task_moves）は、遅れではなく今日の分として出す（movedFrom に元の日付）。
+ * 完了の記録は、移したあとも元の日付（date）で残す。
  * @param completions [{ task_id, occurrence_date, completed_at? }]
+ * @param moves       [{ task_id, from_date, to_date }]
  */
-export function buildHomeTasks(tasks, completions, todayISO) {
+export function buildHomeTasks(tasks, completions, todayISO, moves = []) {
   const completedAt = new Map(completions.map((c) => [completionKey(c.task_id, c.occurrence_date), c.completed_at]))
+  const movedTo = movesMap(moves)
   const limit = addDaysISO(todayISO, UPCOMING_DAYS)
   const todayItems = []
   const doneToday = []
@@ -92,11 +96,15 @@ export function buildHomeTasks(tasks, completions, todayISO) {
     const last = t.end_date && t.end_date < todayISO ? t.end_date : todayISO
     for (let d = t.due_date; d <= last; d = addDaysISO(d, 1)) {
       if (!occursOn(t, d)) continue
-      const doneAt = completedAt.get(completionKey(t.id, d))
-      const late = d < todayISO
-      if (doneAt === undefined) todayItems.push({ task: t, date: d, late })
+      const key = completionKey(t.id, d)
+      const doneAt = completedAt.get(key)
+      const moved = movedTo.get(key)
+      if (moved === SKIPPED_DATE) continue
+      const late = (moved || d) < todayISO
+      const item = moved ? { task: t, date: d, late, movedFrom: d } : { task: t, date: d, late }
+      if (doneAt === undefined) todayItems.push(item)
       // 今日完了したものだけ「今日終わったこと」に出す（完了日時が不明なときは今日の分だけ）
-      else if (doneAt ? toISODate(new Date(doneAt)) === todayISO : d === todayISO) doneToday.push({ task: t, date: d, late })
+      else if (doneAt ? toISODate(new Date(doneAt)) === todayISO : d === todayISO) doneToday.push(item)
     }
   })
 
@@ -106,13 +114,38 @@ export function buildHomeTasks(tasks, completions, todayISO) {
   return { todayItems, upcoming, doneToday }
 }
 
-// あしたの分（くり返しも含む）。まだ終わらせられないので、完了の記録は見ない
-export function buildTomorrowItems(tasks, todayISO) {
+// あしたの分（くり返しも含む）。前の日のうちに終わらせてもよい（done: 完了ずみ）
+export function buildTomorrowItems(tasks, completions, todayISO) {
   const date = addDaysISO(todayISO, 1)
+  const done = new Set(completions.map((c) => completionKey(c.task_id, c.occurrence_date)))
   return tasks
     .filter((t) => t.is_active && occursOn(t, date))
-    .map((task) => ({ task, date }))
+    .map((task) => ({ task, date, done: done.has(completionKey(task.id, date)) }))
     .sort((a, b) => bySubject(a, b) || byOrder(a, b))
+}
+
+// task_moves の to_date がこの日付なら「やらない（未完了のまま消した）」。ホームにも予定カレンダーにも出さない
+export const SKIPPED_DATE = '9999-12-31'
+
+// 「今日にする」「消す」の記録 → Map（やることID|元の日付 → 移した先の日付）
+const movesMap = (moves) => new Map(moves.map((m) => [completionKey(m.task_id, m.from_date), m.to_date]))
+
+// その日に出す「やること」（予定カレンダー用）。移した分は、移した先の日に出す
+// 戻り値：[{ task, date: 元の日付, movedFrom? }]
+export function itemsOnDay(tasks, moves, iso) {
+  const movedTo = movesMap(moves)
+  const items = []
+  tasks.forEach((t) => {
+    if (!t.is_active || !occursOn(t, iso)) return
+    const to = movedTo.get(completionKey(t.id, iso))
+    if (!to || to === iso) items.push({ task: t, date: iso })
+    else if (to === SKIPPED_DATE) items.push({ task: t, date: iso, skipped: true })
+  })
+  moves.forEach((m) => {
+    const t = m.to_date === iso && m.from_date !== iso && tasks.find((x) => x.id === m.task_id)
+    if (t && t.is_active) items.push({ task: t, date: m.from_date, movedFrom: m.from_date })
+  })
+  return items
 }
 
 // 管理画面の一覧に出す、くり返しの説明文
@@ -124,9 +157,9 @@ export function describeSchedule(t) {
 
 // 「アプリの学習を終えたら自動で完了にする」やることを1件探す。
 // 対象は link_to が同じで auto_complete のやること。遅れている分があれば古い順に1件ずつ（まとめて消さない）
-export function findAutoCompleteTarget(tasks, completions, todayISO, app) {
+export function findAutoCompleteTarget(tasks, completions, todayISO, app, moves = []) {
   const linked = tasks.filter((t) => t.auto_complete && t.link_to === app)
-  return buildHomeTasks(linked, completions, todayISO).todayItems[0] || null
+  return buildHomeTasks(linked, completions, todayISO, moves).todayItems[0] || null
 }
 
 // ---- 取得・保存 ----
@@ -135,6 +168,22 @@ export const fetchTasks = () =>
 
 export const fetchTaskCompletions = () =>
   fetchAllRows('task_completions', (q) => q.select('task_id, occurrence_date, completed_at, points_awarded').order('id', { ascending: true }))
+
+export const fetchTaskMoves = () =>
+  fetchAllRows('task_moves', (q) => q.select('task_id, from_date, to_date').order('id', { ascending: true }))
+
+// 遅れている1日分を、今日の分に移す（同じ分をもう一度移したときは、移す先を今日に上書き）
+// items: [{ task, date }]。toDate に SKIPPED_DATE を渡すと「消す」
+export const moveTaskOccurrences = (items, toDate) =>
+  run(supabase.from('task_moves').upsert(
+    items.map((i) => ({ task_id: i.task.id, from_date: i.date, to_date: toDate })),
+    { onConflict: 'task_id,from_date' }
+  ))
+export const moveTaskToToday = (item, todayISO) => moveTaskOccurrences([item], todayISO)
+
+// 「今日にする」「消す」を取り消して、元の日付の分にもどす
+export const restoreTaskOccurrence = (taskId, fromDate) =>
+  run(supabase.from('task_moves').delete().eq('task_id', taskId).eq('from_date', fromDate))
 
 export const saveTask = (values, id) =>
   run(id ? supabase.from('tasks').update(values).eq('id', id) : supabase.from('tasks').insert(values))

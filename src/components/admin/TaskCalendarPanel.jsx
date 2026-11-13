@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
-import { subjectStyle, occursOn, completionKey, fetchTasks, fetchTaskCompletions, fetchMilestones } from '../../lib/tasks'
+import { subjectStyle, completionKey, itemsOnDay, fetchTasks, fetchTaskCompletions, fetchTaskMoves, fetchMilestones } from '../../lib/tasks'
 import { toISODate, parseISO, addDaysISO, daysBetweenISO, formatMD, WEEKDAY_LABELS } from '../../lib/dates'
 import { loadString, saveString, STORAGE_KEYS } from '../../lib/storage'
 import { LoadingView, ErrorView } from '../common/Status'
 import { useSubjectFilter } from './useSubjectFilter'
 import SubjectFilter from './SubjectFilter'
+import LateTasksPanel from './LateTasksPanel'
 
 const RANGES = [7, 10, 30] // 表示する日数の選び方
 const DEFAULT_RANGE = 10
@@ -25,6 +26,7 @@ function buildDays(startISO, count) {
 export default function TaskCalendarPanel() {
   const [tasks, setTasks] = useState(null)
   const [completions, setCompletions] = useState([])
+  const [moves, setMoves] = useState([])
   const [milestones, setMilestones] = useState([])
   const [failed, setFailed] = useState(false)
   const [subjects, setSubjects] = useSubjectFilter() // 表示する教科（前回の選択を引き継ぐ）
@@ -42,9 +44,14 @@ export default function TaskCalendarPanel() {
 
   function load() {
     setFailed(false)
-    Promise.all([fetchTasks(), fetchTaskCompletions(), fetchMilestones()])
-      .then(([t, c, m]) => { setTasks(t); setCompletions(c); setMilestones(m) })
+    Promise.all([fetchTasks(), fetchTaskCompletions(), fetchTaskMoves(), fetchMilestones()])
+      .then(([t, c, mv, m]) => { setTasks(t); setCompletions(c); setMoves(mv); setMilestones(m) })
       .catch((e) => { console.error(e); setFailed(true) })
+  }
+  // 遅れている分を整理したあと：やること・完了・移した記録だけ読み直す
+  async function reloadTasks() {
+    const [t, c, mv] = await Promise.all([fetchTasks(), fetchTaskCompletions(), fetchTaskMoves()])
+    setTasks(t); setCompletions(c); setMoves(mv)
   }
   useEffect(load, [])
 
@@ -52,13 +59,13 @@ export default function TaskCalendarPanel() {
 
   const days = useMemo(() => {
     const list = buildDays(addDaysISO(todayISO, offset), range)
+    const shown = (tasks || []).filter((t) => subjects.includes(t.subject))
     return list.map((day) => ({
       ...day,
-      items: (tasks || [])
-        .filter((t) => t.is_active && subjects.includes(t.subject) && occursOn(t, day.iso))
-        .map((t) => ({ task: t, done: doneKeys.has(completionKey(t.id, day.iso)) }))
+      // 移した分は移した先の日に出す。消した分はうすく出す（完了の記録は元の日付で見る）
+      items: itemsOnDay(shown, moves, day.iso).map((i) => ({ ...i, done: doneKeys.has(completionKey(i.task.id, i.date)) }))
     }))
-  }, [tasks, subjects, doneKeys, todayISO, range, offset])
+  }, [tasks, moves, subjects, doneKeys, todayISO, range, offset])
 
   // 表示中の期間にあるイベント（日付ごと）／今日以降のイベント一覧
   const eventsByDate = useMemo(() => {
@@ -97,6 +104,8 @@ export default function TaskCalendarPanel() {
         </div>
       </div>
 
+      <LateTasksPanel tasks={tasks} completions={completions} moves={moves} todayISO={todayISO} onChanged={reloadTasks} />
+
       <SubjectFilter subjects={subjects} onChange={setSubjects} />
       <div className="cal-nav">
         <button className="cal-nav-btn" onClick={() => setOffset((o) => o - range)} aria-label="前の期間">←</button>
@@ -119,7 +128,7 @@ export default function TaskCalendarPanel() {
             <div className="cal-day-head">
               <span>{day.label}（{WEEKDAY_LABELS[day.wd]}）</span>
               {day.iso === todayISO && <span className="cal-today-badge">今日</span>}
-              <span className="cal-count">{day.items.length}件</span>
+              <span className="cal-count">{day.items.filter((i) => !i.skipped).length}件</span>
             </div>
             {(eventsByDate.get(day.iso) || []).map((m) => (
               <div key={m.id} className="cal-event">🚩 {m.title}</div>
@@ -127,9 +136,13 @@ export default function TaskCalendarPanel() {
             {day.items.length === 0 ? (
               <div className="cal-empty">なし</div>
             ) : (
-              day.items.map(({ task, done }) => (
-                <div key={task.id} className={`cal-task ${done ? 'done' : ''}`} style={subjectStyle(task.subject)} title={`${task.subject}：${task.title}`}>
-                  <span className="cal-task-title">{task.title}</span>
+              day.items.map(({ task, date, done, skipped, movedFrom }) => (
+                <div key={completionKey(task.id, date)} className={`cal-task ${done ? 'done' : ''} ${skipped ? 'skipped' : ''}`} style={subjectStyle(task.subject)} title={`${task.subject}：${task.title}`}>
+                  <span className="cal-task-title">
+                    {task.title}
+                    {skipped && <span className="cal-task-note">（消した分）</span>}
+                    {movedFrom && <span className="cal-task-note">（{formatMD(movedFrom, false)}の分）</span>}
+                  </span>
                   <span className="cal-mark" title={task.frequency === 'once' ? MARK.once.label : MARK.repeat.label}>
                     {task.frequency === 'once' ? MARK.once.icon : MARK.repeat.icon}
                   </span>

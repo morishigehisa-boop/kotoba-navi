@@ -164,6 +164,17 @@ create table task_completions (
 );
 create index task_completions_occurrence_idx on task_completions (occurrence_date);
 
+-- 遅れている1日分の付けかえ。「今日にする」＝to_date に今日、「消す」＝to_date に '9999-12-31'（未完了のまま子どもの画面に出さない）
+-- 完了の記録（task_completions）は、移したあとも元の日付（from_date）で残す
+create table task_moves (
+  id bigint generated always as identity primary key,
+  task_id uuid not null references tasks(id) on delete cascade,
+  from_date date not null,
+  to_date date not null,
+  created_at timestamptz not null default now(),
+  unique (task_id, from_date)
+);
+
 -- イベント（テスト・行事などの目標日。ホームと管理画面の予定カレンダーに表示）
 create table milestones (
   id bigint generated always as identity primary key,
@@ -227,6 +238,7 @@ alter table point_logs enable row level security;
 alter table tasks enable row level security;
 alter table task_completions enable row level security;
 alter table milestones enable row level security;
+alter table task_moves enable row level security;
 alter table sansu_questions enable row level security;
 alter table sansu_answer_logs enable row level security;
 alter table sansu_meta_options enable row level security;
@@ -260,6 +272,11 @@ create policy "milestones anon select" on milestones for select to anon, authent
 create policy "milestones anon insert" on milestones for insert to anon, authenticated with check (true);
 create policy "milestones anon update" on milestones for update to anon, authenticated using (true) with check (true);
 create policy "milestones anon delete" on milestones for delete to anon, authenticated using (true);
+
+create policy "task_moves anon select" on task_moves for select to anon, authenticated using (true);
+create policy "task_moves anon insert" on task_moves for insert to anon, authenticated with check (true);
+create policy "task_moves anon update" on task_moves for update to anon, authenticated using (true) with check (true);
+create policy "task_moves anon delete" on task_moves for delete to anon, authenticated using (true);
 
 -- =========================================
 -- 関数

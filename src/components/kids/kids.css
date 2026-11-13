@@ -290,6 +290,8 @@ body { margin: 0; background: var(--bg); }
 .task-note { font-size: 12px; font-weight: 700; color: var(--ink-soft); }
 .task-go { flex: none; align-self: center; min-height: 44px; margin-right: 10px; padding: 0 14px; border: none; border-radius: 14px; background: var(--c, var(--fox)); color: #fff; font-family: inherit; font-size: 14px; font-weight: 800; cursor: pointer; }
 .task-go:active { transform: scale(.95); }
+.task-move { flex: none; align-self: center; min-height: 44px; margin-right: 8px; padding: 0 12px; border: 2px solid var(--c, var(--fox)); border-radius: 14px; background: #fff; color: var(--c, var(--fox)); font-family: inherit; font-size: 13px; font-weight: 800; cursor: pointer; }
+.task-move:active { transform: scale(.95); }
 .task-row.soon { opacity: .65; box-shadow: none; }
 .task-row.soon .task-main { cursor: default; min-height: 48px; }
 .task-row.soon .task-check { opacity: .5; }
