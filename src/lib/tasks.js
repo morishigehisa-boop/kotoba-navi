@@ -66,6 +66,9 @@ export function occursOn(task, iso) {
 // 並び順：教科の順 → 管理画面で並べた順（sort_order）
 const bySubject = (a, b) => SUBJECTS.indexOf(a.task.subject) - SUBJECTS.indexOf(b.task.subject)
 const byOrder = (a, b) => a.task.sort_order - b.task.sort_order
+const byDay = (a, b) => a.date.localeCompare(b.date) // やるべき日（元の日付）の早い順
+// 教科の順（算数→国語→理科→社会）→ やるべき日 → 管理画面で並べた順。「今日にする」「明日にする」で移した分もこの順に入る
+const bySubjectDay = (a, b) => bySubject(a, b) || byDay(a, b) || byOrder(a, b)
 
 /**
  * ホームに出す一覧をつくる。
@@ -108,9 +111,10 @@ export function buildHomeTasks(tasks, completions, todayISO, moves = []) {
     }
   })
 
-  todayItems.sort((a, b) => Number(b.late) - Number(a.late) || a.date.localeCompare(b.date) || bySubject(a, b) || byOrder(a, b))
-  upcoming.sort((a, b) => a.date.localeCompare(b.date) || bySubject(a, b) || byOrder(a, b))
-  doneToday.sort((a, b) => bySubject(a, b) || byOrder(a, b) || a.date.localeCompare(b.date))
+  // 遅れている分は日付ごとに出すので「日付→教科」、今日の分は教科ごとに出すので「教科→やるべき日」の順
+  todayItems.sort((a, b) => Number(b.late) - Number(a.late) || (a.late ? byDay(a, b) || bySubject(a, b) || byOrder(a, b) : bySubjectDay(a, b)))
+  upcoming.sort((a, b) => byDay(a, b) || bySubject(a, b) || byOrder(a, b))
+  doneToday.sort(bySubjectDay)
   return { todayItems, upcoming, doneToday }
 }
 
@@ -119,7 +123,7 @@ export function buildTomorrowItems(tasks, completions, todayISO, moves = []) {
   const done = new Set(completions.map((c) => completionKey(c.task_id, c.occurrence_date)))
   return itemsOnDay(tasks, moves, addDaysISO(todayISO, 1))
     .map((i) => ({ ...i, done: done.has(completionKey(i.task.id, i.date)) }))
-    .sort((a, b) => bySubject(a, b) || byOrder(a, b) || a.date.localeCompare(b.date))
+    .sort(bySubjectDay)
 }
 
 // task_moves の to_date がこの日付なら「やらない（未完了のまま消した）」。ホームにも予定カレンダーにも出さない
