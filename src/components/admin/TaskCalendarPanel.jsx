@@ -62,7 +62,7 @@ export default function TaskCalendarPanel() {
     const shown = (tasks || []).filter((t) => subjects.includes(t.subject))
     return list.map((day) => ({
       ...day,
-      // 移した分は移した先の日に出す。消した分はうすく出す（完了の記録は元の日付で見る）
+      // 移した分は移した先の日に出す。消した分は出さない（完了の記録は元の日付で見る）
       items: itemsOnDay(shown, moves, day.iso).map((i) => ({ ...i, done: doneKeys.has(completionKey(i.task.id, i.date)) }))
     }))
   }, [tasks, moves, subjects, doneKeys, todayISO, range, offset])
@@ -128,7 +128,7 @@ export default function TaskCalendarPanel() {
             <div className="cal-day-head">
               <span>{day.label}（{WEEKDAY_LABELS[day.wd]}）</span>
               {day.iso === todayISO && <span className="cal-today-badge">今日</span>}
-              <span className="cal-count">{day.items.filter((i) => !i.skipped).length}件</span>
+              <span className="cal-count">{day.items.length}件</span>
             </div>
             {(eventsByDate.get(day.iso) || []).map((m) => (
               <div key={m.id} className="cal-event">🚩 {m.title}</div>
@@ -136,11 +136,10 @@ export default function TaskCalendarPanel() {
             {day.items.length === 0 ? (
               <div className="cal-empty">なし</div>
             ) : (
-              day.items.map(({ task, date, done, skipped, movedFrom }) => (
-                <div key={completionKey(task.id, date)} className={`cal-task ${done ? 'done' : ''} ${skipped ? 'skipped' : ''}`} style={subjectStyle(task.subject)} title={`${task.subject}：${task.title}`}>
+              day.items.map(({ task, date, done, movedFrom }) => (
+                <div key={completionKey(task.id, date)} className={`cal-task ${done ? 'done' : ''}`} style={subjectStyle(task.subject)} title={`${task.subject}：${task.title}`}>
                   <span className="cal-task-title">
                     {task.title}
-                    {skipped && <span className="cal-task-note">（消した分）</span>}
                     {movedFrom && <span className="cal-task-note">（{formatMD(movedFrom, false)}の分）</span>}
                   </span>
                   <span className="cal-mark" title={task.frequency === 'once' ? MARK.once.label : MARK.repeat.label}>

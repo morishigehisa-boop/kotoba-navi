@@ -164,7 +164,7 @@ create table task_completions (
 );
 create index task_completions_occurrence_idx on task_completions (occurrence_date);
 
--- 遅れている1日分の付けかえ。「今日にする」＝to_date に今日、「消す」＝to_date に '9999-12-31'（未完了のまま子どもの画面に出さない）
+-- 遅れている1日分の付けかえ。「今日にする」「明日にする」＝to_date にその日、「消す」＝to_date に '9999-12-31'（未完了のまま、どの画面にも出さない）
 -- 完了の記録（task_completions）は、移したあとも元の日付（from_date）で残す
 create table task_moves (
   id bigint generated always as identity primary key,

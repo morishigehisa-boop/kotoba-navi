@@ -118,7 +118,6 @@ export function buildHomeTasks(tasks, completions, todayISO, moves = []) {
 export function buildTomorrowItems(tasks, completions, todayISO, moves = []) {
   const done = new Set(completions.map((c) => completionKey(c.task_id, c.occurrence_date)))
   return itemsOnDay(tasks, moves, addDaysISO(todayISO, 1))
-    .filter((i) => !i.skipped)
     .map((i) => ({ ...i, done: done.has(completionKey(i.task.id, i.date)) }))
     .sort((a, b) => bySubject(a, b) || byOrder(a, b) || a.date.localeCompare(b.date))
 }
@@ -137,8 +136,7 @@ export function itemsOnDay(tasks, moves, iso) {
   tasks.forEach((t) => {
     if (!t.is_active || !occursOn(t, iso)) return
     const to = movedTo.get(completionKey(t.id, iso))
-    if (!to || to === iso) items.push({ task: t, date: iso })
-    else if (to === SKIPPED_DATE) items.push({ task: t, date: iso, skipped: true })
+    if (!to || to === iso) items.push({ task: t, date: iso }) // 消した分・ほかの日に移した分は出さない
   })
   moves.forEach((m) => {
     const t = m.to_date === iso && m.from_date !== iso && tasks.find((x) => x.id === m.task_id)
@@ -180,9 +178,6 @@ export const moveTaskOccurrences = (items, toDate) =>
   ))
 export const moveTaskToToday = (item, todayISO) => moveTaskOccurrences([item], todayISO)
 
-// 「今日にする」「消す」を取り消して、元の日付の分にもどす
-export const restoreTaskOccurrence = (taskId, fromDate) =>
-  run(supabase.from('task_moves').delete().eq('task_id', taskId).eq('from_date', fromDate))
 
 export const saveTask = (values, id) =>
   run(id ? supabase.from('tasks').update(values).eq('id', id) : supabase.from('tasks').insert(values))

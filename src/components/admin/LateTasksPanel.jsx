@@ -1,10 +1,10 @@
 import { useMemo, useState } from 'react'
-import { SUBJECT_EMOJI, subjectStyle, completionKey, buildHomeTasks, moveTaskOccurrences, restoreTaskOccurrence, SKIPPED_DATE } from '../../lib/tasks'
+import { SUBJECT_EMOJI, subjectStyle, completionKey, buildHomeTasks, moveTaskOccurrences, SKIPPED_DATE } from '../../lib/tasks'
 import { formatMD, addDaysISO } from '../../lib/dates'
 import { useConfirm } from './useConfirm'
 import { useToast } from './useToast'
 
-// 遅れている分（未完了）を選んで「今日にする」「明日にする」「消す」。消した分は未完了のまま、子どもの画面に出なくなる
+// 遅れている分（未完了）を選んで「今日にする」「明日にする」「消す」。消した分は未完了のまま、どこにも出さない
 export default function LateTasksPanel({ tasks, completions, moves, todayISO, onChanged }) {
   const [open, setOpen] = useState(false)
   const [selected, setSelected] = useState(() => new Set())
@@ -16,15 +16,7 @@ export default function LateTasksPanel({ tasks, completions, moves, todayISO, on
     () => buildHomeTasks(tasks, completions, todayISO, moves).todayItems.filter((i) => i.late),
     [tasks, completions, todayISO, moves]
   )
-  const skipped = useMemo(() => {
-    const byId = new Map(tasks.map((t) => [t.id, t]))
-    return moves
-      .filter((m) => m.to_date === SKIPPED_DATE && byId.has(m.task_id))
-      .map((m) => ({ task: byId.get(m.task_id), date: m.from_date }))
-      .sort((a, b) => b.date.localeCompare(a.date))
-  }, [tasks, moves])
-
-  if (lateItems.length === 0 && skipped.length === 0) return null
+  if (lateItems.length === 0) return toastEl // 最後の1件を整理したあとも、お知らせは出す
 
   const keyOf = (i) => completionKey(i.task.id, i.date)
   const chosen = lateItems.filter((i) => selected.has(keyOf(i)))
@@ -52,14 +44,14 @@ export default function LateTasksPanel({ tasks, completions, moves, todayISO, on
   }
 
   async function skip() {
-    if (!(await confirm(`選んだ ${chosen.length}件 を消しますか？\n未完了のまま、子どもの画面には出なくなります（下の「消した分」から戻せます）。`))) return
+    if (!(await confirm(`選んだ ${chosen.length}件 を消しますか？\n未完了のまま、子どもの画面にも管理画面にも出なくなります（元には戻せません）。`))) return
     run(() => moveTaskOccurrences(chosen, SKIPPED_DATE), `${chosen.length}件を消しました`)
   }
 
   return (
     <div className="late-panel">
       <button className="late-panel-toggle" aria-expanded={open} onClick={() => setOpen(!open)}>
-        <span>⚠️ 遅れている分 {lateItems.length}件{skipped.length > 0 && `（消した分 ${skipped.length}件）`}</span>
+        <span>⚠️ 遅れている分 {lateItems.length}件</span>
         <span className="late-panel-hint">{open ? '▲ 閉じる' : '▼ 開いて整理する'}</span>
       </button>
       {open && (
@@ -85,18 +77,6 @@ export default function LateTasksPanel({ tasks, completions, moves, todayISO, on
                   <span className="late-panel-date">{formatMD(i.date)}</span>
                   <span className="late-panel-title">{SUBJECT_EMOJI[i.task.subject]} {i.task.title}</span>
                 </label>
-              ))}
-            </>
-          )}
-          {skipped.length > 0 && (
-            <>
-              <div className="late-panel-sub">消した分（未完了のまま、子どもの画面には出ません）</div>
-              {skipped.map((i) => (
-                <div key={keyOf(i)} className="late-panel-row skipped" style={subjectStyle(i.task.subject)}>
-                  <span className="late-panel-date">{formatMD(i.date)}</span>
-                  <span className="late-panel-title">{SUBJECT_EMOJI[i.task.subject]} {i.task.title}</span>
-                  <button className="btn btn-secondary" disabled={busy} onClick={() => run(() => restoreTaskOccurrence(i.task.id, i.date), '元にもどしました')}>戻す</button>
-                </div>
               ))}
             </>
           )}
