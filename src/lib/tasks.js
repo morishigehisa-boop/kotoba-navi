@@ -121,9 +121,7 @@ export function buildHomeTasks(tasks, completions, todayISO, moves = []) {
 // あしたの分（くり返しも含む。「明日にする」で移した分も入る）。前の日のうちに終わらせてもよい（done: 完了ずみ）
 export function buildTomorrowItems(tasks, completions, todayISO, moves = []) {
   const done = new Set(completions.map((c) => completionKey(c.task_id, c.occurrence_date)))
-  return itemsOnDay(tasks, moves, addDaysISO(todayISO, 1))
-    .map((i) => ({ ...i, done: done.has(completionKey(i.task.id, i.date)) }))
-    .sort(bySubjectDay)
+  return itemsOnDay(tasks, moves, addDaysISO(todayISO, 1)).map((i) => ({ ...i, done: done.has(completionKey(i.task.id, i.date)) }))
 }
 
 // task_moves の to_date がこの日付なら「やらない（未完了のまま消した）」。ホームにも予定カレンダーにも出さない
@@ -146,7 +144,7 @@ export function itemsOnDay(tasks, moves, iso) {
     const t = m.to_date === iso && m.from_date !== iso && tasks.find((x) => x.id === m.task_id)
     if (t && t.is_active) items.push({ task: t, date: m.from_date, movedFrom: m.from_date })
   })
-  return items
+  return items.sort(bySubjectDay) // 元からその日の分と、移してきた分をまぜて並べる
 }
 
 // 管理画面の一覧に出す、くり返しの説明文
