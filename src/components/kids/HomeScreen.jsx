@@ -66,7 +66,7 @@ export default function HomeScreen({ character, accessory, pendingSession, onRes
     () => buildHomeTasks(tasks || [], completions, todayISO, moves),
     [tasks, completions, todayISO, moves]
   )
-  const tomorrowItems = useMemo(() => buildTomorrowItems(tasks || [], completions, todayISO), [tasks, completions, todayISO])
+  const tomorrowItems = useMemo(() => buildTomorrowItems(tasks || [], completions, todayISO, moves), [tasks, completions, todayISO, moves])
   const tomorrowISO = tomorrowItems[0]?.date
   // 「もうすぐ」には、あしたの分を二重に出さない
   const soonItems = upcoming.filter((i) => i.date !== tomorrowISO)

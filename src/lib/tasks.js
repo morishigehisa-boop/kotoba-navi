@@ -99,7 +99,7 @@ export function buildHomeTasks(tasks, completions, todayISO, moves = []) {
       const key = completionKey(t.id, d)
       const doneAt = completedAt.get(key)
       const moved = movedTo.get(key)
-      if (moved === SKIPPED_DATE) continue
+      if (moved && moved > todayISO) continue // 消した分・明日以降に移した分は出さない
       const late = (moved || d) < todayISO
       const item = moved ? { task: t, date: d, late, movedFrom: d } : { task: t, date: d, late }
       if (doneAt === undefined) todayItems.push(item)
@@ -114,14 +114,13 @@ export function buildHomeTasks(tasks, completions, todayISO, moves = []) {
   return { todayItems, upcoming, doneToday }
 }
 
-// あしたの分（くり返しも含む）。前の日のうちに終わらせてもよい（done: 完了ずみ）
-export function buildTomorrowItems(tasks, completions, todayISO) {
-  const date = addDaysISO(todayISO, 1)
+// あしたの分（くり返しも含む。「明日にする」で移した分も入る）。前の日のうちに終わらせてもよい（done: 完了ずみ）
+export function buildTomorrowItems(tasks, completions, todayISO, moves = []) {
   const done = new Set(completions.map((c) => completionKey(c.task_id, c.occurrence_date)))
-  return tasks
-    .filter((t) => t.is_active && occursOn(t, date))
-    .map((task) => ({ task, date, done: done.has(completionKey(task.id, date)) }))
-    .sort((a, b) => bySubject(a, b) || byOrder(a, b))
+  return itemsOnDay(tasks, moves, addDaysISO(todayISO, 1))
+    .filter((i) => !i.skipped)
+    .map((i) => ({ ...i, done: done.has(completionKey(i.task.id, i.date)) }))
+    .sort((a, b) => bySubject(a, b) || byOrder(a, b) || a.date.localeCompare(b.date))
 }
 
 // task_moves の to_date がこの日付なら「やらない（未完了のまま消した）」。ホームにも予定カレンダーにも出さない

@@ -1,10 +1,10 @@
 import { useMemo, useState } from 'react'
 import { SUBJECT_EMOJI, subjectStyle, completionKey, buildHomeTasks, moveTaskOccurrences, restoreTaskOccurrence, SKIPPED_DATE } from '../../lib/tasks'
-import { formatMD } from '../../lib/dates'
+import { formatMD, addDaysISO } from '../../lib/dates'
 import { useConfirm } from './useConfirm'
 import { useToast } from './useToast'
 
-// 遅れている分（未完了）を選んで「今日にする」「消す」。消した分は未完了のまま、子どもの画面に出なくなる
+// 遅れている分（未完了）を選んで「今日にする」「明日にする」「消す」。消した分は未完了のまま、子どもの画面に出なくなる
 export default function LateTasksPanel({ tasks, completions, moves, todayISO, onChanged }) {
   const [open, setOpen] = useState(false)
   const [selected, setSelected] = useState(() => new Set())
@@ -73,6 +73,9 @@ export default function LateTasksPanel({ tasks, completions, moves, todayISO, on
                 </label>
                 <button className="btn btn-primary" disabled={busy || chosen.length === 0} onClick={() => run(() => moveTaskOccurrences(chosen, todayISO), `${chosen.length}件を今日の分にしました`)}>
                   今日にする（{chosen.length}）
+                </button>
+                <button className="btn btn-secondary" disabled={busy || chosen.length === 0} onClick={() => run(() => moveTaskOccurrences(chosen, addDaysISO(todayISO, 1)), `${chosen.length}件を明日の分にしました`)}>
+                  明日にする（{chosen.length}）
                 </button>
                 <button className="btn btn-danger" disabled={busy || chosen.length === 0} onClick={skip}>消す（{chosen.length}）</button>
               </div>

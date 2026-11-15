@@ -307,5 +307,5 @@ a.area-btn { text-decoration: none; display: inline-block; }
 .cal-task-note { font-size: 10px; color: #8A7B62; }
 @media (max-width: 480px) {
   .late-panel-actions .toggle-row { flex-basis: 100%; }
-  .late-panel-actions .btn { flex: 1; }
+  .late-panel-actions .btn { flex: 1; align-self: stretch; padding: 10px 4px; font-size: 13px; white-space: nowrap; }
 }
