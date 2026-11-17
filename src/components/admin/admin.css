@@ -306,3 +306,7 @@ a.area-btn { text-decoration: none; display: inline-block; }
   .late-panel-actions .toggle-row { flex-basis: 100%; }
   .late-panel-actions .btn { flex: 1; align-self: stretch; padding: 10px 4px; font-size: 13px; white-space: nowrap; }
 }
+
+/* 「元に戻す」付きのお知らせ */
+.toast-has-undo { display: flex; align-items: center; gap: 12px; padding: 6px 6px 6px 16px; max-width: calc(100vw - 32px); }
+.toast-undo { flex: none; min-height: 40px; padding: 0 14px; border: none; border-radius: 8px; background: #fff; color: #2E8956; font: inherit; font-weight: 800; cursor: pointer; }

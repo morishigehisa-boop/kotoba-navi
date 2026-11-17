@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { SUBJECT_EMOJI, subjectStyle, completionKey, buildHomeTasks, moveTaskOccurrences, SKIPPED_DATE } from '../../lib/tasks'
+import { SUBJECT_EMOJI, subjectStyle, completionKey, buildHomeTasks, moveTaskOccurrences, undoTaskMoves, SKIPPED_DATE } from '../../lib/tasks'
 import { formatMD, addDaysISO } from '../../lib/dates'
 import { useConfirm } from './useConfirm'
 import { useToast } from './useToast'
@@ -28,13 +28,17 @@ export default function LateTasksPanel({ tasks, completions, moves, todayISO, on
     return next
   })
 
-  async function run(action, message) {
+  // 選んだ分を toDate に移す（SKIPPED_DATE なら消す）。直後なら「元に戻す」で前の状態にもどせる
+  async function run(toDate, message) {
+    const items = chosen
+    const prevTo = new Map(moves.map((m) => [completionKey(m.task_id, m.from_date), m.to_date]))
+    const before = items.map((i) => ({ task_id: i.task.id, from_date: i.date, to_date: prevTo.get(keyOf(i)) || null }))
     setBusy(true)
     try {
-      await action()
+      await moveTaskOccurrences(items, toDate)
       setSelected(new Set())
       await onChanged()
-      notify(message, 'success')
+      notify(message, 'success', { undo: async () => { await undoTaskMoves(before); await onChanged() } })
     } catch (e) {
       console.error(e)
       notify(`うまくいきませんでした：${e.message}`)
@@ -44,8 +48,8 @@ export default function LateTasksPanel({ tasks, completions, moves, todayISO, on
   }
 
   async function skip() {
-    if (!(await confirm(`選んだ ${chosen.length}件 を消しますか？\n未完了のまま、子どもの画面にも管理画面にも出なくなります（元には戻せません）。`))) return
-    run(() => moveTaskOccurrences(chosen, SKIPPED_DATE), `${chosen.length}件を消しました`)
+    if (!(await confirm(`選んだ ${chosen.length}件 を消しますか？\n未完了のまま、子どもの画面にも管理画面にも出なくなります（直後なら「元に戻す」で戻せます）。`))) return
+    run(SKIPPED_DATE, `${chosen.length}件を消しました`)
   }
 
   return (
@@ -63,10 +67,10 @@ export default function LateTasksPanel({ tasks, completions, moves, todayISO, on
                   <input type="checkbox" checked={allOn} onChange={() => setSelected(allOn ? new Set() : new Set(lateItems.map(keyOf)))} />
                   <span>すべて選ぶ</span>
                 </label>
-                <button className="btn btn-primary" disabled={busy || chosen.length === 0} onClick={() => run(() => moveTaskOccurrences(chosen, todayISO), `${chosen.length}件を今日の分にしました`)}>
+                <button className="btn btn-primary" disabled={busy || chosen.length === 0} onClick={() => run(todayISO, `${chosen.length}件を今日の分にしました`)}>
                   今日にする（{chosen.length}）
                 </button>
-                <button className="btn btn-secondary" disabled={busy || chosen.length === 0} onClick={() => run(() => moveTaskOccurrences(chosen, addDaysISO(todayISO, 1)), `${chosen.length}件を明日の分にしました`)}>
+                <button className="btn btn-secondary" disabled={busy || chosen.length === 0} onClick={() => run(addDaysISO(todayISO, 1), `${chosen.length}件を明日の分にしました`)}>
                   明日にする（{chosen.length}）
                 </button>
                 <button className="btn btn-danger" disabled={busy || chosen.length === 0} onClick={skip}>消す（{chosen.length}）</button>

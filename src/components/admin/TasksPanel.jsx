@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { TASK_POINT_OPTIONS, DEFAULT_TASK_POINTS, SUBJECTS, SUBJECT_EMOJI, SUBJECT_COLORS, FREQUENCIES, LINK_APPS, taskPoints, describeSchedule, fetchTasks, saveTask, deleteTask, reorderTasks } from '../../lib/tasks'
+import { TASK_POINT_OPTIONS, DEFAULT_TASK_POINTS, SUBJECTS, SUBJECT_EMOJI, SUBJECT_COLORS, FREQUENCIES, LINK_APPS, taskPoints, describeSchedule, fetchTasks, saveTask, deleteTask, restoreTask, reorderTasks } from '../../lib/tasks'
 import { toISODate, WEEKDAY_LABELS } from '../../lib/dates'
 import { toggleItem } from '../../lib/utils'
 import { LoadingView, ErrorView } from '../common/Status'
@@ -119,11 +119,11 @@ export default function TasksPanel() {
   }
 
   async function handleDelete(t) {
-    if (!(await confirm(`「${t.title}」を削除しますか？\n完了の記録も消えます。`))) return
+    if (!(await confirm(`「${t.title}」を削除しますか？\n完了の記録も消えます（直後なら「元に戻す」で戻せます）。`))) return
     try {
-      await deleteTask(t.id)
+      const backup = await deleteTask(t.id)
       await reload()
-      notify('削除しました', 'success')
+      notify(`「${t.title}」を削除しました`, 'success', { undo: async () => { await restoreTask(backup); await reload() } })
     } catch (e) {
       notify(`削除に失敗しました：${e.message}`)
     }

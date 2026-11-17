@@ -178,6 +178,14 @@ export const moveTaskOccurrences = (items, toDate) =>
     items.map((i) => ({ task_id: i.task.id, from_date: i.date, to_date: toDate })),
     { onConflict: 'task_id,from_date' }
   ))
+// 「今日にする」「明日にする」「消す」の前の状態にもどす
+// before: [{ task_id, from_date, to_date }]（to_date が null ＝ もともと移していなかった）
+export async function undoTaskMoves(before) {
+  const restore = before.filter((m) => m.to_date)
+  await Promise.all(before.filter((m) => !m.to_date).map((m) =>
+    run(supabase.from('task_moves').delete().eq('task_id', m.task_id).eq('from_date', m.from_date))))
+  if (restore.length) await run(supabase.from('task_moves').upsert(restore, { onConflict: 'task_id,from_date' }))
+}
 export const moveTaskToToday = (item, todayISO) => moveTaskOccurrences([item], todayISO)
 
 
@@ -190,7 +198,23 @@ export async function reorderTasks(ordered) {
   await Promise.all(changed.map((r) => run(supabase.from('tasks').update({ sort_order: r.order }).eq('id', r.id))))
 }
 
-export const deleteTask = (id) => run(supabase.from('tasks').delete().eq('id', id))
+// 削除する。あとで「元に戻す」ができるよう、やること本体・完了の記録・移した記録を返す
+export async function deleteTask(id) {
+  const [task, completions, moves] = await Promise.all([
+    run(supabase.from('tasks').select('*').eq('id', id).single()),
+    fetchAllRows('task_completions', (q) => q.select('*').eq('task_id', id).order('id', { ascending: true })),
+    fetchAllRows('task_moves', (q) => q.select('task_id, from_date, to_date, created_at').eq('task_id', id).order('id', { ascending: true }))
+  ])
+  await run(supabase.from('tasks').delete().eq('id', id)) // 完了・移した記録は on delete cascade で消える
+  return { task, completions, moves }
+}
+
+// deleteTask の戻り値から、同じIDで元どおりに登録しなおす
+export async function restoreTask({ task, completions, moves }) {
+  await run(supabase.from('tasks').insert(task))
+  if (completions.length) await run(supabase.from('task_completions').insert(completions))
+  if (moves.length) await run(supabase.from('task_moves').insert(moves))
+}
 
 // 完了を記録する。そのときのポイントも一緒に残す（あとでポイント設定を変えても、取り消しがずれないように）
 // 戻り値：新しく記録できたら true、すでに完了ずみ（二重タップ）なら false → ポイントの二重加算を防ぐ
